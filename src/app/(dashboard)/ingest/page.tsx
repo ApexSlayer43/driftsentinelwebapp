@@ -71,7 +71,7 @@ export default function IngestPage() {
         return;
       }
 
-      const res = await fetch(`${apiUrl}/v1/fills`, {
+      const res = await fetch(`${apiUrl}/v1/ingest/fills/csv`, {
         method: 'POST',
         headers: {
           'X-Device-Token': tokens[0].token_hash,

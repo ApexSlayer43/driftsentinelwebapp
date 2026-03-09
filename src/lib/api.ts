@@ -38,7 +38,7 @@ export async function fetchDrivers(token: string) {
 export async function uploadFills(token: string, csvText: string, fileName: string) {
   if (!API_URL) throw new Error('API_URL not configured');
 
-  const res = await fetch(`${API_URL}/v1/fills`, {
+  const res = await fetch(`${API_URL}/v1/ingest/fills/csv`, {
     method: 'POST',
     headers: {
       'X-Device-Token': token,
