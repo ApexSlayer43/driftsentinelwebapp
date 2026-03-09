@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Save, Plus, Trash2, Upload, FileText, Shield, Swords, Hammer, X, ChevronDown, ChevronRight, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Save, Plus, Trash2, Upload, FileText, Shield, Swords, Hammer, X, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, Plug, Unplug, ExternalLink, Loader2, Puzzle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { SessionConfig } from '@/lib/types';
 
@@ -240,6 +240,85 @@ export default function SettingsPage() {
   const [protocolDragOver, setProtocolDragOver] = useState(false);
   const [protocolUploading, setProtocolUploading] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+  // ── Extension connection state ──────────────────────────────
+  const [extStatus, setExtStatus] = useState<'detecting' | 'not_installed' | 'installed' | 'connecting' | 'connected'>('detecting');
+
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type === 'DS_STATUS') {
+        setExtStatus(event.data.connected ? 'connected' : 'installed');
+      }
+      if (event.data?.type === 'DS_REGISTER_ACK') {
+        if (event.data.ok) setExtStatus('connected');
+      }
+    }
+
+    window.addEventListener('message', handleMessage);
+
+    // If no DS_STATUS arrives within 1s, extension is not installed
+    const timeout = setTimeout(() => {
+      setExtStatus(prev => prev === 'detecting' ? 'not_installed' : prev);
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  async function connectExtension() {
+    setExtStatus('connecting');
+
+    let deviceId = localStorage.getItem('ds_device_id');
+    if (!deviceId) {
+      deviceId = crypto.randomUUID();
+      localStorage.setItem('ds_device_id', deviceId);
+    }
+
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setExtStatus('installed');
+        return;
+      }
+
+      const res = await fetch('https://api.driftsentinel.io/v1/device/register', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ device_id: deviceId, account_ref: session.user.id }),
+      });
+
+      if (!res.ok) {
+        setExtStatus('installed');
+        return;
+      }
+
+      const data = await res.json();
+      window.postMessage({
+        type: 'DS_REGISTER_DEVICE',
+        device_token: data.device_token,
+        account_ref: session.user.id,
+      }, '*');
+
+      // Wait for ACK — fall back to installed after 3s if no response
+      setTimeout(() => {
+        setExtStatus(prev => prev === 'connecting' ? 'installed' : prev);
+      }, 3000);
+    } catch {
+      setExtStatus('installed');
+    }
+  }
+
+  function disconnectExtension() {
+    localStorage.removeItem('ds_device_id');
+    setExtStatus('installed');
+  }
 
   // Load saved protocol from localStorage
   useEffect(() => {
@@ -770,6 +849,90 @@ export default function SettingsPage() {
                 className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-stable"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Connect Extension */}
+        <div className="rounded-xl glass p-6">
+          <h3 className="font-display text-sm font-bold text-text-primary">Chrome Extension</h3>
+          <p className="mt-1 font-mono text-[10px] text-text-muted">
+            Connect the Drift Sentinel extension for real-time monitoring
+          </p>
+
+          <div className="mt-4">
+            {extStatus === 'detecting' && (
+              <div className="flex items-center gap-2 rounded-lg glass-raised p-3">
+                <Loader2 size={14} className="animate-spin text-text-muted" />
+                <span className="font-mono text-[10px] text-text-muted">Detecting extension...</span>
+              </div>
+            )}
+
+            {extStatus === 'not_installed' && (
+              <div className="flex items-center justify-between rounded-lg glass-raised p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-text-dim/10">
+                    <Puzzle size={16} className="text-text-dim" />
+                  </div>
+                  <div>
+                    <div className="font-mono text-[10px] font-semibold text-text-secondary">Extension not detected</div>
+                    <div className="font-mono text-[8px] text-text-dim">Install the Chrome extension for live monitoring</div>
+                  </div>
+                </div>
+                <a
+                  href="https://github.com/ApexSlayer43/drift-sentinel-ext"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 rounded-lg bg-elevated px-3 py-1.5 font-mono text-[10px] font-semibold text-text-secondary hover:text-stable transition-colors"
+                >
+                  <ExternalLink size={10} /> Install Extension
+                </a>
+              </div>
+            )}
+
+            {(extStatus === 'installed' || extStatus === 'connecting') && (
+              <div className="flex items-center justify-between rounded-lg glass-raised p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10">
+                    <Unplug size={16} className="text-amber-400" />
+                  </div>
+                  <div>
+                    <div className="font-mono text-[10px] font-semibold text-text-secondary">Extension installed</div>
+                    <div className="font-mono text-[8px] text-text-dim">Connect to enable real-time behavioral monitoring</div>
+                  </div>
+                </div>
+                <button
+                  onClick={connectExtension}
+                  disabled={extStatus === 'connecting'}
+                  className="flex items-center gap-1.5 rounded-lg bg-stable px-3 py-1.5 font-mono text-[10px] font-bold text-void transition-opacity hover:opacity-90 disabled:opacity-50"
+                >
+                  {extStatus === 'connecting' ? (
+                    <><Loader2 size={10} className="animate-spin" /> Connecting...</>
+                  ) : (
+                    <><Plug size={10} /> Connect Extension</>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {extStatus === 'connected' && (
+              <div className="flex items-center justify-between rounded-lg glass-raised p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-stable/10">
+                    <Plug size={16} className="text-stable" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-stable animate-pulse" />
+                    <div className="font-mono text-[10px] font-semibold text-stable">Extension Connected</div>
+                  </div>
+                </div>
+                <button
+                  onClick={disconnectExtension}
+                  className="flex items-center gap-1 font-mono text-[10px] text-text-dim hover:text-breakdown transition-colors"
+                >
+                  <Unplug size={10} /> Disconnect
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
