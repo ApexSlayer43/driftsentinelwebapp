@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { SentinelEye } from '@/components/sentinel-eye';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,18 +34,21 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-void px-4">
       <div className="w-full max-w-sm">
         {/* Header */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-border-subtle bg-surface">
-            <Shield size={24} className="text-stable" strokeWidth={1.5} />
+        <div className="mb-10 text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center">
+            <SentinelEye className="h-16 w-16 text-stable" />
           </div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-text-primary">
-            DRIFT SENTINEL
+          <p className="font-mono text-[9px] font-medium uppercase tracking-[0.25em] text-text-muted">
+            Drift
+          </p>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-stable">
+            SENTINEL
           </h1>
-          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-text-muted">
-            Behavioral Monitor
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-text-muted">
+            Behavioral Intelligence
           </p>
         </div>
 
@@ -60,7 +63,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-lg border border-border-subtle bg-raised px-3 py-2.5 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-colors focus:border-stable"
+              className="w-full border border-[#1A1D23] bg-surface px-3 py-2.5 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-colors focus:border-stable"
               placeholder="trader@example.com"
             />
           </div>
@@ -73,7 +76,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-lg border border-border-subtle bg-raised px-3 py-2.5 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-colors focus:border-stable"
+              className="w-full border border-[#1A1D23] bg-surface px-3 py-2.5 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-colors focus:border-stable"
               placeholder="Enter password"
             />
           </div>
@@ -85,9 +88,9 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-stable py-2.5 font-mono text-sm font-bold text-void transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="w-full border border-stable bg-stable py-2.5 font-mono text-sm font-bold uppercase tracking-wider text-void transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Authenticating...' : 'Sign In'}
           </button>
         </form>
 

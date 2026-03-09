@@ -15,15 +15,15 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "Drift Sentinel — Behavioral Monitor",
-  description: "Behavioral monitoring dashboard for futures traders. Maximize BSS, not PnL.",
+  title: "Drift Sentinel — Behavioral Intelligence",
+  description: "Behavioral intelligence dashboard for futures traders. Maximize BSS, not PnL.",
   icons: {
     icon: '/favicon.svg',
     apple: '/apple-touch-icon.svg',
   },
   openGraph: {
-    title: "Drift Sentinel — Behavioral Monitor",
-    description: "Behavioral monitoring dashboard for futures traders. Maximize BSS, not PnL.",
+    title: "Drift Sentinel — Behavioral Intelligence",
+    description: "Behavioral intelligence dashboard for futures traders. Maximize BSS, not PnL.",
     images: [{ url: '/og-image.svg', width: 1200, height: 630 }],
   },
 };
