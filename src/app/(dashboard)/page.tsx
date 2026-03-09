@@ -2,88 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { BssOrb } from '@/components/bss-orb';
-import { StateBadge } from '@/components/state-badge';
 import { ViolationRow } from '@/components/violation-row';
 import { DriverRow } from '@/components/driver-row';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
+import { Upload } from 'lucide-react';
 import { getInsight } from '@/lib/insights';
 import { createClient } from '@/lib/supabase/client';
 import type { StatePayload } from '@/lib/types';
 
-// Mock data for development — replaced by live API in Piece 8
-const MOCK_STATE: StatePayload = {
-  account_ref: 'DEMO-001',
-  drift: {
-    state: 'DRIFT_FORMING',
-    drift_index: 24,
-    data_stale: false,
-    computed_at: new Date().toISOString(),
-    window_start_utc: new Date(Date.now() - 86400000).toISOString(),
-    window_end_utc: new Date().toISOString(),
-    drivers: [
-      { mode: 'OFF_SESSION', points: 8, onset_utc: new Date(Date.now() - 3600000).toISOString() },
-      { mode: 'FREQUENCY', points: 5, onset_utc: new Date(Date.now() - 7200000).toISOString() },
-    ],
-  },
-  last_execution_update_utc: new Date().toISOString(),
-  protocol: {
-    ref: 'PROTOCOL/DEMO-001/DEFAULT',
-    version: 'v1',
-    activation_utc: null,
-    source: 'TRADOVATE',
-  },
-  metrics: {
-    trades_today_utc: 8,
-    violations_today_utc: 3,
-    protocol_breaches_today_utc: 1,
-    daily_pnl: null,
-  },
-  bss_score: 87,
-  bss_tier: 'TESTED',
-  dsi_score: 74,
-  dsi_state: 'DRIFT_FORMING',
-  violations_today: [
-    {
-      violation_id: 'v-mock-001',
-      mode: 'OFF_SESSION',
-      rule_id: 'R-OFF-01',
-      severity: 'MED',
-      points: 5,
-      first_seen_utc: new Date(Date.now() - 3600000).toISOString(),
-      created_at: new Date(Date.now() - 3600000).toISOString(),
-    },
-    {
-      violation_id: 'v-mock-002',
-      mode: 'FREQUENCY',
-      rule_id: 'R-FREQ-01',
-      severity: 'LOW',
-      points: 3,
-      first_seen_utc: new Date(Date.now() - 7200000).toISOString(),
-      created_at: new Date(Date.now() - 7200000).toISOString(),
-    },
-    {
-      violation_id: 'v-mock-003',
-      mode: 'OVERSIZE',
-      rule_id: 'R-SIZE-01',
-      severity: 'HIGH',
-      points: 8,
-      first_seen_utc: new Date(Date.now() - 1800000).toISOString(),
-      created_at: new Date(Date.now() - 1800000).toISOString(),
-    },
-  ],
-  onboarding: {
-    phase: 'SCORING',
-    status: 'READY',
-    is_building: false,
-    total_fills_seen: 310,
-    scoring_window_fills: 48,
-    baseline_window_fills: 262,
-    scoring_progress: { collected: 20, required: 20, remaining: 0 },
-    baseline_progress: { collected: 50, required: 50, remaining: 0 },
-  },
-};
-
-const MOCK_YESTERDAY_SCORE = 82;
 
 export default function DashboardPage() {
   const [showDetails, setShowDetails] = useState(false);
@@ -97,45 +23,230 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        // Use mock data when not authenticated (dev mode)
-        setData(MOCK_STATE);
+        setError('Not authenticated');
         setLoading(false);
         return;
       }
 
-      // Try to get device token for this user
-      const { data: tokens } = await supabase
-        .from('device_tokens')
-        .select('device_id,account_ref,token_hash')
+      // Get account(s) for this user
+      const { data: accounts } = await supabase
+        .from('accounts')
+        .select('account_ref, bss_score')
         .eq('user_id', user.id)
-        .eq('status', 'ACTIVE')
         .limit(1);
 
-      if (!tokens || tokens.length === 0) {
-        setData(MOCK_STATE);
+      if (!accounts || accounts.length === 0) {
+        setError('No trading account linked. Go to Settings to connect your account.');
         setLoading(false);
         return;
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl) {
-        setData(MOCK_STATE);
-        setLoading(false);
-        return;
+      const accountRef = accounts[0].account_ref;
+
+      // Fetch all needed data in parallel from Supabase
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      const todayISO = todayStart.toISOString();
+
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const [
+        driftScoresRes,
+        violationsRes,
+        todayFillsRes,
+        modeStateRes,
+        userConfigRes,
+        totalFillsRes,
+        dailyScoresRes,
+      ] = await Promise.all([
+        // Latest drift score
+        supabase
+          .from('drift_scores')
+          .select('*')
+          .eq('account_ref', accountRef)
+          .order('computed_at', { ascending: false })
+          .limit(1),
+        // Today's violations
+        supabase
+          .from('violations')
+          .select('*')
+          .eq('account_ref', accountRef)
+          .gte('first_seen_utc', todayISO)
+          .order('first_seen_utc', { ascending: false }),
+        // Today's fills count
+        supabase
+          .from('fills_canonical')
+          .select('event_id', { count: 'exact', head: true })
+          .eq('account_ref', accountRef)
+          .gte('timestamp_utc', todayISO),
+        // Active mode states (drift drivers)
+        supabase
+          .from('mode_state')
+          .select('*')
+          .eq('account_ref', accountRef)
+          .eq('state', 'ACTIVE'),
+        // User config
+        supabase
+          .from('user_configs')
+          .select('*')
+          .eq('account_ref', accountRef)
+          .limit(1),
+        // Total fills for onboarding progress
+        supabase
+          .from('fills_canonical')
+          .select('event_id', { count: 'exact', head: true })
+          .eq('account_ref', accountRef),
+        // Last 30 days of daily scores for BSS calculation
+        supabase
+          .from('daily_scores')
+          .select('trading_date, dsi_score')
+          .eq('account_ref', accountRef)
+          .gte('trading_date', thirtyDaysAgo.toISOString().slice(0, 10))
+          .order('trading_date', { ascending: false }),
+      ]);
+
+      const driftScore = driftScoresRes.data?.[0] ?? null;
+      const violations = violationsRes.data ?? [];
+      const todayFillsCount = todayFillsRes.count ?? 0;
+      const modeStates = modeStateRes.data ?? [];
+      const config = userConfigRes.data?.[0] ?? null;
+      const totalFills = totalFillsRes.count ?? 0;
+      const dailyScores = (dailyScoresRes.data ?? []) as { trading_date: string; dsi_score: number }[];
+
+      // Build onboarding view
+      const baselineWindowFills = config?.baseline_window_fills ?? 200;
+      const scoringWindowFills = config?.scoring_window_fills ?? 20;
+      const isBuilding = totalFills < baselineWindowFills;
+
+      // Build drivers from mode_state + drift_scores.top_modes
+      const topModes = (driftScore?.top_modes ?? []) as { mode: string; points: number }[];
+      const drivers = modeStates.map((ms: { mode: string; onset_utc: string | null }) => {
+        // Get points from drift_scores.top_modes first, fall back to today's violations
+        const fromTopModes = topModes.find((tm) => tm.mode === ms.mode);
+        const modePoints = fromTopModes?.points ??
+          violations
+            .filter((v: { mode: string }) => v.mode === ms.mode)
+            .reduce((sum: number, v: { points: number }) => sum + v.points, 0);
+        return {
+          mode: ms.mode,
+          points: modePoints,
+          onset_utc: ms.onset_utc ?? new Date().toISOString(),
+        };
+      }).sort((a: { points: number }, b: { points: number }) => b.points - a.points);
+
+      // ── BSS Algorithm: 60/40 weighted average ──
+      // Last 7 days DSI scores × 0.60 weight
+      // Days 8-30 DSI scores × 0.40 weight
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const sevenDaysAgoStr = sevenDaysAgo.toISOString().slice(0, 10);
+
+      const recent7 = dailyScores.filter(d => d.trading_date > sevenDaysAgoStr);
+      const older8to30 = dailyScores.filter(d => d.trading_date <= sevenDaysAgoStr);
+
+      let bssScore: number;
+      if (dailyScores.length === 0) {
+        // No history — use account stored value or default
+        bssScore = accounts[0].bss_score ?? 100;
+      } else if (recent7.length > 0 && older8to30.length > 0) {
+        const recentAvg = recent7.reduce((s, d) => s + d.dsi_score, 0) / recent7.length;
+        const olderAvg = older8to30.reduce((s, d) => s + d.dsi_score, 0) / older8to30.length;
+        bssScore = Math.round(recentAvg * 0.60 + olderAvg * 0.40);
+      } else if (recent7.length > 0) {
+        // Only recent data, use as-is
+        bssScore = Math.round(recent7.reduce((s, d) => s + d.dsi_score, 0) / recent7.length);
+      } else {
+        // Only older data
+        bssScore = Math.round(older8to30.reduce((s, d) => s + d.dsi_score, 0) / older8to30.length);
       }
 
-      const res = await fetch(`${apiUrl}/v1/state`, {
-        headers: { 'X-Device-Token': tokens[0].token_hash },
-        cache: 'no-store',
-      });
+      // Determine BSS tier
+      let bssTier: 'UNRANKED' | 'DRAFT' | 'TESTED' | 'VERIFIED' = 'UNRANKED';
+      if (isBuilding) bssTier = 'UNRANKED';
+      else if (bssScore >= 85) bssTier = 'VERIFIED';
+      else if (bssScore >= 65) bssTier = 'TESTED';
+      else if (bssScore >= 40) bssTier = 'DRAFT';
 
-      if (!res.ok) throw new Error(`API error: ${res.status}`);
-      const stateData: StatePayload = await res.json();
-      setData(stateData);
+      // ── DSI Score: 100 minus today's total violation points ──
+      const todayTotalPoints = violations.reduce((sum: number, v: { points: number }) => sum + v.points, 0);
+      const dsiScore = Math.max(0, 100 - todayTotalPoints);
+
+      // Protocol breaches today
+      const protocolBreaches = violations.filter((v: { severity: string }) =>
+        v.severity === 'HIGH' || v.severity === 'CRITICAL'
+      ).length;
+
+      // Assemble the StatePayload
+      const statePayload: StatePayload = {
+        account_ref: accountRef,
+        drift: {
+          state: driftScore?.state ?? 'STABLE',
+          drift_index: driftScore?.drift_index ?? 0,
+          data_stale: driftScore?.data_stale ?? false,
+          computed_at: driftScore?.computed_at ?? null,
+          window_start_utc: driftScore?.window_start_utc ?? null,
+          window_end_utc: driftScore?.window_end_utc ?? null,
+          drivers,
+        },
+        last_execution_update_utc: null,
+        protocol: {
+          ref: accountRef,
+          version: '1.0',
+          activation_utc: null,
+          source: 'SUPABASE',
+        },
+        metrics: {
+          trades_today_utc: todayFillsCount,
+          violations_today_utc: violations.length,
+          protocol_breaches_today_utc: protocolBreaches,
+          daily_pnl: null,
+        },
+        bss_score: bssScore,
+        bss_tier: bssTier,
+        dsi_score: dsiScore,
+        dsi_state: dsiScore >= 80 ? 'CLEAN' : dsiScore >= 50 ? 'DRIFT' : 'BREACH',
+        violations_today: violations.map((v: {
+          violation_id: string;
+          mode: string;
+          rule_id: string;
+          severity: 'LOW' | 'MED' | 'HIGH' | 'CRITICAL';
+          points: number;
+          first_seen_utc: string;
+          created_at: string;
+        }) => ({
+          violation_id: v.violation_id,
+          mode: v.mode,
+          rule_id: v.rule_id,
+          severity: v.severity,
+          points: v.points,
+          first_seen_utc: v.first_seen_utc,
+          created_at: v.created_at,
+        })),
+        onboarding: {
+          phase: isBuilding ? 'BASELINE' : 'ACTIVE',
+          status: isBuilding ? 'BUILDING' : 'READY',
+          is_building: isBuilding,
+          total_fills_seen: totalFills,
+          scoring_window_fills: scoringWindowFills,
+          baseline_window_fills: baselineWindowFills,
+          scoring_progress: {
+            collected: Math.min(totalFills, scoringWindowFills),
+            required: scoringWindowFills,
+            remaining: Math.max(0, scoringWindowFills - totalFills),
+          },
+          baseline_progress: {
+            collected: Math.min(totalFills, baselineWindowFills),
+            required: baselineWindowFills,
+            remaining: Math.max(0, baselineWindowFills - totalFills),
+          },
+        },
+      };
+
+      setData(statePayload);
     } catch (err) {
       console.error('Failed to fetch state:', err);
       setError(err instanceof Error ? err.message : 'Failed to load');
-      setData(MOCK_STATE);
     } finally {
       setLoading(false);
     }
@@ -170,7 +281,15 @@ export default function DashboardPage() {
   if (!data) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className="font-mono text-sm text-text-muted">No data available</p>
+        <div className="max-w-sm text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-border-subtle bg-surface">
+            <Upload size={20} className="text-text-muted" />
+          </div>
+          <h2 className="font-display text-lg font-bold text-text-primary">No Data Yet</h2>
+          <p className="mt-2 font-mono text-xs leading-relaxed text-text-muted">
+            {error || 'Link your trading account and ingest fills to start monitoring.'}
+          </p>
+        </div>
       </div>
     );
   }
@@ -201,7 +320,7 @@ export default function DashboardPage() {
           score={data.bss_score}
           tier={data.bss_tier}
           state={effectiveState}
-          yesterdayScore={MOCK_YESTERDAY_SCORE}
+          yesterdayScore={undefined}
           size={showDetails ? 'sm' : 'lg'}
           isBuilding={data.onboarding.is_building}
           buildProgress={data.onboarding.is_building ? data.onboarding.baseline_progress : undefined}

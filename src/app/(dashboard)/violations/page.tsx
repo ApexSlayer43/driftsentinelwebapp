@@ -9,60 +9,6 @@ import type { ViolationDetail } from '@/lib/types';
 
 type SeverityFilter = 'ALL' | 'LOW' | 'MED' | 'HIGH' | 'CRITICAL';
 
-function daysAgo(d: number, h = 0) {
-  return new Date(Date.now() - d * 86400000 - h * 3600000).toISOString();
-}
-
-const MOCK_VIOLATIONS: ViolationDetail[] = [
-  {
-    violation_id: 'v-m-001', mode_instance_id: 'mi-001', account_ref: 'DEMO-001',
-    rule_id: 'R-SIZE-01', mode: 'OVERSIZE', severity: 'HIGH', points: 8,
-    first_seen_utc: daysAgo(0, 1), window_start_utc: daysAgo(0, 2), window_end_utc: daysAgo(0),
-    evidence_event_ids: ['e-1', 'e-2', 'e-3'], created_at: daysAgo(0, 1),
-  },
-  {
-    violation_id: 'v-m-002', mode_instance_id: 'mi-002', account_ref: 'DEMO-001',
-    rule_id: 'R-OFF-01', mode: 'OFF_SESSION', severity: 'MED', points: 5,
-    first_seen_utc: daysAgo(0, 3), window_start_utc: daysAgo(0, 4), window_end_utc: daysAgo(0, 2),
-    evidence_event_ids: ['e-4', 'e-5'], created_at: daysAgo(0, 3),
-  },
-  {
-    violation_id: 'v-m-003', mode_instance_id: 'mi-003', account_ref: 'DEMO-001',
-    rule_id: 'R-FREQ-01', mode: 'FREQUENCY', severity: 'LOW', points: 3,
-    first_seen_utc: daysAgo(0, 5), window_start_utc: daysAgo(0, 6), window_end_utc: daysAgo(0, 4),
-    evidence_event_ids: ['e-6'], created_at: daysAgo(0, 5),
-  },
-  {
-    violation_id: 'v-m-004', mode_instance_id: 'mi-004', account_ref: 'DEMO-001',
-    rule_id: 'R-SIZE-02', mode: 'SIZE_ESCALATION', severity: 'CRITICAL', points: 12,
-    first_seen_utc: daysAgo(2, 2), window_start_utc: daysAgo(2, 3), window_end_utc: daysAgo(2, 1),
-    evidence_event_ids: ['e-7', 'e-8', 'e-9', 'e-10'], created_at: daysAgo(2, 2),
-  },
-  {
-    violation_id: 'v-m-005', mode_instance_id: 'mi-005', account_ref: 'DEMO-001',
-    rule_id: 'R-OFF-01', mode: 'OFF_SESSION', severity: 'MED', points: 5,
-    first_seen_utc: daysAgo(3, 1), window_start_utc: daysAgo(3, 2), window_end_utc: daysAgo(3),
-    evidence_event_ids: ['e-11', 'e-12'], created_at: daysAgo(3, 1),
-  },
-  {
-    violation_id: 'v-m-006', mode_instance_id: 'mi-006', account_ref: 'DEMO-001',
-    rule_id: 'R-REVENGE-01', mode: 'REVENGE_ENTRY', severity: 'HIGH', points: 10,
-    first_seen_utc: daysAgo(5, 4), window_start_utc: daysAgo(5, 5), window_end_utc: daysAgo(5, 3),
-    evidence_event_ids: ['e-13', 'e-14', 'e-15'], created_at: daysAgo(5, 4),
-  },
-  {
-    violation_id: 'v-m-007', mode_instance_id: 'mi-007', account_ref: 'DEMO-001',
-    rule_id: 'R-FREQ-01', mode: 'FREQUENCY', severity: 'LOW', points: 2,
-    first_seen_utc: daysAgo(7, 3), window_start_utc: daysAgo(7, 4), window_end_utc: daysAgo(7, 2),
-    evidence_event_ids: ['e-16'], created_at: daysAgo(7, 3),
-  },
-  {
-    violation_id: 'v-m-008', mode_instance_id: 'mi-008', account_ref: 'DEMO-001',
-    rule_id: 'R-HESIT-01', mode: 'HESITATION', severity: 'LOW', points: 2,
-    first_seen_utc: daysAgo(8, 2), window_start_utc: daysAgo(8, 3), window_end_utc: daysAgo(8, 1),
-    evidence_event_ids: ['e-17', 'e-18'], created_at: daysAgo(8, 2),
-  },
-];
 
 export default function ViolationsPage() {
   const [violations, setViolations] = useState<ViolationDetail[]>([]);
@@ -75,7 +21,6 @@ export default function ViolationsPage() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setViolations(MOCK_VIOLATIONS);
         setLoading(false);
         return;
       }

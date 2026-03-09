@@ -14,24 +14,6 @@ import type { TimelineItem } from '@/components/ui/radial-orbital-timeline';
 
 type TimeRange = '7D' | '30D' | '90D';
 
-function daysAgo(d: number) {
-  const dt = new Date(Date.now() - d * 86400000);
-  return dt.toISOString().slice(0, 10);
-}
-
-// Mock daily scores aligned with violations mock data
-const MOCK_SCORES: DailyScore[] = [
-  { daily_score_id: 'ds-01', account_ref: 'DEMO-001', trading_date: daysAgo(9),  dsi_score: 94, violation_count: 0, fills_count: 12, computed_at: daysAgo(9) },
-  { daily_score_id: 'ds-02', account_ref: 'DEMO-001', trading_date: daysAgo(8),  dsi_score: 88, violation_count: 1, fills_count: 18, computed_at: daysAgo(8) },   // Hesitation
-  { daily_score_id: 'ds-03', account_ref: 'DEMO-001', trading_date: daysAgo(7),  dsi_score: 85, violation_count: 1, fills_count: 15, computed_at: daysAgo(7) },   // Excessive Frequency
-  { daily_score_id: 'ds-04', account_ref: 'DEMO-001', trading_date: daysAgo(6),  dsi_score: 91, violation_count: 0, fills_count: 9,  computed_at: daysAgo(6) },
-  { daily_score_id: 'ds-05', account_ref: 'DEMO-001', trading_date: daysAgo(5),  dsi_score: 72, violation_count: 1, fills_count: 22, computed_at: daysAgo(5) },   // Revenge Entry
-  { daily_score_id: 'ds-06', account_ref: 'DEMO-001', trading_date: daysAgo(4),  dsi_score: 89, violation_count: 0, fills_count: 11, computed_at: daysAgo(4) },
-  { daily_score_id: 'ds-07', account_ref: 'DEMO-001', trading_date: daysAgo(3),  dsi_score: 82, violation_count: 1, fills_count: 16, computed_at: daysAgo(3) },   // Off-Session
-  { daily_score_id: 'ds-08', account_ref: 'DEMO-001', trading_date: daysAgo(2),  dsi_score: 63, violation_count: 1, fills_count: 24, computed_at: daysAgo(2) },   // Size Escalation (CRITICAL)
-  { daily_score_id: 'ds-09', account_ref: 'DEMO-001', trading_date: daysAgo(1),  dsi_score: 78, violation_count: 0, fills_count: 14, computed_at: daysAgo(1) },
-  { daily_score_id: 'ds-10', account_ref: 'DEMO-001', trading_date: daysAgo(0),  dsi_score: 71, violation_count: 3, fills_count: 19, computed_at: daysAgo(0) },   // Oversize + Off-Session + Frequency
-];
 
 function buildMetricNodes(scores: DailyScore[], range: string): TimelineItem[] {
   const currentScore = scores.length > 0 ? scores[scores.length - 1].dsi_score : null;
@@ -119,12 +101,6 @@ export default function HistoryPage() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        // Filter mock data by range
-        const days = range === '7D' ? 7 : range === '30D' ? 30 : 90;
-        const since = new Date();
-        since.setDate(since.getDate() - days);
-        const sinceStr = since.toISOString().slice(0, 10);
-        setScores(MOCK_SCORES.filter(d => d.trading_date >= sinceStr));
         setLoading(false);
         return;
       }
