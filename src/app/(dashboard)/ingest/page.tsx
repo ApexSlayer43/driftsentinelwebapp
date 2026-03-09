@@ -42,35 +42,10 @@ export default function IngestPage() {
 
     try {
       const csvText = await file.text();
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-      if (!apiUrl) {
-        setError('API URL not configured');
-        setUploading(false);
-        return;
-      }
-
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setError('Not authenticated');
-        setUploading(false);
-        return;
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setError('Session expired. Please log in again.');
-        setUploading(false);
-        return;
-      }
-
-      const res = await fetch(`${apiUrl}/v1/ingest/fills/csv`, {
+      const res = await fetch('/api/ingest/csv', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ csv_text: csvText, source_file: file.name }),
       });
 
