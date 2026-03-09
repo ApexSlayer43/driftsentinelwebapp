@@ -1,12 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 
 export async function middleware(request: NextRequest) {
-  // AUTH DISABLED FOR DEV — uncomment block below to re-enable Supabase Auth gate
-  return NextResponse.next({ request });
-
-  /*
-  import { createServerClient } from '@supabase/ssr';
-
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -38,10 +33,11 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // If user is not logged in and not on the login page, redirect to login
+  // If not logged in and not on auth pages, redirect to login
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
+    !request.nextUrl.pathname.startsWith('/signup') &&
     !request.nextUrl.pathname.startsWith('/auth')
   ) {
     const url = request.nextUrl.clone();
@@ -49,15 +45,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If user is logged in and on the login page, redirect to dashboard
-  if (user && request.nextUrl.pathname.startsWith('/login')) {
+  // If logged in and on login/signup page, redirect to dashboard
+  if (
+    user &&
+    (request.nextUrl.pathname.startsWith('/login') ||
+      request.nextUrl.pathname.startsWith('/signup'))
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);
   }
 
   return supabaseResponse;
-  */
 }
 
 export const config = {
