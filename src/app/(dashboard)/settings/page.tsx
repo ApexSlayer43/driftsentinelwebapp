@@ -242,13 +242,14 @@ export default function SettingsPage() {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   // ── Extension connection state ──────────────────────────────
-  const [extStatus, setExtStatus] = useState<'detecting' | 'not_installed' | 'installed' | 'connecting' | 'connected'>('detecting');
+  const [extStatus, setExtStatus] = useState<'loading' | 'not_installed' | 'detected' | 'connecting' | 'connected'>('loading');
+  const [extError, setExtError] = useState<string | null>(null);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       if (event.origin !== window.location.origin) return;
       if (event.data?.type === 'DS_STATUS') {
-        setExtStatus(event.data.connected ? 'connected' : 'installed');
+        setExtStatus(event.data.connected ? 'connected' : 'detected');
       }
       if (event.data?.type === 'DS_REGISTER_ACK') {
         if (event.data.ok) setExtStatus('connected');
@@ -257,10 +258,10 @@ export default function SettingsPage() {
 
     window.addEventListener('message', handleMessage);
 
-    // If no DS_STATUS arrives within 1s, extension is not installed
+    // If no DS_STATUS arrives within 1.5s, extension is not installed
     const timeout = setTimeout(() => {
-      setExtStatus(prev => prev === 'detecting' ? 'not_installed' : prev);
-    }, 1000);
+      setExtStatus(prev => prev === 'loading' ? 'not_installed' : prev);
+    }, 1500);
 
     return () => {
       window.removeEventListener('message', handleMessage);
@@ -270,6 +271,7 @@ export default function SettingsPage() {
 
   async function connectExtension() {
     setExtStatus('connecting');
+    setExtError(null);
 
     let deviceId = localStorage.getItem('ds_device_id');
     if (!deviceId) {
@@ -281,7 +283,8 @@ export default function SettingsPage() {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        setExtStatus('installed');
+        setExtError('Session expired. Please log in again.');
+        setExtStatus('detected');
         return;
       }
 
@@ -291,11 +294,13 @@ export default function SettingsPage() {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ device_id: deviceId, account_ref: session.user.id }),
+        body: JSON.stringify({ device_id: deviceId, account_ref: session.user.email }),
       });
 
       if (!res.ok) {
-        setExtStatus('installed');
+        const errData = await res.json().catch(() => null);
+        setExtError(errData?.error || `Registration failed (${res.status})`);
+        setExtStatus('detected');
         return;
       }
 
@@ -303,21 +308,23 @@ export default function SettingsPage() {
       window.postMessage({
         type: 'DS_REGISTER_DEVICE',
         device_token: data.device_token,
-        account_ref: session.user.id,
+        account_ref: session.user.email,
       }, '*');
 
-      // Wait for ACK — fall back to installed after 3s if no response
+      // Wait for ACK — fall back to detected after 3s if no response
       setTimeout(() => {
-        setExtStatus(prev => prev === 'connecting' ? 'installed' : prev);
+        setExtStatus(prev => prev === 'connecting' ? 'detected' : prev);
       }, 3000);
     } catch {
-      setExtStatus('installed');
+      setExtError('Connection failed. Check your network.');
+      setExtStatus('detected');
     }
   }
 
   function disconnectExtension() {
     localStorage.removeItem('ds_device_id');
-    setExtStatus('installed');
+    setExtError(null);
+    setExtStatus('detected');
   }
 
   // Load saved protocol from localStorage
@@ -859,8 +866,8 @@ export default function SettingsPage() {
             Connect the Drift Sentinel extension for real-time monitoring
           </p>
 
-          <div className="mt-4">
-            {extStatus === 'detecting' && (
+          <div className="mt-4 space-y-2">
+            {extStatus === 'loading' && (
               <div className="flex items-center gap-2 rounded-lg glass-raised p-3">
                 <Loader2 size={14} className="animate-spin text-text-muted" />
                 <span className="font-mono text-[10px] text-text-muted">Detecting extension...</span>
@@ -879,7 +886,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <a
-                  href="https://github.com/ApexSlayer43/drift-sentinel-ext"
+                  href="https://app.driftsentinel.io"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 rounded-lg bg-elevated px-3 py-1.5 font-mono text-[10px] font-semibold text-text-secondary hover:text-stable transition-colors"
@@ -889,14 +896,14 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {(extStatus === 'installed' || extStatus === 'connecting') && (
+            {(extStatus === 'detected' || extStatus === 'connecting') && (
               <div className="flex items-center justify-between rounded-lg glass-raised p-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10">
                     <Unplug size={16} className="text-amber-400" />
                   </div>
                   <div>
-                    <div className="font-mono text-[10px] font-semibold text-text-secondary">Extension installed</div>
+                    <div className="font-mono text-[10px] font-semibold text-text-secondary">Extension detected</div>
                     <div className="font-mono text-[8px] text-text-dim">Connect to enable real-time behavioral monitoring</div>
                   </div>
                 </div>
@@ -931,6 +938,13 @@ export default function SettingsPage() {
                 >
                   <Unplug size={10} /> Disconnect
                 </button>
+              </div>
+            )}
+
+            {extError && (
+              <div className="flex items-center gap-2 rounded-lg border border-breakdown/20 bg-breakdown/[0.04] px-3 py-2">
+                <X size={12} className="text-breakdown shrink-0" />
+                <span className="font-mono text-[9px] text-breakdown">{extError}</span>
               </div>
             )}
           </div>
