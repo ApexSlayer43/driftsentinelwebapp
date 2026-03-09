@@ -46,7 +46,7 @@ export function Sidebar({ bssScore, bssTier, className = '' }: SidebarProps) {
               Drift Sentinel
             </div>
             <div className="font-mono text-[7px] uppercase tracking-[0.15em] text-text-dim">
-              Behavioral Monitor
+              Behavioral Intelligence
             </div>
           </div>
         </div>
