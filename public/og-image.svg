@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#080A0E"/>
+  <!-- Subtle grid dots -->
+  <pattern id="dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+    <circle cx="15" cy="15" r="0.8" fill="#1C2535"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  <!-- Shield icon -->
+  <g transform="translate(520, 140)">
+    <path d="M80 10 L150 40 V100 C150 150 120 180 80 200 C40 180 10 150 10 100 V40 Z"
+          fill="none" stroke="#00D4AA" stroke-width="2" opacity="0.3"/>
+    <circle cx="80" cy="110" r="12" fill="#00D4AA" opacity="0.6"/>
+  </g>
+  <!-- Text -->
+  <text x="600" y="400" text-anchor="middle" font-family="monospace" font-size="48" font-weight="700" fill="#E8EDF5" letter-spacing="6">DRIFT SENTINEL</text>
+  <text x="600" y="445" text-anchor="middle" font-family="monospace" font-size="16" fill="#4A5568" letter-spacing="4">BEHAVIORAL STABILITY MONITOR</text>
+  <!-- Bottom accent line -->
+  <rect x="500" y="500" width="200" height="2" rx="1" fill="#00D4AA" opacity="0.4"/>
+</svg>

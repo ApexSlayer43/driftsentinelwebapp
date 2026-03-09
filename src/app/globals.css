@@ -8,7 +8,67 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
+
+  /* Surfaces */
+  --color-void: #080A0E;
+  --color-surface: #111720;
+  --color-raised: #161E2A;
+  --color-elevated: #1C2535;
+
+  /* Behavioral states */
+  --color-stable: #00D4AA;
+  --color-drift: #F5A623;
+  --color-compromised: #FF6B35;
+  --color-breakdown: #FF3B5C;
+  --color-building: #5A6A85;
+
+  /* Severity */
+  --color-sev-low: #8A9BB8;
+  --color-sev-med: #F5A623;
+  --color-sev-high: #FF6B35;
+  --color-sev-crit: #FF3B5C;
+
+  /* BSS Tiers */
+  --color-tier-unranked: #5A6A85;
+  --color-tier-draft: #8A9BB8;
+  --color-tier-tested: #00D4AA;
+  --color-tier-verified: #FFD700;
+
+  /* Text */
+  --color-text-primary: #E8EDF5;
+  --color-text-secondary: #8A9BB8;
+  --color-text-muted: #4A5568;
+  --color-text-dim: #2D3748;
+
+  /* Borders */
+  --color-border-dim: rgba(255, 255, 255, 0.04);
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-active: rgba(255, 255, 255, 0.14);
+
+  /* shadcn overrides */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -17,27 +77,6 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -48,82 +87,168 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.58 0.22 27);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
+  --background: #080A0E;
+  --foreground: #E8EDF5;
+  --card: #111720;
+  --card-foreground: #E8EDF5;
+  --popover: #111720;
+  --popover-foreground: #E8EDF5;
+  --primary: #00D4AA;
+  --primary-foreground: #080A0E;
+  --secondary: #161E2A;
+  --secondary-foreground: #E8EDF5;
+  --muted: #161E2A;
+  --muted-foreground: #8A9BB8;
+  --accent: #1C2535;
+  --accent-foreground: #E8EDF5;
+  --destructive: #FF3B5C;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #00D4AA;
+  --chart-1: #00D4AA;
+  --chart-2: #F5A623;
+  --chart-3: #FF6B35;
+  --chart-4: #FF3B5C;
+  --chart-5: #5A6A85;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.87 0.00 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.371 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: #111720;
+  --sidebar-foreground: #E8EDF5;
+  --sidebar-primary: #00D4AA;
+  --sidebar-primary-foreground: #080A0E;
+  --sidebar-accent: #161E2A;
+  --sidebar-accent-foreground: #E8EDF5;
+  --sidebar-border: rgba(255, 255, 255, 0.04);
+  --sidebar-ring: #00D4AA;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border-subtle outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-void text-text-primary;
+    font-family: var(--font-mono);
   }
   html {
-    @apply font-sans;
+    @apply font-mono;
+    scrollbar-width: thin;
+    scrollbar-color: #1C2535 transparent;
   }
 }
+
+/* ── Liquid Glass Panels ──────────────────────────── */
+.glass {
+  background: rgba(17, 23, 32, 0.30);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
+    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.35),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.2),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.2),
+    inset 0 0 6px 6px rgba(255, 255, 255, 0.02),
+    0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.glass-raised {
+  background: rgba(22, 30, 42, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    0 0 4px rgba(0, 0, 0, 0.02),
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    inset 2px 2px 0.5px -2.5px rgba(255, 255, 255, 0.04),
+    inset -2px -2px 0.5px -2.5px rgba(255, 255, 255, 0.28),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.15),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.15),
+    inset 0 0 4px 4px rgba(255, 255, 255, 0.02),
+    0 0 6px rgba(0, 0, 0, 0.08);
+}
+
+.glass-input {
+  background: rgba(28, 37, 53, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow:
+    inset 2px 2px 0.5px -2px rgba(255, 255, 255, 0.03),
+    inset -2px -2px 0.5px -2px rgba(255, 255, 255, 0.2),
+    inset 0 0 4px 3px rgba(255, 255, 255, 0.015),
+    0 0 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Liquid glass — full effect for nav and featured elements */
+.liquid-glass {
+  background: rgba(17, 23, 32, 0.28);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
+    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.4),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.25),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.25),
+    inset 0 0 6px 6px rgba(255, 255, 255, 0.04),
+    inset 0 0 2px 2px rgba(255, 255, 255, 0.02),
+    0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Liquid glass nav tab buttons */
+.liquid-glass-tab {
+  background: rgba(255, 255, 255, 0.015);
+  box-shadow:
+    inset 1px 1px 0.5px -1px rgba(255, 255, 255, 0.12),
+    inset -1px -1px 0.5px -1px rgba(255, 255, 255, 0.12);
+  transition: all 0.3s ease;
+}
+.liquid-glass-tab:hover {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow:
+    0 0 4px rgba(0, 0, 0, 0.02),
+    inset 2px 2px 0.5px -2px rgba(255, 255, 255, 0.08),
+    inset -2px -2px 0.5px -2px rgba(255, 255, 255, 0.25),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.12),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.12),
+    inset 0 0 4px 3px rgba(255, 255, 255, 0.02),
+    0 0 6px rgba(0, 0, 0, 0.06);
+}
+.liquid-glass-tab-active {
+  background: rgba(0, 212, 170, 0.04);
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
+    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.4),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.25),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.25),
+    inset 0 0 6px 6px rgba(255, 255, 255, 0.03),
+    0 0 10px rgba(0, 212, 170, 0.05);
+}
+
+/* ── Precision Crosshair Cursor ──────────────────────────── */
+body {
+  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14" stroke="%234A5568" stroke-width="1"/><line x1="2" y1="8" x2="14" y2="8" stroke="%234A5568" stroke-width="1"/></svg>') 8 8, crosshair;
+}
+
+button, a, [role="button"], .interactive, [data-clickable] {
+  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14" stroke="%234A5568" stroke-width="1"/><line x1="2" y1="8" x2="14" y2="8" stroke="%234A5568" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="%2300D4AA"/></svg>') 8 8, pointer;
+}
+
+.bss-orb {
+  cursor: none;
+}
+
+input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea {
+  cursor: text;
+}
+
+/* ── Custom scrollbar ──────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1C2535; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #2D3748; }

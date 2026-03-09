@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <rect width="180" height="180" rx="36" fill="#080A0E"/>
+  <!-- Shield outline -->
+  <path d="M90 30 L140 50 V95 C140 130 118 155 90 168 C62 155 40 130 40 95 V50 Z"
+        fill="none" stroke="#00D4AA" stroke-width="2.5" opacity="0.25"/>
+  <!-- Inner shield fill -->
+  <path d="M90 45 L130 60 V97 C130 125 112 145 90 155 C68 145 50 125 50 97 V60 Z"
+        fill="#00D4AA" fill-opacity="0.06"/>
+  <!-- Center dot -->
+  <circle cx="90" cy="98" r="14" fill="#00D4AA" opacity="0.7"/>
+  <circle cx="90" cy="98" r="6" fill="#080A0E"/>
+  <circle cx="90" cy="98" r="3" fill="#00D4AA"/>
+</svg>
