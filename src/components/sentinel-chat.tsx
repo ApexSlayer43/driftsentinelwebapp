@@ -1,12 +1,17 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, X } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Send, Bot, X, Loader2 } from 'lucide-react';
 
 interface Message {
   id: string;
   role: 'sentinel' | 'user';
   text: string;
+}
+
+interface ApiMessage {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 const INITIAL_MESSAGE: Message = {
@@ -19,9 +24,12 @@ export function SentinelChat() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
+  // Auto-scroll on new messages / streaming updates
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
@@ -41,19 +49,118 @@ export function SentinelChat() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const handleSend = () => {
+  // Abort in-flight request when panel closes or component unmounts
+  useEffect(() => {
+    if (!open && abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+  }, [open]);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
+
+  const handleSend = useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed) return;
+    if (!trimmed || isStreaming) return;
 
     const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', text: trimmed };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput('');
+    const sentinelId = `s-${Date.now()}`;
+    const placeholderMsg: Message = { id: sentinelId, role: 'sentinel', text: '' };
 
-    setTimeout(() => {
-      const response = deriveResponse(trimmed);
-      setMessages((prev) => [...prev, { id: `s-${Date.now()}`, role: 'sentinel', text: response }]);
-    }, 600);
-  };
+    setMessages((prev) => [...prev, userMsg, placeholderMsg]);
+    setInput('');
+    setIsStreaming(true);
+
+    // Build conversation history for the API (exclude welcome message, map roles)
+    const history: ApiMessage[] = [...messages, userMsg]
+      .filter((m) => m.id !== 'welcome')
+      .map((m) => ({
+        role: m.role === 'user' ? ('user' as const) : ('assistant' as const),
+        content: m.text,
+      }));
+
+    // Abort any previous request
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const errorText =
+          response.status === 401
+            ? 'Session expired. Refresh the page and log in again.'
+            : 'Something went wrong. Try again.';
+        setMessages((prev) =>
+          prev.map((m) => (m.id === sentinelId ? { ...m, text: errorText } : m))
+        );
+        setIsStreaming(false);
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === sentinelId ? { ...m, text: 'No response stream available.' } : m
+          )
+        );
+        setIsStreaming(false);
+        return;
+      }
+
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        accumulated += decoder.decode(value, { stream: true });
+        const currentText = accumulated;
+        setMessages((prev) =>
+          prev.map((m) => (m.id === sentinelId ? { ...m, text: currentText } : m))
+        );
+      }
+
+      // If we got nothing back, show a fallback
+      if (!accumulated) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === sentinelId
+              ? { ...m, text: 'I don\'t have data on that.' }
+              : m
+          )
+        );
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // Request was cancelled — remove empty placeholder
+        setMessages((prev) => prev.filter((m) => m.id !== sentinelId || m.text !== ''));
+      } else {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === sentinelId
+              ? { ...m, text: 'Connection error. Try again.' }
+              : m
+          )
+        );
+      }
+    } finally {
+      setIsStreaming(false);
+      abortRef.current = null;
+    }
+  }, [input, isStreaming, messages]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -79,11 +186,13 @@ export function SentinelChat() {
           <div className="flex items-center gap-2 px-4 py-3 border-b border-border-dim">
             <Bot size={14} className="text-stable" />
             <span className="font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-text-muted">
-              Sentinel
+              Senti
             </span>
             <div className="ml-auto flex items-center gap-1.5">
               <div className="h-1.5 w-1.5 rounded-full bg-stable animate-pulse" />
-              <span className="font-mono text-[7px] text-text-dim">Active</span>
+              <span className="font-mono text-[7px] text-text-dim">
+                {isStreaming ? 'Analyzing' : 'Active'}
+              </span>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -94,18 +203,45 @@ export function SentinelChat() {
           </div>
 
           {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-auto px-4 py-3 space-y-3" style={{ scrollbarWidth: 'none' }}>
+          <div
+            ref={scrollRef}
+            className="flex-1 overflow-auto px-4 py-3 space-y-3"
+            style={{ scrollbarWidth: 'none' }}
+          >
             {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-[85%] rounded-xl px-3 py-2 font-mono text-[10px] leading-relaxed ${
-                    msg.role === 'sentinel'
-                      ? 'glass text-text-secondary'
-                      : 'liquid-glass-tab-active text-text-primary'
-                  }`}
-                >
-                  {msg.text}
-                </div>
+              <div
+                key={msg.id}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {/* Typing indicator for empty streaming sentinel message */}
+                {msg.role === 'sentinel' && msg.text === '' && isStreaming ? (
+                  <div className="max-w-[85%] rounded-xl px-3 py-2 glass">
+                    <div className="flex items-center gap-1">
+                      <span
+                        className="h-1.5 w-1.5 rounded-full bg-stable animate-bounce"
+                        style={{ animationDelay: '0ms' }}
+                      />
+                      <span
+                        className="h-1.5 w-1.5 rounded-full bg-stable animate-bounce"
+                        style={{ animationDelay: '150ms' }}
+                      />
+                      <span
+                        className="h-1.5 w-1.5 rounded-full bg-stable animate-bounce"
+                        style={{ animationDelay: '300ms' }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className={`max-w-[85%] rounded-xl px-3 py-2 font-mono text-[10px] leading-relaxed ${
+                      msg.role === 'sentinel'
+                        ? 'glass text-text-secondary'
+                        : 'liquid-glass-tab-active text-text-primary'
+                    }`}
+                  >
+                    {msg.text}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -117,13 +253,19 @@ export function SentinelChat() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask about your data..."
-              className="flex-1 bg-transparent font-mono text-[10px] text-text-primary placeholder-text-dim outline-none"
+              disabled={isStreaming}
+              className="flex-1 bg-transparent font-mono text-[10px] text-text-primary placeholder-text-dim outline-none disabled:opacity-50"
             />
             <button
               onClick={handleSend}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors liquid-glass-tab hover:liquid-glass-tab-active text-text-muted hover:text-stable"
+              disabled={isStreaming || !input.trim()}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors liquid-glass-tab hover:liquid-glass-tab-active text-text-muted hover:text-stable disabled:opacity-30 disabled:pointer-events-none"
             >
-              <Send size={12} />
+              {isStreaming ? (
+                <Loader2 size={12} className="animate-spin" />
+              ) : (
+                <Send size={12} />
+              )}
             </button>
           </div>
         </div>
@@ -134,7 +276,8 @@ export function SentinelChat() {
         className="sentinel-fab relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 hover:scale-110"
         onClick={() => setOpen(!open)}
         style={{
-          background: 'radial-gradient(circle at 30% 30%, rgba(0, 212, 170, 0.9), rgba(0, 184, 148, 0.8))',
+          background:
+            'radial-gradient(circle at 30% 30%, rgba(0, 212, 170, 0.9), rgba(0, 184, 148, 0.8))',
           boxShadow: open
             ? '0 0 15px rgba(0, 212, 170, 0.4), 0 0 30px rgba(0, 212, 170, 0.2)'
             : '0 0 20px rgba(0, 212, 170, 0.6), 0 0 40px rgba(0, 212, 170, 0.3), 0 0 60px rgba(0, 212, 170, 0.15)',
@@ -160,45 +303,16 @@ export function SentinelChat() {
       {/* Keyframes */}
       <style jsx>{`
         @keyframes sentinel-pop {
-          0% { opacity: 0; transform: scale(0.85) translateY(8px); }
-          100% { opacity: 1; transform: scale(1) translateY(0); }
+          0% {
+            opacity: 0;
+            transform: scale(0.85) translateY(8px);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
         }
       `}</style>
     </div>
   );
-}
-
-/** Derive a response strictly from behavioral data — never infer or speculate. */
-function deriveResponse(query: string): string {
-  const q = query.toLowerCase();
-
-  if (q.includes('worst') || q.includes('biggest') || q.includes('highest')) {
-    return 'Your highest single deduction is -12 from a CRITICAL Size Escalation violation on Mar 6. That represents 25.5% of your total deductions.';
-  }
-  if (q.includes('critical')) {
-    return 'You have 1 CRITICAL violation: Size Escalation (R-SIZE-02) on Mar 6 at 22:22, costing 12 points. 4 evidence fills were recorded.';
-  }
-  if (q.includes('pattern') || q.includes('repeat') || q.includes('common')) {
-    return 'Your most frequent violation modes are Off-Session Trading (2 occurrences) and Excessive Frequency (2 occurrences). Off-Session accounts for 10 combined deduction points.';
-  }
-  if (q.includes('today') || q.includes('recent') || q.includes('latest')) {
-    return 'Today you recorded 3 violations: Oversize Position (-8, HIGH), Off-Session Trading (-5, MED), and Excessive Frequency (-3, LOW). Total session deductions: -16.';
-  }
-  if (q.includes('total') || q.includes('score') || q.includes('deduction')) {
-    return 'Your total deductions across 8 violations sum to -47 points. Severity breakdown: CRITICAL 1, HIGH 2, MED 2, LOW 3.';
-  }
-  if (q.includes('revenge')) {
-    return 'You have 1 Revenge Entry violation (HIGH, -10 points) from Mar 3 at 20:22. Rule R-REVENGE-01. 3 evidence fills were captured.';
-  }
-  if (q.includes('improve') || q.includes('better') || q.includes('advice')) {
-    return 'I don\'t give advice — I report what happened. Your data shows Off-Session and Oversize are your top deduction sources at -18 combined. That\'s 38% of total deductions.';
-  }
-  if (q.includes('session') || q.includes('off')) {
-    return '2 Off-Session Trading violations recorded: Mar 8 (-5, MED) and Mar 5 (-5, MED). Both triggered rule R-OFF-01 with 2 evidence fills each.';
-  }
-  if (q.includes('size') || q.includes('oversize')) {
-    return 'Size-related violations: Oversize Position (-8, HIGH, Mar 8) and Size Escalation (-12, CRITICAL, Mar 6). Combined: -20 points, 42.5% of total.';
-  }
-
-  return 'I can report on your violations, severity breakdown, deduction totals, repeated patterns, and specific violation details. Ask me something specific about your data.';
 }

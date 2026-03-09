@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { BssOrb } from '@/components/bss-orb';
 import { ViolationRow } from '@/components/violation-row';
 import { DriverRow } from '@/components/driver-row';
@@ -36,7 +37,6 @@ export default function DashboardPage() {
         .limit(1);
 
       if (!accounts || accounts.length === 0) {
-        setError('No trading account linked. Go to Settings to connect your account.');
         setLoading(false);
         return;
       }
@@ -280,16 +280,36 @@ export default function DashboardPage() {
 
   if (!data) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <div className="max-w-sm text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-border-subtle bg-surface">
-            <Upload size={20} className="text-text-muted" />
-          </div>
-          <h2 className="font-display text-lg font-bold text-text-primary">No Data Yet</h2>
-          <p className="mt-2 font-mono text-xs leading-relaxed text-text-muted">
-            {error || 'Link your trading account and ingest fills to start monitoring.'}
-          </p>
+      <div className="flex h-full flex-col items-center justify-center">
+        {/* BSS label */}
+        <div className="mb-6">
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+            Behavioral Stability Score
+          </span>
         </div>
+
+        {/* BSS Orb at 0, UNRANKED */}
+        <BssOrb
+          score={0}
+          tier="UNRANKED"
+          state="BUILDING"
+          yesterdayScore={undefined}
+          size="lg"
+          isBuilding={false}
+          buildProgress={undefined}
+        />
+
+        <p className="mt-6 font-mono text-sm text-text-muted">
+          No data yet. Upload your Tradovate CSV to begin.
+        </p>
+
+        <Link
+          href="/ingest"
+          className="mt-4 flex items-center gap-2 rounded-lg bg-stable px-5 py-2.5 font-mono text-sm font-bold text-void transition-opacity hover:opacity-90"
+        >
+          <Upload size={14} />
+          Upload CSV
+        </Link>
       </div>
     );
   }

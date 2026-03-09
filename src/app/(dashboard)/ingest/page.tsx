@@ -58,15 +58,9 @@ export default function IngestPage() {
         return;
       }
 
-      const { data: tokens } = await supabase
-        .from('device_tokens')
-        .select('token_hash')
-        .eq('user_id', user.id)
-        .eq('status', 'ACTIVE')
-        .limit(1);
-
-      if (!tokens || tokens.length === 0) {
-        setError('No device token found. Set up your account first.');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setError('Session expired. Please log in again.');
         setUploading(false);
         return;
       }
@@ -74,7 +68,7 @@ export default function IngestPage() {
       const res = await fetch(`${apiUrl}/v1/ingest/fills/csv`, {
         method: 'POST',
         headers: {
-          'X-Device-Token': tokens[0].token_hash,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ csv_text: csvText, source_file: file.name }),
@@ -113,7 +107,7 @@ export default function IngestPage() {
         Ingest
       </h1>
       <p className="mt-1 font-mono text-xs text-text-muted">
-        Upload Tradovate fill data via CSV
+        Upload your trade history CSV
       </p>
 
       {/* Upload zone */}
@@ -136,10 +130,13 @@ export default function IngestPage() {
           <>
             <Upload size={32} className="text-text-muted" strokeWidth={1} />
             <p className="mt-3 font-mono text-sm text-text-secondary">
-              Drop your Tradovate CSV here
+              Upload your trade history CSV
             </p>
             <p className="mt-1 font-mono text-[10px] text-text-muted">
               or click to browse
+            </p>
+            <p className="mt-3 font-mono text-[9px] text-text-dim">
+              Currently supports Tradovate CSV exports
             </p>
             <input
               type="file"
