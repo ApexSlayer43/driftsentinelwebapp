@@ -9,8 +9,8 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
   const [blinkProgress, setBlinkProgress] = useState(0); // 0 = open, 1 = closed
   const [isBlinking, setIsBlinking] = useState(false);
   const [dilationScale, setDilationScale] = useState(1);
-  const blinkTimeoutRef = useRef<NodeJS.Timeout>();
-  const animFrameRef = useRef<number>();
+  const blinkTimeoutRef = useRef<NodeJS.Timeout>(null);
+  const animFrameRef = useRef<number>(null);
   const cx = size / 2;
   const cy = size / 2;
   const eyeW = size * 0.42;
