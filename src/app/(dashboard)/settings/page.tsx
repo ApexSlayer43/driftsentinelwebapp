@@ -247,21 +247,27 @@ export default function SettingsPage() {
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
-      if (event.origin !== window.location.origin) return;
-      if (event.data?.type === 'DS_STATUS') {
+      if (event.source !== window) return;
+      if (!event.data || event.data.target !== 'drift-sentinel-webapp') return;
+
+      if (event.data.type === 'DS_PONG' || event.data.type === 'DS_EXTENSION_READY') {
+        setExtStatus(prev => prev === 'connected' ? prev : 'detected');
+      }
+      if (event.data.type === 'DS_STATUS') {
         setExtStatus(event.data.connected ? 'connected' : 'detected');
       }
-      if (event.data?.type === 'DS_REGISTER_ACK') {
+      if (event.data.type === 'DS_CONFIG_SAVED') {
         if (event.data.ok) setExtStatus('connected');
+        else setExtError(event.data.error || 'Extension failed to save config');
       }
     }
 
     window.addEventListener('message', handleMessage);
 
     // Ping the extension — handles SPA navigation where bridge.js already loaded
-    window.postMessage({ type: 'DS_PING' }, '*');
+    window.postMessage({ target: 'drift-sentinel-companion', type: 'DS_PING' }, '*');
 
-    // If no DS_STATUS arrives within 3s, extension is not installed
+    // If no response arrives within 3s, extension is not installed
     const timeout = setTimeout(() => {
       setExtStatus(prev => prev === 'loading' ? 'not_installed' : prev);
     }, 3000);
@@ -291,7 +297,9 @@ export default function SettingsPage() {
         return;
       }
 
-      const res = await fetch('https://api.driftsentinel.io/v1/device/register', {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.driftsentinel.io';
+
+      const res = await fetch(`${apiBaseUrl}/v1/device/register`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -309,12 +317,15 @@ export default function SettingsPage() {
 
       const data = await res.json();
       window.postMessage({
-        type: 'DS_REGISTER_DEVICE',
-        device_token: data.device_token,
-        account_ref: session.user.email,
+        target: 'drift-sentinel-companion',
+        type: 'DS_SET_CONFIG',
+        config: {
+          deviceToken: data.device_token,
+          apiBaseUrl,
+        },
       }, '*');
 
-      // Wait for ACK — fall back to detected after 3s if no response
+      // Wait for DS_CONFIG_SAVED — fall back to detected after 3s if no response
       setTimeout(() => {
         setExtStatus(prev => prev === 'connecting' ? 'detected' : prev);
       }, 3000);
