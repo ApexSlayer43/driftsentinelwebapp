@@ -258,10 +258,13 @@ export default function SettingsPage() {
 
     window.addEventListener('message', handleMessage);
 
-    // If no DS_STATUS arrives within 1.5s, extension is not installed
+    // Ping the extension — handles SPA navigation where bridge.js already loaded
+    window.postMessage({ type: 'DS_PING' }, '*');
+
+    // If no DS_STATUS arrives within 3s, extension is not installed
     const timeout = setTimeout(() => {
       setExtStatus(prev => prev === 'loading' ? 'not_installed' : prev);
-    }, 1500);
+    }, 3000);
 
     return () => {
       window.removeEventListener('message', handleMessage);
@@ -886,7 +889,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <a
-                  href="https://app.driftsentinel.io"
+                  href="https://github.com/ApexSlayer43/drift-sentinel-extension"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 rounded-lg bg-elevated px-3 py-1.5 font-mono text-[10px] font-semibold text-text-secondary hover:text-stable transition-colors"
