@@ -297,6 +297,15 @@ export default function SettingsPage() {
         return;
       }
 
+      // Look up the user's existing account_ref (matches CSV ingest format: WEB-XXXXXXXX)
+      const { data: account } = await supabase
+        .from('accounts')
+        .select('account_ref')
+        .eq('user_id', session.user.id)
+        .single();
+
+      const accountRef = account?.account_ref || `WEB-${session.user.id.slice(0, 8).toUpperCase()}`;
+
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.driftsentinel.io';
 
       const res = await fetch(`${apiBaseUrl}/v1/device/register`, {
@@ -305,7 +314,7 @@ export default function SettingsPage() {
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ device_id: deviceId, account_ref: session.user.email }),
+        body: JSON.stringify({ device_id: deviceId, account_ref: accountRef }),
       });
 
       if (!res.ok) {
