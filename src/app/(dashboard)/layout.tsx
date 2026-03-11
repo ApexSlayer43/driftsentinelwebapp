@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -47,6 +47,60 @@ export default function DashboardLayout({
 
     window.addEventListener('drift-state-update', handleStateUpdate as EventListener);
     return () => window.removeEventListener('drift-state-update', handleStateUpdate as EventListener);
+  }, []);
+
+  // Auto-configure extension: detect it, provision a device token, push config
+  const autoConfigRan = useRef(false);
+  useEffect(() => {
+    if (autoConfigRan.current) return;
+
+    // Skip if user already auto-configured this session
+    if (sessionStorage.getItem('ds_auto_configured')) return;
+
+    let cancelled = false;
+
+    function handlePong(event: MessageEvent) {
+      if (event.source !== window) return;
+      if (!event.data || event.data.target !== 'drift-sentinel-webapp') return;
+      if (event.data.type !== 'DS_PONG' && event.data.type !== 'DS_EXTENSION_READY') return;
+      if (cancelled || autoConfigRan.current) return;
+
+      autoConfigRan.current = true;
+      window.removeEventListener('message', handlePong);
+      pushConfigToExtension();
+    }
+
+    async function pushConfigToExtension() {
+      try {
+        const res = await fetch('/api/device/provision', { method: 'POST' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.ok || !data.device_token) return;
+
+        window.postMessage({
+          target: 'drift-sentinel-companion',
+          type: 'DS_SET_CONFIG',
+          config: {
+            deviceToken: data.device_token,
+            apiBaseUrl: data.api_base_url,
+          },
+        }, '*');
+
+        sessionStorage.setItem('ds_auto_configured', '1');
+      } catch {
+        // Silent fail — extension config is best-effort
+      }
+    }
+
+    window.addEventListener('message', handlePong);
+
+    // Ping the extension to check if it's installed
+    window.postMessage({ target: 'drift-sentinel-companion', type: 'DS_PING' }, '*');
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('message', handlePong);
+    };
   }, []);
 
   return (
