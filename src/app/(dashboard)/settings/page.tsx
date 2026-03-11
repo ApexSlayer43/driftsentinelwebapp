@@ -282,44 +282,13 @@ export default function SettingsPage() {
     setExtStatus('connecting');
     setExtError(null);
 
-    let deviceId = localStorage.getItem('ds_device_id');
-    if (!deviceId) {
-      deviceId = crypto.randomUUID();
-      localStorage.setItem('ds_device_id', deviceId);
-    }
-
     try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        setExtError('Session expired. Please log in again.');
-        setExtStatus('detected');
-        return;
-      }
-
-      // Look up the user's existing account_ref (matches CSV ingest format: WEB-XXXXXXXX)
-      const { data: account } = await supabase
-        .from('accounts')
-        .select('account_ref')
-        .eq('user_id', session.user.id)
-        .single();
-
-      const accountRef = account?.account_ref || `WEB-${session.user.id.slice(0, 8).toUpperCase()}`;
-
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.driftsentinel.io';
-
-      const res = await fetch(`${apiBaseUrl}/v1/device/register`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ device_id: deviceId, account_ref: accountRef }),
-      });
+      // Use the deterministic provision endpoint (same token every time for same user)
+      const res = await fetch('/api/device/provision', { method: 'POST' });
 
       if (!res.ok) {
         const errData = await res.json().catch(() => null);
-        setExtError(errData?.error || `Registration failed (${res.status})`);
+        setExtError(errData?.error || `Provision failed (${res.status})`);
         setExtStatus('detected');
         return;
       }
@@ -330,7 +299,7 @@ export default function SettingsPage() {
         type: 'DS_SET_CONFIG',
         config: {
           deviceToken: data.device_token,
-          apiBaseUrl,
+          apiBaseUrl: data.api_base_url,
         },
       }, '*');
 
@@ -345,7 +314,6 @@ export default function SettingsPage() {
   }
 
   function disconnectExtension() {
-    localStorage.removeItem('ds_device_id');
     setExtError(null);
     setExtStatus('detected');
   }
