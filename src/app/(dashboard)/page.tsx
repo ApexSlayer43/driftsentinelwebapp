@@ -117,7 +117,7 @@ export default function DashboardPage() {
       // Build onboarding view
       const baselineWindowFills = config?.baseline_window_fills ?? 200;
       const scoringWindowFills = config?.scoring_window_fills ?? 20;
-      const isBuilding = totalFills < baselineWindowFills;
+      const isBuilding = totalFills < (scoringWindowFills + baselineWindowFills);
 
       // Build drivers from mode_state + drift_scores.top_modes
       const topModes = (driftScore?.top_modes ?? []) as { mode: string; points: number }[];
@@ -147,8 +147,8 @@ export default function DashboardPage() {
 
       let bssScore: number;
       if (dailyScores.length === 0) {
-        // No history — use account stored value or default
-        bssScore = accounts[0].bss_score ?? 100;
+        // No history — no proven stability yet
+        bssScore = 0;
       } else if (recent7.length > 0 && older8to30.length > 0) {
         const recentAvg = recent7.reduce((s, d) => s + d.dsi_score, 0) / recent7.length;
         const olderAvg = older8to30.reduce((s, d) => s + d.dsi_score, 0) / older8to30.length;
@@ -223,24 +223,32 @@ export default function DashboardPage() {
           first_seen_utc: v.first_seen_utc,
           created_at: v.created_at,
         })),
-        onboarding: {
-          phase: isBuilding ? 'BASELINE' : 'ACTIVE',
-          status: isBuilding ? 'BUILDING' : 'READY',
-          is_building: isBuilding,
-          total_fills_seen: totalFills,
-          scoring_window_fills: scoringWindowFills,
-          baseline_window_fills: baselineWindowFills,
-          scoring_progress: {
-            collected: Math.min(totalFills, scoringWindowFills),
-            required: scoringWindowFills,
-            remaining: Math.max(0, scoringWindowFills - totalFills),
-          },
-          baseline_progress: {
-            collected: Math.min(totalFills, baselineWindowFills),
-            required: baselineWindowFills,
-            remaining: Math.max(0, baselineWindowFills - totalFills),
-          },
-        },
+        onboarding: (() => {
+          // Two-window math: scoring window fills first, then baseline window
+          const scoringCollected = Math.min(totalFills, scoringWindowFills);
+          const baselineCollected = Math.min(
+            Math.max(0, totalFills - scoringWindowFills),
+            baselineWindowFills
+          );
+          return {
+            phase: isBuilding ? 'BASELINE' : 'ACTIVE',
+            status: isBuilding ? 'BUILDING' : 'READY',
+            is_building: isBuilding,
+            total_fills_seen: totalFills,
+            scoring_window_fills: scoringWindowFills,
+            baseline_window_fills: baselineWindowFills,
+            scoring_progress: {
+              collected: scoringCollected,
+              required: scoringWindowFills,
+              remaining: Math.max(0, scoringWindowFills - scoringCollected),
+            },
+            baseline_progress: {
+              collected: baselineCollected,
+              required: baselineWindowFills,
+              remaining: Math.max(0, baselineWindowFills - baselineCollected),
+            },
+          };
+        })(),
       };
 
       setData(statePayload);
