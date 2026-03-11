@@ -44,14 +44,14 @@ export async function POST(req: Request) {
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
 
-  /* 3. Check / create account */
-  const { data: account } = await admin
+  /* 3. Check / create account (user may have multiple — prefer WEB source) */
+  const { data: accounts } = await admin
     .from('accounts')
-    .select('account_ref')
-    .eq('user_id', user.id)
-    .single();
+    .select('account_ref, source')
+    .eq('user_id', user.id);
 
-  let accountRef = account?.account_ref as string | undefined;
+  let accountRef = (accounts ?? []).find((a: { source: string }) => a.source === 'WEB')?.account_ref as string | undefined
+    ?? (accounts ?? [])[0]?.account_ref as string | undefined;
 
   if (!accountRef) {
     accountRef = `WEB-${user.id.slice(0, 8).toUpperCase()}`;
