@@ -140,15 +140,32 @@ export async function POST(req: Request) {
   const apiUrl = process.env.API_URL || 'https://api.driftsentinel.io';
   const body = await req.json();
 
-  const upstream = await fetch(`${apiUrl}/v1/ingest/fills/csv`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${rawToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  try {
+    const upstream = await fetch(`${apiUrl}/v1/ingest/fills/csv`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${rawToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
 
-  const data = await upstream.json();
-  return Response.json(data, { status: upstream.status });
+    const rawText = await upstream.text();
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      console.error('ingest proxy: upstream returned non-JSON:', upstream.status, rawText.slice(0, 500));
+      return Response.json(
+        { error: 'upstream_invalid_response', status: upstream.status, body: rawText.slice(0, 200) },
+        { status: 502 },
+      );
+    }
+
+    return Response.json(data, { status: upstream.status });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('ingest proxy: upstream fetch failed:', msg);
+    return Response.json({ error: 'upstream_unreachable', detail: msg }, { status: 502 });
+  }
 }

@@ -49,7 +49,11 @@ export default function IngestPage() {
         body: JSON.stringify({ csv_text: csvText, source_file: file.name }),
       });
 
-      if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        const detail = errBody?.error || errBody?.detail || '';
+        throw new Error(`Upload failed: ${res.status}${detail ? ` — ${detail}` : ''}`);
+      }
 
       const data = await res.json();
       setResult({
