@@ -9,6 +9,7 @@ import {
   Upload,
   Settings,
   LogOut,
+  Shield,
   type LucideIcon,
 } from 'lucide-react';
 import { Particles } from '@/components/ui/particles';
@@ -21,6 +22,7 @@ import type { BehavioralState } from '@/lib/tokens';
 
 const NAV_ITEMS: { title: string; icon: LucideIcon; href: string }[] = [
   { title: 'Dashboard', icon: LayoutDashboard, href: '/' },
+  { title: 'Protocol', icon: Shield, href: '/protocol' },
   { title: 'Violations', icon: AlertTriangle, href: '/violations' },
   { title: 'History', icon: BarChart3, href: '/history' },
   { title: 'Ingest', icon: Upload, href: '/ingest' },

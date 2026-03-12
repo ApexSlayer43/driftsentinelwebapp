@@ -1,229 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Save, Plus, Trash2, Upload, FileText, Shield, Swords, Hammer, X, ChevronDown, ChevronRight, ToggleLeft, ToggleRight, Plug, Unplug, ExternalLink, Loader2, Puzzle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Save, Plus, Trash2, X, Shield, Plug, Unplug, ExternalLink, Loader2, Puzzle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { SessionConfig } from '@/lib/types';
-
-// ── Canonical protocol rule types ──────────────────────────────
-interface RuleParam {
-  key: string;
-  label: string;
-  value: number | string | boolean;
-  unit?: string;
-  type: 'number' | 'string' | 'boolean' | 'percent';
-  min?: number;
-  max?: number;
-}
-
-interface ProtocolRule {
-  id: string;
-  category: string;
-  name: string;
-  description: string;
-  params: RuleParam[];
-  enabled: boolean;
-}
-
-interface ProtocolData {
-  name: string;
-  fileName: string;
-  uploadedAt: string;
-  rules: ProtocolRule[];
-}
-
-// ── Parse PDF text into canonical rules ────────────────────────
-function canonicalizeProtocol(text: string, fileName: string): ProtocolData {
-  const rules: ProtocolRule[] = [];
-  const t = text.toLowerCase();
-
-  // 1. Lifebar / Max Drawdown
-  if (/lifebar|drawdown|max.*draw/i.test(text)) {
-    const amountMatch = text.match(/\$([0-9,]+)\s*(?:lifebar|drawdown|end.?of.?day)/i);
-    const pctMatch = text.match(/(\d+)%\s*(?:to\s*(\d+)%)?\s*max\s*drawdown/i);
-    rules.push({
-      id: 'lifebar',
-      category: 'Risk',
-      name: 'Max Drawdown (Lifebar)',
-      description: 'Maximum drawdown limit that defines your true risk capital',
-      enabled: true,
-      params: [
-        { key: 'amount', label: 'Lifebar Amount', value: amountMatch ? parseInt(amountMatch[1].replace(/,/g, '')) : 2000, unit: '$', type: 'number', min: 100 },
-        { key: 'type', label: 'Drawdown Type', value: /end.?of.?day|eod/i.test(text) ? 'EOD' : 'Trailing', type: 'string' },
-      ],
-    });
-  }
-
-  // 2. Risk Tiers
-  if (/tier|shield|sword|hammer|armory/i.test(text)) {
-    const shieldPct = text.match(/shield[^%]*?(\d+)%/i);
-    const swordPct = text.match(/sword[^%]*?(\d+)%/i);
-    const hammerPct = text.match(/hammer[^%]*?(\d+)%/i);
-
-    rules.push({
-      id: 'tier-shield',
-      category: 'Position Sizing',
-      name: 'Tier 1: Shield',
-      description: 'Conservative tier for new strategies or drawdown recovery',
-      enabled: true,
-      params: [
-        { key: 'risk_pct', label: 'Lifebar Risk', value: shieldPct ? parseInt(shieldPct[1]) : 25, unit: '%', type: 'percent', min: 1, max: 100 },
-        { key: 'max_losses', label: 'Max Consecutive Losses', value: 4, type: 'number', min: 1 },
-      ],
-    });
-    rules.push({
-      id: 'tier-sword',
-      category: 'Position Sizing',
-      name: 'Tier 2: Sword',
-      description: 'Standard tier for proven consistent profitability',
-      enabled: true,
-      params: [
-        { key: 'risk_pct', label: 'Lifebar Risk', value: swordPct ? parseInt(swordPct[1]) : 30, unit: '%', type: 'percent', min: 1, max: 100 },
-        { key: 'max_losses', label: 'Max Consecutive Losses', value: 3, type: 'number', min: 1 },
-      ],
-    });
-    rules.push({
-      id: 'tier-hammer',
-      category: 'Position Sizing',
-      name: 'Tier 3: Hammer',
-      description: 'Aggressive tier reserved for A+ setups with strong edge data',
-      enabled: true,
-      params: [
-        { key: 'risk_pct', label: 'Lifebar Risk', value: hammerPct ? parseInt(hammerPct[1]) : 40, unit: '%', type: 'percent', min: 1, max: 100 },
-        { key: 'max_losses', label: 'Max Consecutive Losses', value: 2, type: 'number', min: 1 },
-      ],
-    });
-  }
-
-  // 3. One-Shot Daily Rule
-  if (/one.?shot|wounded|stop trading.*rest of the day/i.test(text)) {
-    rules.push({
-      id: 'one-shot',
-      category: 'Session Rules',
-      name: 'One-Shot Daily Rule',
-      description: 'Stop trading for the day after taking a full stop loss',
-      enabled: true,
-      params: [
-        { key: 'max_full_losses', label: 'Max Full Losses Per Day', value: 1, type: 'number', min: 1, max: 5 },
-      ],
-    });
-  }
-
-  // 4. Protect the Green
-  if (/protect the green|green day|break.?even.*end.*session/i.test(text)) {
-    rules.push({
-      id: 'protect-green',
-      category: 'Session Rules',
-      name: 'Protect the Green',
-      description: 'End session immediately if P&L retraces to breakeven after being green',
-      enabled: true,
-      params: [
-        { key: 'stop_at_breakeven', label: 'Stop at Breakeven', value: true, type: 'boolean' },
-      ],
-    });
-  }
-
-  // 5. Volatility Filter
-  if (/volatility.*filter|reduce size|wider stop/i.test(text)) {
-    const reductionMatch = text.match(/(?:reduce.*?|by\s*)~?(\d+)%/i);
-    rules.push({
-      id: 'volatility-filter',
-      category: 'Session Rules',
-      name: 'Session Volatility Filter',
-      description: 'Reduce position size when stop distance expands during high-volatility sessions',
-      enabled: true,
-      params: [
-        { key: 'size_reduction', label: 'Size Reduction', value: reductionMatch ? parseInt(reductionMatch[1]) : 50, unit: '%', type: 'percent', min: 10, max: 90 },
-      ],
-    });
-  }
-
-  // 6. Ghost Equity / End-of-Day
-  if (/ghost equity|close.*positions.*before.*bell|time stop/i.test(text)) {
-    const minutesMatch = text.match(/(\d+)\s*minutes?\s*before/i);
-    rules.push({
-      id: 'ghost-equity',
-      category: 'Session Rules',
-      name: 'Ghost Equity Defense',
-      description: 'Close all positions before the daily closing bell to avoid floating drawdown at settlement',
-      enabled: true,
-      params: [
-        { key: 'minutes_before_close', label: 'Minutes Before Close', value: minutesMatch ? parseInt(minutesMatch[1]) : 15, unit: 'min', type: 'number', min: 1, max: 60 },
-        { key: 'no_carry_floating', label: 'No Floating DD at Close', value: true, type: 'boolean' },
-      ],
-    });
-  }
-
-  // 7. Profit Allocation
-  if (/treasury|profit allocation|payout|withdraw/i.test(text)) {
-    const growthMatch = text.match(/(\d+)%\s*(?:active\s*)?account\s*growth/i);
-    const armoryMatch = text.match(/(\d+)%\s*armory/i);
-    const taxMatch = text.match(/(\d+)%\s*(?:crown|tax)/i);
-    const wealthMatch = text.match(/(\d+)%\s*(?:sovereign|wealth|invest)/i);
-    rules.push({
-      id: 'profit-allocation',
-      category: 'Capital',
-      name: 'Profit Allocation',
-      description: 'Split payouts into buckets for sustainability and growth',
-      enabled: true,
-      params: [
-        { key: 'account_growth', label: 'Account Growth', value: growthMatch ? parseInt(growthMatch[1]) : 25, unit: '%', type: 'percent', min: 0, max: 100 },
-        { key: 'armory_fund', label: 'Armory Fund', value: armoryMatch ? parseInt(armoryMatch[1]) : 20, unit: '%', type: 'percent', min: 0, max: 100 },
-        { key: 'taxes', label: 'Taxes', value: taxMatch ? parseInt(taxMatch[1]) : 30, unit: '%', type: 'percent', min: 0, max: 100 },
-        { key: 'wealth', label: 'Long-term Wealth', value: wealthMatch ? parseInt(wealthMatch[1]) : 25, unit: '%', type: 'percent', min: 0, max: 100 },
-      ],
-    });
-  }
-
-  // 8. Yield / Expectancy Model
-  if (/expectancy|win rate|R per|yield/i.test(text)) {
-    const wrMatch = text.match(/win\s*rate[:\s]*(\d+)%/i);
-    const avgWinMatch = text.match(/average\s*win[:\s]*\+?([\d.]+)R/i);
-    const avgLossMatch = text.match(/average\s*loss[:\s]*-?([\d.]+)R/i);
-    const tradesMatch = text.match(/(\d+)\s*trades?\s*per\s*week/i);
-    rules.push({
-      id: 'yield-model',
-      category: 'Capital',
-      name: 'Expected Yield Model',
-      description: 'Edge assumptions driving weekly yield projections',
-      enabled: true,
-      params: [
-        { key: 'win_rate', label: 'Win Rate', value: wrMatch ? parseInt(wrMatch[1]) : 80, unit: '%', type: 'percent', min: 1, max: 100 },
-        { key: 'avg_win_r', label: 'Avg Win (R)', value: avgWinMatch ? parseFloat(avgWinMatch[1]) : 0.5, type: 'number', min: 0.1 },
-        { key: 'avg_loss_r', label: 'Avg Loss (R)', value: avgLossMatch ? parseFloat(avgLossMatch[1]) : 1.0, type: 'number', min: 0.1 },
-        { key: 'trades_per_week', label: 'Trades / Week', value: tradesMatch ? parseInt(tradesMatch[1]) : 10, type: 'number', min: 1 },
-      ],
-    });
-  }
-
-  // Fallback if nothing matched
-  if (rules.length === 0) {
-    rules.push({
-      id: 'generic',
-      category: 'General',
-      name: 'Trading Protocol',
-      description: 'Protocol uploaded — add rules manually',
-      enabled: true,
-      params: [],
-    });
-  }
-
-  return {
-    name: fileName.replace(/\.pdf$/i, '').replace(/[-_]/g, ' '),
-    fileName,
-    uploadedAt: new Date().toISOString(),
-    rules,
-  };
-}
-
-// ── Category icons ─────────────────────────────────────────────
-const CATEGORY_ICONS: Record<string, typeof Shield> = {
-  'Risk': Shield,
-  'Position Sizing': Swords,
-  'Session Rules': Hammer,
-  'Capital': FileText,
-  'General': FileText,
-};
+import Link from 'next/link';
 
 // ── Main page ──────────────────────────────────────────────────
 export default function SettingsPage() {
@@ -236,10 +17,6 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [accountRef, setAccountRef] = useState<string | null>(null);
-  const [protocol, setProtocol] = useState<ProtocolData | null>(null);
-  const [protocolDragOver, setProtocolDragOver] = useState(false);
-  const [protocolUploading, setProtocolUploading] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   // ── Extension connection state ──────────────────────────────
   const [extStatus, setExtStatus] = useState<'loading' | 'not_installed' | 'detected' | 'connecting' | 'connected'>('loading');
@@ -318,129 +95,6 @@ export default function SettingsPage() {
     setExtStatus('detected');
   }
 
-  // Load saved protocol from API (falls back to localStorage for migration)
-  useEffect(() => {
-    if (!accountRef) return;
-    async function loadProtocol() {
-      try {
-        const res = await fetch('/api/protocol');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.rules && data.rules.length > 0) {
-            // Convert DB rows back to ProtocolData shape
-            const dbRules: ProtocolRule[] = data.rules.map((r: any) => ({
-              id: r.rule_id,
-              category: r.category,
-              name: r.name,
-              description: r.description || '',
-              enabled: r.enabled,
-              params: Object.entries(r.params || {}).map(([key, value]) => ({
-                key,
-                label: key.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
-                value: value as number | string | boolean,
-                type: typeof value === 'number' ? 'number' : typeof value === 'boolean' ? 'boolean' : 'string',
-              })),
-            }));
-            const sourceFile = data.rules[0]?.source_file || '';
-            const protocolData: ProtocolData = {
-              name: sourceFile ? sourceFile.replace(/\.pdf$/i, '').replace(/[-_]/g, ' ') : 'Saved Protocol',
-              fileName: sourceFile || '',
-              uploadedAt: data.rules[0]?.updated_at || new Date().toISOString(),
-              rules: dbRules,
-            };
-            setProtocol(protocolData);
-            setExpandedCategories(new Set(dbRules.map(r => r.category)));
-            return;
-          }
-        }
-      } catch { /* API unavailable, fall through */ }
-
-      // Fallback: migrate from localStorage if present
-      const saved = localStorage.getItem('drift-sentinel-protocol');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setProtocol(parsed);
-          if (parsed.rules) {
-            setExpandedCategories(new Set<string>(parsed.rules.map((r: ProtocolRule) => r.category)));
-          }
-        } catch { /* ignore */ }
-      }
-    }
-    loadProtocol();
-  }, [accountRef]);
-
-  const handleProtocolFile = useCallback(async (file: File) => {
-    if (!file.name.toLowerCase().endsWith('.pdf')) return;
-    setProtocolUploading(true);
-
-    try {
-      const text = await file.text();
-      const data = canonicalizeProtocol(text, file.name);
-      setProtocol(data);
-      // Expand all categories
-      setExpandedCategories(new Set(data.rules.map(r => r.category)));
-    } catch {
-      // Fallback for unreadable PDFs
-      const data: ProtocolData = {
-        name: file.name.replace(/\.pdf$/i, '').replace(/[-_]/g, ' '),
-        fileName: file.name,
-        uploadedAt: new Date().toISOString(),
-        rules: [{ id: 'generic', category: 'General', name: 'Trading Protocol', description: 'Protocol uploaded — add rules manually', enabled: true, params: [] }],
-      };
-      setProtocol(data);
-      setExpandedCategories(new Set(['General']));
-    } finally {
-      setProtocolUploading(false);
-    }
-  }, []);
-
-  function removeProtocol() {
-    setProtocol(null);
-    localStorage.removeItem('drift-sentinel-protocol');
-    setExpandedCategories(new Set());
-    // Delete from API on next save (or immediately if we want)
-    if (accountRef) {
-      fetch('/api/protocol', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rules: [], source_file: null }),
-      }).catch(() => {/* non-blocking */});
-    }
-  }
-
-  function toggleRule(ruleId: string) {
-    if (!protocol) return;
-    const updated = {
-      ...protocol,
-      rules: protocol.rules.map(r => r.id === ruleId ? { ...r, enabled: !r.enabled } : r),
-    };
-    setProtocol(updated);
-  }
-
-  function updateRuleParam(ruleId: string, paramKey: string, value: number | string | boolean) {
-    if (!protocol) return;
-    const updated = {
-      ...protocol,
-      rules: protocol.rules.map(r => {
-        if (r.id !== ruleId) return r;
-        return {
-          ...r,
-          params: r.params.map(p => p.key === paramKey ? { ...p, value } : p),
-        };
-      }),
-    };
-    setProtocol(updated);
-  }
-
-  function toggleCategory(cat: string) {
-    setExpandedCategories(prev => {
-      const next = new Set(prev);
-      if (next.has(cat)) next.delete(cat); else next.add(cat);
-      return next;
-    });
-  }
-
   useEffect(() => {
     async function loadSettings() {
       const supabase = createClient();
@@ -500,27 +154,6 @@ export default function SettingsPage() {
         updated_at: new Date().toISOString(),
       });
 
-    // Save protocol rules to API (persists to protocol_rules table + syncs user_configs)
-    if (protocol && protocol.rules.length > 0) {
-      try {
-        const apiRules = protocol.rules.map(r => ({
-          rule_id: r.id,
-          category: r.category,
-          name: r.name,
-          description: r.description,
-          params: Object.fromEntries(r.params.map(p => [p.key, p.value])),
-          enabled: r.enabled,
-        }));
-        await fetch('/api/protocol', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ rules: apiRules, source_file: protocol.fileName }),
-        });
-        // Clear localStorage after successful API save (migration complete)
-        localStorage.removeItem('drift-sentinel-protocol');
-      } catch { /* protocol save failed — non-blocking */ }
-    }
-
     setSaving(false);
     if (!error) {
       setSaved(true);
@@ -550,15 +183,6 @@ export default function SettingsPage() {
     );
   }
 
-  // Group protocol rules by category
-  const rulesByCategory: Record<string, ProtocolRule[]> = {};
-  if (protocol) {
-    for (const rule of protocol.rules) {
-      if (!rulesByCategory[rule.category]) rulesByCategory[rule.category] = [];
-      rulesByCategory[rule.category].push(rule);
-    }
-  }
-
   return (
     <div className="overflow-auto px-8 py-8">
       <div className="flex items-center justify-between">
@@ -577,206 +201,24 @@ export default function SettingsPage() {
       </div>
 
       <div className="mt-8 grid gap-6">
-        {/* Protocol */}
-        <div className="rounded-xl glass p-6">
-          <div className="flex items-center justify-between">
+        {/* Protocol — managed on dedicated page */}
+        <Link
+          href="/protocol"
+          className="group flex items-center justify-between rounded-xl glass p-6 transition-colors hover:bg-raised/30"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-stable/10">
+              <Shield size={16} className="text-stable" />
+            </div>
             <div>
               <h3 className="font-display text-sm font-bold text-text-primary">Protocol</h3>
-              <p className="mt-1 font-mono text-[10px] text-text-muted">
-                {protocol ? 'Rules canonicalized from your protocol' : 'Upload your trading protocol (PDF)'}
+              <p className="mt-0.5 font-mono text-[10px] text-text-muted">
+                Upload and manage your trading protocol rules
               </p>
             </div>
-            {protocol && (
-              <button
-                onClick={removeProtocol}
-                className="flex items-center gap-1 font-mono text-[10px] text-text-dim hover:text-breakdown transition-colors"
-              >
-                <X size={12} /> Remove
-              </button>
-            )}
           </div>
-
-          {protocol ? (
-            <div className="mt-4">
-              {/* Protocol header */}
-              <div className="flex items-center gap-3 rounded-lg glass-raised p-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-stable/10">
-                  <Shield size={16} className="text-stable" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-display text-sm font-bold text-text-primary truncate">
-                    {protocol.name}
-                  </div>
-                  <div className="font-mono text-[9px] text-text-muted">
-                    {protocol.rules.length} rules extracted &middot; {protocol.rules.filter(r => r.enabled).length} active
-                  </div>
-                </div>
-                <div className="font-mono text-[8px] text-text-dim shrink-0">
-                  {new Date(protocol.uploadedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </div>
-              </div>
-
-              {/* Rules by category */}
-              <div className="mt-3 space-y-2">
-                {Object.entries(rulesByCategory).map(([category, catRules]) => {
-                  const CatIcon = CATEGORY_ICONS[category] || FileText;
-                  const isExpanded = expandedCategories.has(category);
-                  const activeCount = catRules.filter(r => r.enabled).length;
-
-                  return (
-                    <div key={category} className="rounded-lg glass-raised overflow-hidden">
-                      {/* Category header */}
-                      <button
-                        onClick={() => toggleCategory(category)}
-                        className="flex w-full items-center gap-2.5 px-3 py-2.5 hover:bg-raised/50 transition-colors"
-                      >
-                        <CatIcon size={13} className="text-text-muted shrink-0" />
-                        <span className="font-mono text-[10px] font-semibold text-text-secondary flex-1 text-left">
-                          {category}
-                        </span>
-                        <span className="font-mono text-[8px] text-text-dim">
-                          {activeCount}/{catRules.length}
-                        </span>
-                        {isExpanded
-                          ? <ChevronDown size={12} className="text-text-dim" />
-                          : <ChevronRight size={12} className="text-text-dim" />
-                        }
-                      </button>
-
-                      {/* Rules */}
-                      {isExpanded && (
-                        <div className="border-t border-border-dim">
-                          {catRules.map((rule) => (
-                            <div key={rule.id} className={`px-3 py-3 border-b border-border-dim last:border-b-0 transition-opacity ${!rule.enabled ? 'opacity-40' : ''}`}>
-                              {/* Rule header with toggle */}
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => toggleRule(rule.id)}
-                                  className="shrink-0"
-                                >
-                                  {rule.enabled
-                                    ? <ToggleRight size={18} className="text-stable" />
-                                    : <ToggleLeft size={18} className="text-text-dim" />
-                                  }
-                                </button>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-mono text-[10px] font-semibold text-text-primary">
-                                    {rule.name}
-                                  </div>
-                                  <div className="font-mono text-[8px] text-text-muted leading-relaxed">
-                                    {rule.description}
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Editable params */}
-                              {rule.enabled && rule.params.length > 0 && (
-                                <div className="mt-2.5 ml-6 grid grid-cols-2 gap-x-4 gap-y-2">
-                                  {rule.params.map((param) => (
-                                    <div key={param.key}>
-                                      <label className="mb-1 block font-mono text-[7px] font-semibold uppercase tracking-[0.15em] text-text-dim">
-                                        {param.label}
-                                      </label>
-                                      {param.type === 'boolean' ? (
-                                        <button
-                                          onClick={() => updateRuleParam(rule.id, param.key, !param.value)}
-                                          className={`rounded px-2 py-1 font-mono text-[9px] font-bold ${
-                                            param.value
-                                              ? 'bg-stable/15 text-stable'
-                                              : 'bg-elevated text-text-dim'
-                                          }`}
-                                        >
-                                          {param.value ? 'YES' : 'NO'}
-                                        </button>
-                                      ) : param.type === 'string' ? (
-                                        <select
-                                          value={param.value as string}
-                                          onChange={(e) => updateRuleParam(rule.id, param.key, e.target.value)}
-                                          className="w-full rounded border border-border-subtle bg-transparent px-2 py-1 font-mono text-[10px] text-text-primary outline-none focus:border-stable"
-                                        >
-                                          {param.key === 'type' && (
-                                            <>
-                                              <option value="EOD">EOD (End of Day)</option>
-                                              <option value="Trailing">Trailing</option>
-                                            </>
-                                          )}
-                                        </select>
-                                      ) : (
-                                        <div className="flex items-center gap-1.5">
-                                          {param.unit === '$' && (
-                                            <span className="font-mono text-[9px] text-text-dim">$</span>
-                                          )}
-                                          <input
-                                            type="number"
-                                            min={param.min}
-                                            max={param.max}
-                                            step={typeof param.value === 'number' && param.value % 1 !== 0 ? 0.1 : 1}
-                                            value={param.value as number}
-                                            onChange={(e) => updateRuleParam(rule.id, param.key, parseFloat(e.target.value) || 0)}
-                                            className="w-full rounded border border-border-subtle bg-transparent px-2 py-1 font-mono text-[10px] text-text-primary outline-none focus:border-stable"
-                                          />
-                                          {param.unit && param.unit !== '$' && (
-                                            <span className="font-mono text-[8px] text-text-dim shrink-0">{param.unit}</span>
-                                          )}
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div
-              onDragOver={(e) => { e.preventDefault(); setProtocolDragOver(true); }}
-              onDragLeave={() => setProtocolDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setProtocolDragOver(false);
-                const file = e.dataTransfer.files[0];
-                if (file) handleProtocolFile(file);
-              }}
-              className={`mt-4 relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-colors ${
-                protocolDragOver
-                  ? 'border-stable bg-stable/[0.04]'
-                  : 'border-border-subtle hover:border-border-active'
-              }`}
-            >
-              {protocolUploading ? (
-                <>
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-stable border-t-transparent" />
-                  <p className="mt-2 font-mono text-[10px] text-text-secondary">Canonicalizing protocol...</p>
-                </>
-              ) : (
-                <>
-                  <Upload size={24} className="text-text-muted" strokeWidth={1} />
-                  <p className="mt-2 font-mono text-[11px] text-text-secondary">
-                    Drop your protocol PDF here
-                  </p>
-                  <p className="mt-0.5 font-mono text-[9px] text-text-dim">
-                    or click to browse
-                  </p>
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleProtocolFile(file);
-                    }}
-                    className="absolute inset-0 cursor-pointer opacity-0"
-                  />
-                </>
-              )}
-            </div>
-          )}
-        </div>
+          <ExternalLink size={14} className="text-text-dim group-hover:text-stable transition-colors" />
+        </Link>
 
         {/* Trading Rules */}
         <div className="rounded-xl glass p-6">
