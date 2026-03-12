@@ -139,14 +139,14 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex min-h-full flex-col overflow-auto">
+    <div className="relative flex min-h-full flex-col overflow-auto">
+      {/* UTC Clock — top right */}
+      <div className="absolute top-4 right-6 z-10">
+        <UtcClock />
+      </div>
+
       {/* Signal Mode: Always visible */}
       <div className={`flex flex-col items-center justify-center transition-all duration-500 ${showDetails ? 'pt-8 pb-4' : 'flex-1'}`}>
-        {/* UTC Clock */}
-        <div className="mb-2">
-          <UtcClock />
-        </div>
-
         {/* BSS label */}
         <div className="mb-6">
           <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
