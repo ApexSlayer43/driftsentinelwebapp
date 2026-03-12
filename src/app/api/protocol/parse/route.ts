@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// pdf-parse v2 uses named export PDFParse class
+// pdf-parse v1 has no type declarations
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { PDFParse } = require("pdf-parse");
+const pdfParse = require("pdf-parse");
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,17 +33,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert Blob to Uint8Array for pdf-parse v2
+    // Convert Blob to Buffer for pdf-parse v1
     const arrayBuffer = await file.arrayBuffer();
-    const uint8 = new Uint8Array(arrayBuffer);
+    const buffer = Buffer.from(arrayBuffer);
 
-    // Extract text using pdf-parse v2
-    const parser = new PDFParse(uint8);
-    const result = await parser.getText();
+    // Extract text using pdf-parse v1: pdfParse(buffer) → { text, numpages, info }
+    const result = await pdfParse(buffer);
 
     return NextResponse.json({
       text: result.text,
-      pages: result.total,
+      pages: result.numpages,
     });
   } catch (err: unknown) {
     console.error("PDF parse error:", err);
