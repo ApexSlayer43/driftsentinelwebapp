@@ -22,10 +22,10 @@ export function getInsight(data: StatePayload): Insight {
     };
   }
 
-  // Clean streak — high score + zero violations signals compounding discipline
-  if (violations_today.length === 0 && data.bss_score >= 90) {
+  // Clean streak — VERIFIED tier + zero violations signals compounding discipline
+  if (violations_today.length === 0 && data.bss_tier === 'VERIFIED') {
     return {
-      text: '12 clean days. Your discipline is compounding.',
+      text: 'Discipline is compounding. VERIFIED tier — stay the course.',
       tone: 'positive',
     };
   }
