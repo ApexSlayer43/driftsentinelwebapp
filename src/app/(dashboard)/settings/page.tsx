@@ -318,21 +318,57 @@ export default function SettingsPage() {
     setExtStatus('detected');
   }
 
-  // Load saved protocol from localStorage
+  // Load saved protocol from API (falls back to localStorage for migration)
   useEffect(() => {
-    const saved = localStorage.getItem('drift-sentinel-protocol');
-    if (saved) {
+    if (!accountRef) return;
+    async function loadProtocol() {
       try {
-        const parsed = JSON.parse(saved);
-        setProtocol(parsed);
-        // Expand all categories on load
-        if (parsed.rules) {
-          const cats = new Set<string>(parsed.rules.map((r: ProtocolRule) => r.category));
-          setExpandedCategories(cats);
+        const res = await fetch('/api/protocol');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.rules && data.rules.length > 0) {
+            // Convert DB rows back to ProtocolData shape
+            const dbRules: ProtocolRule[] = data.rules.map((r: any) => ({
+              id: r.rule_id,
+              category: r.category,
+              name: r.name,
+              description: r.description || '',
+              enabled: r.enabled,
+              params: Object.entries(r.params || {}).map(([key, value]) => ({
+                key,
+                label: key.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+                value: value as number | string | boolean,
+                type: typeof value === 'number' ? 'number' : typeof value === 'boolean' ? 'boolean' : 'string',
+              })),
+            }));
+            const sourceFile = data.rules[0]?.source_file || '';
+            const protocolData: ProtocolData = {
+              name: sourceFile ? sourceFile.replace(/\.pdf$/i, '').replace(/[-_]/g, ' ') : 'Saved Protocol',
+              fileName: sourceFile || '',
+              uploadedAt: data.rules[0]?.updated_at || new Date().toISOString(),
+              rules: dbRules,
+            };
+            setProtocol(protocolData);
+            setExpandedCategories(new Set(dbRules.map(r => r.category)));
+            return;
+          }
         }
-      } catch { /* ignore */ }
+      } catch { /* API unavailable, fall through */ }
+
+      // Fallback: migrate from localStorage if present
+      const saved = localStorage.getItem('drift-sentinel-protocol');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setProtocol(parsed);
+          if (parsed.rules) {
+            setExpandedCategories(new Set<string>(parsed.rules.map((r: ProtocolRule) => r.category)));
+          }
+        } catch { /* ignore */ }
+      }
     }
-  }, []);
+    loadProtocol();
+  }, [accountRef]);
 
   const handleProtocolFile = useCallback(async (file: File) => {
     if (!file.name.toLowerCase().endsWith('.pdf')) return;
@@ -342,7 +378,6 @@ export default function SettingsPage() {
       const text = await file.text();
       const data = canonicalizeProtocol(text, file.name);
       setProtocol(data);
-      localStorage.setItem('drift-sentinel-protocol', JSON.stringify(data));
       // Expand all categories
       setExpandedCategories(new Set(data.rules.map(r => r.category)));
     } catch {
@@ -354,7 +389,6 @@ export default function SettingsPage() {
         rules: [{ id: 'generic', category: 'General', name: 'Trading Protocol', description: 'Protocol uploaded — add rules manually', enabled: true, params: [] }],
       };
       setProtocol(data);
-      localStorage.setItem('drift-sentinel-protocol', JSON.stringify(data));
       setExpandedCategories(new Set(['General']));
     } finally {
       setProtocolUploading(false);
@@ -365,6 +399,14 @@ export default function SettingsPage() {
     setProtocol(null);
     localStorage.removeItem('drift-sentinel-protocol');
     setExpandedCategories(new Set());
+    // Delete from API on next save (or immediately if we want)
+    if (accountRef) {
+      fetch('/api/protocol', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rules: [], source_file: null }),
+      }).catch(() => {/* non-blocking */});
+    }
   }
 
   function toggleRule(ruleId: string) {
@@ -374,7 +416,6 @@ export default function SettingsPage() {
       rules: protocol.rules.map(r => r.id === ruleId ? { ...r, enabled: !r.enabled } : r),
     };
     setProtocol(updated);
-    localStorage.setItem('drift-sentinel-protocol', JSON.stringify(updated));
   }
 
   function updateRuleParam(ruleId: string, paramKey: string, value: number | string | boolean) {
@@ -390,7 +431,6 @@ export default function SettingsPage() {
       }),
     };
     setProtocol(updated);
-    localStorage.setItem('drift-sentinel-protocol', JSON.stringify(updated));
   }
 
   function toggleCategory(cat: string) {
@@ -459,6 +499,27 @@ export default function SettingsPage() {
         sessions_utc: sessions as unknown as Record<string, unknown>,
         updated_at: new Date().toISOString(),
       });
+
+    // Save protocol rules to API (persists to protocol_rules table + syncs user_configs)
+    if (protocol && protocol.rules.length > 0) {
+      try {
+        const apiRules = protocol.rules.map(r => ({
+          rule_id: r.id,
+          category: r.category,
+          name: r.name,
+          description: r.description,
+          params: Object.fromEntries(r.params.map(p => [p.key, p.value])),
+          enabled: r.enabled,
+        }));
+        await fetch('/api/protocol', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rules: apiRules, source_file: protocol.fileName }),
+        });
+        // Clear localStorage after successful API save (migration complete)
+        localStorage.removeItem('drift-sentinel-protocol');
+      } catch { /* protocol save failed — non-blocking */ }
+    }
 
     setSaving(false);
     if (!error) {
