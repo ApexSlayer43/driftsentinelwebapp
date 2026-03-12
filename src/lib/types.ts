@@ -60,6 +60,9 @@ export interface StatePayload {
   };
   bss_score: number;
   bss_tier: 'UNRANKED' | 'DRAFT' | 'TESTED' | 'VERIFIED';
+  bss_streak: number;
+  bss_alpha: number;
+  bss_decay_applied: boolean;
   dsi_score: number;
   dsi_state: string;
   violations_today: ViolationToday[];
@@ -114,6 +117,10 @@ export interface DailyScore {
   dsi_score: number;
   violation_count: number;
   fills_count: number;
+  bss_score: number;
+  bss_previous: number;
+  streak_count: number;
+  alpha_effective: number;
   computed_at: string;
 }
 
