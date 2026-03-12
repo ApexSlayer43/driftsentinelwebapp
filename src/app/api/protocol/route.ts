@@ -86,7 +86,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { rules, source_file } = body as {
+  const { rules, sourceFile: source_file } = body as {
     rules: Array<{
       rule_id: string;
       category: string;
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
       params: Record<string, unknown>;
       enabled: boolean;
     }>;
-    source_file?: string;
+    sourceFile?: string;
   };
 
   if (!rules || !Array.isArray(rules)) {
