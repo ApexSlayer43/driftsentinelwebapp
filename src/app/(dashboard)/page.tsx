@@ -10,6 +10,28 @@ import { Upload } from 'lucide-react';
 import { getInsight } from '@/lib/insights';
 import type { StatePayload } from '@/lib/types';
 
+/** Live UTC clock — updates every second */
+function UtcClock() {
+  const [now, setNow] = useState<string>('');
+  useEffect(() => {
+    const tick = () => {
+      const d = new Date();
+      setNow(
+        d.toISOString().slice(0, 10) + ' ' +
+        d.toISOString().slice(11, 19) + ' UTC'
+      );
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <span className="font-mono text-[9px] tracking-wider text-text-muted">
+      {now}
+    </span>
+  );
+}
+
 
 export default function DashboardPage() {
   const [showDetails, setShowDetails] = useState(false);
@@ -120,6 +142,11 @@ export default function DashboardPage() {
     <div className="flex min-h-full flex-col overflow-auto">
       {/* Signal Mode: Always visible */}
       <div className={`flex flex-col items-center justify-center transition-all duration-500 ${showDetails ? 'pt-8 pb-4' : 'flex-1'}`}>
+        {/* UTC Clock */}
+        <div className="mb-2">
+          <UtcClock />
+        </div>
+
         {/* BSS label */}
         <div className="mb-6">
           <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
