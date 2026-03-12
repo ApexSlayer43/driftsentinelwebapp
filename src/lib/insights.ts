@@ -22,10 +22,10 @@ export function getInsight(data: StatePayload): Insight {
     };
   }
 
-  // Clean streak — VERIFIED tier + zero violations signals compounding discipline
-  if (violations_today.length === 0 && data.bss_tier === 'VERIFIED') {
+  // Clean streak — DISCIPLINED tier + zero violations signals compounding discipline
+  if (violations_today.length === 0 && data.bss_tier === 'DISCIPLINED') {
     return {
-      text: 'Discipline is compounding. VERIFIED tier — stay the course.',
+      text: 'Discipline is compounding. DISCIPLINED tier — stay the course.',
       tone: 'positive',
     };
   }

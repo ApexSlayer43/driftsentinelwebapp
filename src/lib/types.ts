@@ -59,7 +59,7 @@ export interface StatePayload {
     daily_pnl: null;
   };
   bss_score: number;
-  bss_tier: 'UNRANKED' | 'DRAFT' | 'TESTED' | 'VERIFIED';
+  bss_tier: 'CALIBRATING' | 'UNDISCIPLINED' | 'DEVELOPING' | 'DISCIPLINED';
   bss_streak: number;
   bss_alpha: number;
   bss_decay_applied: boolean;

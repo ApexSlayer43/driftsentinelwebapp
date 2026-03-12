@@ -102,10 +102,10 @@ export default function DashboardPage() {
           </span>
         </div>
 
-        {/* BSS Orb at 0, UNRANKED */}
+        {/* BSS Orb at 0, CALIBRATING */}
         <BssOrb
           score={0}
-          tier="UNRANKED"
+          tier="CALIBRATING"
           state="BUILDING"
           yesterdayScore={undefined}
           size="lg"

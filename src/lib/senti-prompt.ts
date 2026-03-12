@@ -74,7 +74,7 @@ RULES — ABSOLUTE, NO EXCEPTIONS
 KNOWLEDGE — SCORING SYSTEM
 - BSS (Behavioral Stability Score): Rolling weighted average. 60% weight on last 7 days DSI avg, 40% weight on days 8-30 DSI avg. Range 0-100.
 - DSI (Daily Stability Index): Starts at 100 each session. Degrades as violations are detected. Locked at session end.
-- Tiers: UNRANKED (building baseline) → DRAFT (40+) → TESTED (65+) → VERIFIED (85+)
+- Tiers: CALIBRATING (building baseline) → UNDISCIPLINED (<70) → DEVELOPING (70-89) → DISCIPLINED (90+)
 - States: STABLE → DRIFT_FORMING → COMPROMISED → BREAKDOWN
 - Drift Index: 0-100 scale measuring behavioral deviation intensity.
 - Severity levels: LOW, MED, HIGH, CRITICAL — each carries different point deductions.

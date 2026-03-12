@@ -31,7 +31,7 @@ interface SidebarProps {
 
 export function Sidebar({ bssScore, bssTier, className = '' }: SidebarProps) {
   const pathname = usePathname();
-  const tierStyle = getTierStyle(bssTier ?? 'DRAFT');
+  const tierStyle = getTierStyle(bssTier ?? 'UNDISCIPLINED');
 
   return (
     <aside
