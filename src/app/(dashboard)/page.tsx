@@ -8,7 +8,6 @@ import { DriverRow } from '@/components/driver-row';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { Upload } from 'lucide-react';
 import { getInsight } from '@/lib/insights';
-import { createClient } from '@/lib/supabase/client';
 import type { StatePayload } from '@/lib/types';
 
 
@@ -20,237 +19,22 @@ export default function DashboardPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      // Single source of truth: Express backend via /api/state proxy
+      // All scoring (DSI, BSS, violations, onboarding) computed server-side
+      const res = await fetch('/api/state');
 
-      if (!user) {
+      if (res.status === 401) {
         setError('Not authenticated');
         setLoading(false);
         return;
       }
 
-      // Get account(s) for this user
-      const { data: accounts } = await supabase
-        .from('accounts')
-        .select('account_ref, bss_score')
-        .eq('user_id', user.id)
-        .limit(1);
-
-      if (!accounts || accounts.length === 0) {
-        setLoading(false);
-        return;
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? `State fetch failed: ${res.status}`);
       }
 
-      const accountRef = accounts[0].account_ref;
-
-      // Fetch all needed data in parallel from Supabase
-      const todayStart = new Date();
-      todayStart.setUTCHours(0, 0, 0, 0);
-      const todayISO = todayStart.toISOString();
-
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      const [
-        driftScoresRes,
-        violationsRes,
-        todayFillsRes,
-        modeStateRes,
-        userConfigRes,
-        totalFillsRes,
-        dailyScoresRes,
-      ] = await Promise.all([
-        // Latest drift score
-        supabase
-          .from('drift_scores')
-          .select('*')
-          .eq('account_ref', accountRef)
-          .order('computed_at', { ascending: false })
-          .limit(1),
-        // Today's violations
-        supabase
-          .from('violations')
-          .select('*')
-          .eq('account_ref', accountRef)
-          .gte('first_seen_utc', todayISO)
-          .order('first_seen_utc', { ascending: false }),
-        // Today's fills count
-        supabase
-          .from('fills_canonical')
-          .select('event_id', { count: 'exact', head: true })
-          .eq('account_ref', accountRef)
-          .gte('timestamp_utc', todayISO),
-        // Active mode states (drift drivers)
-        supabase
-          .from('mode_state')
-          .select('*')
-          .eq('account_ref', accountRef)
-          .eq('state', 'ACTIVE'),
-        // User config
-        supabase
-          .from('user_configs')
-          .select('*')
-          .eq('account_ref', accountRef)
-          .limit(1),
-        // Total fills for onboarding progress
-        supabase
-          .from('fills_canonical')
-          .select('event_id', { count: 'exact', head: true })
-          .eq('account_ref', accountRef),
-        // Last 30 days of daily scores for BSS calculation
-        supabase
-          .from('daily_scores')
-          .select('trading_date, dsi_score')
-          .eq('account_ref', accountRef)
-          .gte('trading_date', thirtyDaysAgo.toISOString().slice(0, 10))
-          .order('trading_date', { ascending: false }),
-      ]);
-
-      const driftScore = driftScoresRes.data?.[0] ?? null;
-      const violations = violationsRes.data ?? [];
-      const todayFillsCount = todayFillsRes.count ?? 0;
-      const modeStates = modeStateRes.data ?? [];
-      const config = userConfigRes.data?.[0] ?? null;
-      const totalFills = totalFillsRes.count ?? 0;
-      const dailyScores = (dailyScoresRes.data ?? []) as { trading_date: string; dsi_score: number }[];
-
-      // Build onboarding view
-      const baselineWindowFills = config?.baseline_window_fills ?? 200;
-      const scoringWindowFills = config?.scoring_window_fills ?? 20;
-      const isBuilding = totalFills < (scoringWindowFills + baselineWindowFills);
-
-      // Build drivers from mode_state + drift_scores.top_modes
-      const topModes = (driftScore?.top_modes ?? []) as { mode: string; points: number }[];
-      const drivers = modeStates.map((ms: { mode: string; onset_utc: string | null }) => {
-        // Get points from drift_scores.top_modes first, fall back to today's violations
-        const fromTopModes = topModes.find((tm) => tm.mode === ms.mode);
-        const modePoints = fromTopModes?.points ??
-          violations
-            .filter((v: { mode: string }) => v.mode === ms.mode)
-            .reduce((sum: number, v: { points: number }) => sum + v.points, 0);
-        return {
-          mode: ms.mode,
-          points: modePoints,
-          onset_utc: ms.onset_utc ?? new Date().toISOString(),
-        };
-      }).sort((a: { points: number }, b: { points: number }) => b.points - a.points);
-
-      // ── BSS Algorithm: 60/40 weighted average ──
-      // Last 7 days DSI scores × 0.60 weight
-      // Days 8-30 DSI scores × 0.40 weight
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const sevenDaysAgoStr = sevenDaysAgo.toISOString().slice(0, 10);
-
-      const recent7 = dailyScores.filter(d => d.trading_date > sevenDaysAgoStr);
-      const older8to30 = dailyScores.filter(d => d.trading_date <= sevenDaysAgoStr);
-
-      let bssScore: number;
-      if (dailyScores.length === 0) {
-        // No history — no proven stability yet
-        bssScore = 0;
-      } else if (recent7.length > 0 && older8to30.length > 0) {
-        const recentAvg = recent7.reduce((s, d) => s + d.dsi_score, 0) / recent7.length;
-        const olderAvg = older8to30.reduce((s, d) => s + d.dsi_score, 0) / older8to30.length;
-        bssScore = Math.round(recentAvg * 0.60 + olderAvg * 0.40);
-      } else if (recent7.length > 0) {
-        // Only recent data, use as-is
-        bssScore = Math.round(recent7.reduce((s, d) => s + d.dsi_score, 0) / recent7.length);
-      } else {
-        // Only older data
-        bssScore = Math.round(older8to30.reduce((s, d) => s + d.dsi_score, 0) / older8to30.length);
-      }
-
-      // Determine BSS tier
-      let bssTier: 'UNRANKED' | 'DRAFT' | 'TESTED' | 'VERIFIED' = 'UNRANKED';
-      if (isBuilding) bssTier = 'UNRANKED';
-      else if (bssScore >= 85) bssTier = 'VERIFIED';
-      else if (bssScore >= 65) bssTier = 'TESTED';
-      else if (bssScore >= 40) bssTier = 'DRAFT';
-
-      // ── DSI Score: 100 minus today's total violation points ──
-      const todayTotalPoints = violations.reduce((sum: number, v: { points: number }) => sum + v.points, 0);
-      const dsiScore = Math.max(0, 100 - todayTotalPoints);
-
-      // Protocol breaches today
-      const protocolBreaches = violations.filter((v: { severity: string }) =>
-        v.severity === 'HIGH' || v.severity === 'CRITICAL'
-      ).length;
-
-      // Assemble the StatePayload
-      const statePayload: StatePayload = {
-        account_ref: accountRef,
-        drift: {
-          state: driftScore?.state ?? 'STABLE',
-          drift_index: driftScore?.drift_index ?? 0,
-          data_stale: driftScore?.data_stale ?? false,
-          computed_at: driftScore?.computed_at ?? null,
-          window_start_utc: driftScore?.window_start_utc ?? null,
-          window_end_utc: driftScore?.window_end_utc ?? null,
-          drivers,
-        },
-        last_execution_update_utc: null,
-        protocol: {
-          ref: accountRef,
-          version: '1.0',
-          activation_utc: null,
-          source: 'SUPABASE',
-        },
-        metrics: {
-          trades_today_utc: todayFillsCount,
-          violations_today_utc: violations.length,
-          protocol_breaches_today_utc: protocolBreaches,
-          daily_pnl: null,
-        },
-        bss_score: bssScore,
-        bss_tier: bssTier,
-        dsi_score: dsiScore,
-        dsi_state: dsiScore >= 80 ? 'CLEAN' : dsiScore >= 50 ? 'DRIFT' : 'BREACH',
-        violations_today: violations.map((v: {
-          violation_id: string;
-          mode: string;
-          rule_id: string;
-          severity: 'LOW' | 'MED' | 'HIGH' | 'CRITICAL';
-          points: number;
-          first_seen_utc: string;
-          created_at: string;
-        }) => ({
-          violation_id: v.violation_id,
-          mode: v.mode,
-          rule_id: v.rule_id,
-          severity: v.severity,
-          points: v.points,
-          first_seen_utc: v.first_seen_utc,
-          created_at: v.created_at,
-        })),
-        onboarding: (() => {
-          // Two-window math: scoring window fills first, then baseline window
-          const scoringCollected = Math.min(totalFills, scoringWindowFills);
-          const baselineCollected = Math.min(
-            Math.max(0, totalFills - scoringWindowFills),
-            baselineWindowFills
-          );
-          return {
-            phase: isBuilding ? 'BASELINE' : 'ACTIVE',
-            status: isBuilding ? 'BUILDING' : 'READY',
-            is_building: isBuilding,
-            total_fills_seen: totalFills,
-            scoring_window_fills: scoringWindowFills,
-            baseline_window_fills: baselineWindowFills,
-            scoring_progress: {
-              collected: scoringCollected,
-              required: scoringWindowFills,
-              remaining: Math.max(0, scoringWindowFills - scoringCollected),
-            },
-            baseline_progress: {
-              collected: baselineCollected,
-              required: baselineWindowFills,
-              remaining: Math.max(0, baselineWindowFills - baselineCollected),
-            },
-          };
-        })(),
-      };
-
+      const statePayload: StatePayload = await res.json();
       setData(statePayload);
     } catch (err) {
       console.error('Failed to fetch state:', err);

@@ -23,7 +23,7 @@ export function getInsight(data: StatePayload): Insight {
   }
 
   // Clean streak — high score + zero violations signals compounding discipline
-  if (violations_today.length === 0 && data.bss_score >= 85) {
+  if (violations_today.length === 0 && data.bss_score >= 90) {
     return {
       text: '12 clean days. Your discipline is compounding.',
       tone: 'positive',
