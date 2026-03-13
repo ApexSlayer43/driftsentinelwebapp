@@ -10,6 +10,44 @@ import { Upload } from 'lucide-react';
 import { getInsight } from '@/lib/insights';
 import type { StatePayload } from '@/lib/types';
 
+/** Data freshness indicator — LIVE / STALE / ERROR */
+type FreshnessState = 'LIVE' | 'STALE' | 'ERROR';
+
+function getDataFreshness(computedAt: string | null): { state: FreshnessState; label: string } {
+  if (!computedAt) return { state: 'ERROR', label: 'ERROR' };
+  const age = (Date.now() - new Date(computedAt).getTime()) / 1000;
+  if (!Number.isFinite(age) || age < 0) return { state: 'ERROR', label: 'ERROR' };
+  if (age < 120) return { state: 'LIVE', label: 'LIVE' };
+  return { state: 'STALE', label: 'STALE' };
+}
+
+const FRESHNESS_STYLES: Record<FreshnessState, { dot: string; text: string }> = {
+  LIVE:  { dot: 'bg-stable',      text: 'text-stable' },
+  STALE: { dot: 'bg-drift',       text: 'text-drift' },
+  ERROR: { dot: 'bg-compromised', text: 'text-compromised' },
+};
+
+function DataFreshnessIndicator({ computedAt }: { computedAt: string | null }) {
+  const [freshness, setFreshness] = useState(() => getDataFreshness(computedAt));
+
+  useEffect(() => {
+    setFreshness(getDataFreshness(computedAt));
+    const id = setInterval(() => setFreshness(getDataFreshness(computedAt)), 10_000);
+    return () => clearInterval(id);
+  }, [computedAt]);
+
+  const styles = FRESHNESS_STYLES[freshness.state];
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className={`inline-block h-1.5 w-1.5 rounded-full ${styles.dot} ${freshness.state === 'LIVE' ? 'animate-pulse' : ''}`} />
+      <span className={`font-mono text-[8px] font-bold uppercase tracking-[0.15em] ${styles.text}`}>
+        {freshness.label}
+      </span>
+    </div>
+  );
+}
+
 /** Live UTC clock — updates every second */
 function UtcClock() {
   const [now, setNow] = useState<string>('');
@@ -102,10 +140,10 @@ export default function DashboardPage() {
           </span>
         </div>
 
-        {/* BSS Orb at 0, CALIBRATING */}
+        {/* BSS Orb at 50, DORMANT */}
         <BssOrb
-          score={0}
-          tier="CALIBRATING"
+          score={50}
+          tier="DORMANT"
           state="BUILDING"
           yesterdayScore={undefined}
           size="lg"
@@ -147,11 +185,12 @@ export default function DashboardPage() {
 
       {/* Signal Mode: Always visible */}
       <div className={`flex flex-col items-center justify-center transition-all duration-500 ${showDetails ? 'pt-8 pb-4' : 'flex-1'}`}>
-        {/* BSS label */}
-        <div className="mb-6">
+        {/* BSS label + data freshness */}
+        <div className="mb-6 flex flex-col items-center gap-1.5">
           <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
             Behavioral Stability Score
           </span>
+          <DataFreshnessIndicator computedAt={data.drift.computed_at} />
         </div>
 
         {/* BSS Orb */}

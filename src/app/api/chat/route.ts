@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     const context: SentiContext = {
       accountRef,
       bssScore: drift?.bss_score ?? 0,
-      bssTier: drift?.bss_tier ?? 'CALIBRATING',
+      bssTier: drift?.bss_tier ?? 'DORMANT',
       dsiScore: drift?.dsi_score ?? 100,
       behavioralState: drift?.behavioral_state ?? 'BUILDING',
       driftIndex: drift?.drift_index ?? 0,

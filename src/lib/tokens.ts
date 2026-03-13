@@ -8,10 +8,12 @@ export const STATE_STYLES = {
 } as const;
 
 export const TIER_STYLES = {
-  CALIBRATING:    { color: '#5A6A85', glow: 'rgba(90,106,133,0.10)' },
-  UNDISCIPLINED:  { color: '#8A9BB8', glow: 'rgba(138,155,184,0.12)' },
-  DEVELOPING:     { color: '#00D4AA', glow: 'rgba(0,212,170,0.14)' },
-  DISCIPLINED:    { color: '#FFD700', glow: 'rgba(255,215,0,0.16)' },
+  DORMANT:    { color: '#5A6A85', glow: 'rgba(90,106,133,0.10)' },
+  FORMING:    { color: '#8A9BB8', glow: 'rgba(138,155,184,0.12)' },
+  DEFINED:    { color: '#4A9EE5', glow: 'rgba(74,158,229,0.14)' },
+  GROUNDED:   { color: '#00D4AA', glow: 'rgba(0,212,170,0.14)' },
+  PROVEN:     { color: '#F5A623', glow: 'rgba(245,166,35,0.16)' },
+  SOVEREIGN:  { color: '#FFD700', glow: 'rgba(255,215,0,0.18)' },
 } as const;
 
 export const SEVERITY_COLORS = {
@@ -50,7 +52,7 @@ export function getStateStyle(state: string) {
 }
 
 export function getTierStyle(tier: string) {
-  return TIER_STYLES[tier as keyof typeof TIER_STYLES] ?? TIER_STYLES.UNDISCIPLINED;
+  return TIER_STYLES[tier as keyof typeof TIER_STYLES] ?? TIER_STYLES.DORMANT;
 }
 
 export function getSeverityColor(severity: string) {

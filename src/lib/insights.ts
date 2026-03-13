@@ -22,10 +22,26 @@ export function getInsight(data: StatePayload): Insight {
     };
   }
 
-  // Clean streak — DISCIPLINED tier + zero violations signals compounding discipline
-  if (violations_today.length === 0 && data.bss_tier === 'DISCIPLINED') {
+  // Clean streak — SOVEREIGN tier + zero violations signals compounding discipline
+  if (violations_today.length === 0 && data.bss_tier === 'SOVEREIGN') {
     return {
-      text: 'Discipline is compounding. DISCIPLINED tier — stay the course.',
+      text: 'Discipline is compounding. SOVEREIGN tier — stay the course.',
+      tone: 'positive',
+    };
+  }
+
+  // PROVEN tier + clean session
+  if (violations_today.length === 0 && data.bss_tier === 'PROVEN') {
+    return {
+      text: 'Strong track record holding. PROVEN tier — consistency is building.',
+      tone: 'positive',
+    };
+  }
+
+  // GROUNDED tier + clean session
+  if (violations_today.length === 0 && data.bss_tier === 'GROUNDED') {
+    return {
+      text: 'Above average and climbing. GROUNDED tier — keep it tight.',
       tone: 'positive',
     };
   }
