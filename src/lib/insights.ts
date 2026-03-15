@@ -30,18 +30,18 @@ export function getInsight(data: StatePayload): Insight {
     };
   }
 
-  // PROVEN tier + clean session
-  if (violations_today.length === 0 && data.bss_tier === 'PROVEN') {
+  // DISCIPLINED tier + clean session
+  if (violations_today.length === 0 && data.bss_tier === 'DISCIPLINED') {
     return {
-      text: 'Strong track record holding. PROVEN tier — consistency is building.',
+      text: 'Strong track record holding. DISCIPLINED tier — consistency is building.',
       tone: 'positive',
     };
   }
 
-  // GROUNDED tier + clean session
-  if (violations_today.length === 0 && data.bss_tier === 'GROUNDED') {
+  // CONSISTENT tier + clean session
+  if (violations_today.length === 0 && data.bss_tier === 'CONSISTENT') {
     return {
-      text: 'Above average and climbing. GROUNDED tier — keep it tight.',
+      text: 'Above average and climbing. CONSISTENT tier — keep it tight.',
       tone: 'positive',
     };
   }

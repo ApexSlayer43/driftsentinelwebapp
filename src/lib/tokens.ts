@@ -9,13 +9,14 @@ export const STATE_STYLES = {
 } as const;
 
 // Tier colors — gaming loot rarity (spec Section 5)
+// DORMANT → FORMING → DEVELOPING → CONSISTENT → DISCIPLINED → SOVEREIGN
 export const TIER_STYLES = {
-  DORMANT:    { color: '#6B7280', glow: 'rgba(107,114,128,0.10)' },
-  FORMING:    { color: '#60A5FA', glow: 'rgba(96,165,250,0.12)' },
-  DEFINED:    { color: '#34D399', glow: 'rgba(52,211,153,0.14)' },
-  GROUNDED:   { color: '#A78BFA', glow: 'rgba(167,139,250,0.14)' },
-  PROVEN:     { color: '#F59E0B', glow: 'rgba(245,158,11,0.16)' },
-  SOVEREIGN:  { color: '#FFD700', glow: 'rgba(255,215,0,0.18)' },
+  DORMANT:     { color: '#6B7280', glow: 'rgba(107,114,128,0.10)' },
+  FORMING:     { color: '#60A5FA', glow: 'rgba(96,165,250,0.12)' },
+  DEVELOPING:  { color: '#34D399', glow: 'rgba(52,211,153,0.14)' },
+  CONSISTENT:  { color: '#A78BFA', glow: 'rgba(167,139,250,0.14)' },
+  DISCIPLINED: { color: '#F59E0B', glow: 'rgba(245,158,11,0.16)' },
+  SOVEREIGN:   { color: '#FFD700', glow: 'rgba(255,215,0,0.18)' },
 } as const;
 
 export const SEVERITY_COLORS = {

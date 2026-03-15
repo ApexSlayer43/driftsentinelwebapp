@@ -97,9 +97,9 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
   function getCellColor(bss: number | null): string {
     if (bss === null) return 'rgba(255, 255, 255, 0.02)'; // no data
     if (bss >= 90) return getTierStyle('SOVEREIGN').color;
-    if (bss >= 80) return getTierStyle('PROVEN').color;
-    if (bss >= 65) return getTierStyle('GROUNDED').color;
-    if (bss >= 50) return getTierStyle('DEFINED').color;
+    if (bss >= 80) return getTierStyle('DISCIPLINED').color;
+    if (bss >= 65) return getTierStyle('CONSISTENT').color;
+    if (bss >= 50) return getTierStyle('DEVELOPING').color;
     if (bss >= 30) return getTierStyle('FORMING').color;
     return getTierStyle('DORMANT').color;
   }
@@ -147,10 +147,10 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+        <span className="font-mono text-[12px] font-semibold uppercase tracking-[0.12em] text-text-muted">
           5-Week Protocol Compliance
         </span>
-        <span className="font-mono text-[9px] font-bold text-text-secondary">
+        <span className="font-mono text-[12px] font-bold text-text-secondary">
           {complianceRate}%
         </span>
       </div>
@@ -162,7 +162,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
           {DAY_LABELS.map((label, i) => (
             <div
               key={i}
-              className="flex h-[14px] w-3 items-center justify-center font-mono text-[7px] text-text-dim"
+              className="flex h-[14px] w-3 items-center justify-center font-mono text-[10px] text-text-dim"
             >
               {i % 2 === 0 ? label : ''}
             </div>
@@ -199,17 +199,17 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
 
                   {/* Tooltip */}
                   <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-lg border border-border-subtle bg-surface px-2.5 py-1.5 shadow-lg group-hover:block">
-                    <div className="font-mono text-[9px] font-bold text-text-primary">
+                    <div className="font-mono text-[12px] font-bold text-text-primary">
                       {dateStr}
                     </div>
                     {day ? (
-                      <div className="mt-0.5 space-y-0.5 font-mono text-[8px] text-text-muted">
+                      <div className="mt-0.5 space-y-0.5 font-mono text-[12px] text-text-muted">
                         <div>BSS: <span style={{ color }}>{bss}</span></div>
                         <div>DSI: {day.dsi ?? '—'}</div>
                         <div>{day.fillCount} fills {day.isClean ? '· clean' : '· violations'}</div>
                       </div>
                     ) : (
-                      <div className="mt-0.5 font-mono text-[8px] text-text-dim">No data</div>
+                      <div className="mt-0.5 font-mono text-[12px] text-text-dim">No data</div>
                     )}
                   </div>
                 </div>
@@ -220,7 +220,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
       </div>
 
       {/* Summary row */}
-      <div className="flex items-center gap-4 font-mono text-[8px] text-text-muted">
+      <div className="flex items-center gap-4 font-mono text-[12px] text-text-muted">
         <span>{cleanDays}/{totalDays} clean days</span>
         {streak > 0 && (
           <span className="text-positive">{streak}d streak</span>
@@ -231,7 +231,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
             <div
               key={i}
               className="h-[10px] w-[10px] rounded-[2px]"
-              style={{ backgroundColor: '#00D4AA', opacity: op }}
+              style={{ backgroundColor: '#6366F1', opacity: op }}
             />
           ))}
           <span className="text-text-dim">More</span>

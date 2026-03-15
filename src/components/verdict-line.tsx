@@ -52,16 +52,16 @@ function computeVerdict(data: StatePayload): { text: string; tone: VerdictTone }
     };
   }
 
-  // PROVEN + clean
-  if (violations_today.length === 0 && bss_tier === 'PROVEN') {
+  // DISCIPLINED + clean
+  if (violations_today.length === 0 && bss_tier === 'DISCIPLINED') {
     return {
       text: `Strong track record holding. ${bss_streak > 1 ? `${bss_streak}-day streak.` : 'Stay the course.'}`,
       tone: 'positive',
     };
   }
 
-  // GROUNDED + clean
-  if (violations_today.length === 0 && bss_tier === 'GROUNDED') {
+  // CONSISTENT + clean
+  if (violations_today.length === 0 && bss_tier === 'CONSISTENT') {
     return {
       text: `Above average and climbing.${bss_delta > 0 ? ` +${bss_delta} today.` : ''}`,
       tone: 'positive',

@@ -247,7 +247,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
                               <p className="truncate font-mono text-[12px] font-semibold text-text-primary">
                                 {notif.title}
                               </p>
-                              <span className="shrink-0 font-mono text-[10px] text-text-dim">
+                              <span className="shrink-0 font-mono text-[12px] text-text-dim">
                                 {timeAgo(notif.timestamp)}
                               </span>
                             </div>

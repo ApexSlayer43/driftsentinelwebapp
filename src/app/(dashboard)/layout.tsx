@@ -4,28 +4,27 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
-  AlertTriangle,
-  BarChart3,
+  Search,
   Upload,
   Settings,
   LogOut,
   Shield,
+  UserCircle,
   type LucideIcon,
 } from 'lucide-react';
 import { Particles } from '@/components/ui/particles';
 import { GlassFilter } from '@/components/ui/liquid-glass-button';
 import { cn } from '@/lib/utils';
-import { SentinelChat } from '@/components/sentinel-chat';
 import LiveEye from '@/components/live-eye';
 import { createClient } from '@/lib/supabase/client';
 import type { BehavioralState } from '@/lib/tokens';
 
 const NAV_ITEMS: { title: string; icon: LucideIcon; href: string }[] = [
   { title: 'Dashboard', icon: LayoutDashboard, href: '/' },
-  { title: 'Protocol', icon: Shield, href: '/protocol' },
-  { title: 'Violations', icon: AlertTriangle, href: '/violations' },
-  { title: 'History', icon: BarChart3, href: '/history' },
-  { title: 'Ingest', icon: Upload, href: '/ingest' },
+  { title: 'Upload', icon: Upload, href: '/ingest' },
+  { title: 'Forensics', icon: Search, href: '/violations' },
+  { title: 'Signal Config', icon: Shield, href: '/protocol' },
+  { title: 'DS Trader ID', icon: UserCircle, href: '/trader-id' },
   { title: 'Settings', icon: Settings, href: '/settings' },
 ];
 
@@ -130,7 +129,7 @@ export default function DashboardLayout({
               className={cn(
                 'group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200',
                 isActive
-                  ? 'text-positive liquid-glass-tab-active'
+                  ? 'text-accent-primary liquid-glass-tab-active'
                   : 'text-text-muted hover:text-text-secondary liquid-glass-tab'
               )}
             >
@@ -166,7 +165,6 @@ export default function DashboardLayout({
         </main>
       </div>
 
-      <SentinelChat />
     </div>
   );
 }

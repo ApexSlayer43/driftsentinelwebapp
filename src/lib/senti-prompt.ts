@@ -74,7 +74,7 @@ RULES — ABSOLUTE, NO EXCEPTIONS
 KNOWLEDGE — SCORING SYSTEM
 - BSS (Behavioral Stability Score): EWMA with asymmetric streak modifier. alpha=0.15 base (~4.3 day half-life). Clean streaks lower alpha (more stability). Violation days spike alpha to 0.375. Range 0-100. New users start at 50.
 - DSI (Daily Stability Index): Starts at 100 each session. Degrades as violations are detected. Locked at session end. Clean day = DSI >= 80.
-- 6-Tier System: DORMANT (<30 fills, insufficient data) → FORMING (BSS <50, early/unproven) → DEFINED (BSS 50-64, pattern visible) → GROUNDED (BSS 65-79, consistent) → PROVEN (BSS 80-89, strong track record) → SOVEREIGN (BSS 90+, elite behavioral stability)
+- 6-Tier System: DORMANT (<30 fills, insufficient data) → FORMING (BSS <50, early/unproven) → DEVELOPING (BSS 50-64, pattern visible) → CONSISTENT (BSS 65-79, consistent) → DISCIPLINED (BSS 80-89, strong track record) → SOVEREIGN (BSS 90+, elite behavioral stability)
 - States: STABLE → DRIFT_FORMING → COMPROMISED → BREAKDOWN
 - Drift Index: 0-100 scale measuring behavioral deviation intensity.
 - Severity levels: LOW, MED, HIGH, CRITICAL — each carries different point deductions.

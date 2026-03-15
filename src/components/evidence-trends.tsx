@@ -179,7 +179,7 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
 function TrendStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg glass-raised p-2.5 text-center">
-      <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+      <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-muted">
         {label}
       </div>
       <div className="mt-1 font-mono text-sm font-bold text-text-primary">

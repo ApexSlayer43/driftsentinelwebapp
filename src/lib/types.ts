@@ -59,7 +59,7 @@ export interface StatePayload {
     daily_pnl: null;
   };
   bss_score: number;
-  bss_tier: 'DORMANT' | 'FORMING' | 'DEFINED' | 'GROUNDED' | 'PROVEN' | 'SOVEREIGN';
+  bss_tier: 'DORMANT' | 'FORMING' | 'DEVELOPING' | 'CONSISTENT' | 'DISCIPLINED' | 'SOVEREIGN';
   bss_streak: number;
   bss_alpha: number;
   bss_decay_applied: boolean;

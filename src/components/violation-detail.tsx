@@ -82,7 +82,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
             <div className="mt-1 font-mono text-[12px] text-text-muted">{time}</div>
           </div>
           <span
-            className="rounded-full px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase"
+            className="rounded-full px-2.5 py-0.5 font-mono text-[12px] font-bold uppercase"
             style={{ color: sevColor, backgroundColor: `${sevColor}15` }}
           >
             {violation.severity}
@@ -116,7 +116,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
         </div>
       ) : fills.length > 0 ? (
         <div className="glass-card rounded-2xl p-4">
-          <h4 className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+          <h4 className="mb-3 font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted">
             Evidence Orbital
           </h4>
           <EvidenceOrbital violation={violation} fills={fills} />
@@ -126,7 +126,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
       {/* Fill-level data table */}
       {fills.length > 0 && (
         <div className="glass-card rounded-2xl p-4">
-          <h4 className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+          <h4 className="mb-3 font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted">
             Fill Timeline
           </h4>
           <div className="space-y-1.5">
@@ -142,7 +142,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
                   className="flex items-center gap-3 glass-inset rounded-xl px-3 py-2"
                 >
                   <span
-                    className="rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold"
+                    className="rounded-full px-1.5 py-0.5 font-mono text-[12px] font-bold"
                     style={{ color: sideColor, backgroundColor: `${sideColor}15` }}
                   >
                     {fill.side}
@@ -153,7 +153,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
                     {fill.qty} @ {fill.price}
                   </span>
                   {fill.off_session && (
-                    <span className="rounded-full bg-warning/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-warning">
+                    <span className="rounded-full bg-warning/10 px-1.5 py-0.5 font-mono text-[12px] font-bold text-warning">
                       OFF
                     </span>
                   )}

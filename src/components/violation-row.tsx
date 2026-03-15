@@ -31,13 +31,13 @@ export function ViolationRow({ violation }: ViolationRowProps) {
       >
         <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-text-muted" />
         <div className="flex-1 text-left">
-          <div className="font-mono text-[11px] font-semibold text-text-primary">
+          <div className="font-mono text-[12px] font-semibold text-text-primary">
             {modeLabel}
           </div>
-          <div className="font-mono text-[8px] text-text-muted">{time}</div>
+          <div className="font-mono text-[12px] text-text-muted">{time}</div>
         </div>
         <span
-          className="rounded-full px-2 py-0.5 font-mono text-[8px] font-bold uppercase"
+          className="rounded-full px-2 py-0.5 font-mono text-[12px] font-bold uppercase"
           style={{ color: sevColor, backgroundColor: sevColor + '14' }}
         >
           {violation.severity}
@@ -56,7 +56,7 @@ export function ViolationRow({ violation }: ViolationRowProps) {
       </button>
       {expanded && (
         <div className="ml-6 mt-1 rounded-lg glass-raised p-3">
-          <div className="grid grid-cols-2 gap-2 font-mono text-[9px]">
+          <div className="grid grid-cols-2 gap-2 font-mono text-[12px]">
             <div>
               <span className="text-text-muted">Rule: </span>
               <span className="text-text-secondary">{violation.rule_id}</span>

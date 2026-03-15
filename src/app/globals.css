@@ -301,7 +301,7 @@
     0 0 6px rgba(0, 0, 0, 0.06);
 }
 .liquid-glass-tab-active {
-  background: rgba(0, 212, 170, 0.04);
+  background: rgba(99, 102, 241, 0.04);
   box-shadow:
     0 0 6px rgba(0, 0, 0, 0.02),
     0 2px 4px rgba(0, 0, 0, 0.06),
@@ -310,7 +310,7 @@
     inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.25),
     inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.25),
     inset 0 0 6px 6px rgba(255, 255, 255, 0.03),
-    0 0 10px rgba(0, 212, 170, 0.05);
+    0 0 10px rgba(99, 102, 241, 0.05);
 }
 
 /* ── 4px Left Border Accents (spec Section 7 — session quality) ── */
@@ -366,7 +366,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
 /* Label utilities — spec minimum 12px */
 .label-small {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.15em;

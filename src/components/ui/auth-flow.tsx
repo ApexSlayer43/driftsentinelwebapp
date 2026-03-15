@@ -57,7 +57,7 @@ function TextLoop() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.4 }}
-        className="block font-mono text-[10px] tracking-[0.15em] text-text-muted"
+        className="block font-mono text-[12px] tracking-[0.15em] text-text-muted"
       >
         {phrases[index]}
       </motion.span>
@@ -84,7 +84,7 @@ export function AuthFlow() {
       useWorker: true,
     });
     // Teal and white themed bursts
-    const colors = ['#22D3EE', '#06B6D4', '#E2E8F0', '#94A3B8'];
+    const colors = ['#6366F1', '#818CF8', '#E2E8F0', '#94A3B8'];
     myConfetti({
       particleCount: 80,
       spread: 80,
@@ -320,7 +320,7 @@ export function AuthFlow() {
             {/* Divider */}
             <div className="my-6 flex items-center gap-4">
               <div className="h-px flex-1 bg-white/[0.06]" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-text-dim">
+              <span className="font-mono text-[12px] uppercase tracking-[0.12em] text-text-dim">
                 or
               </span>
               <div className="h-px flex-1 bg-white/[0.06]" />
@@ -358,7 +358,7 @@ export function AuthFlow() {
               <button
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-stable py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(0,212,170,0.3)] disabled:opacity-50"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-text-primary transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
               >
                 {loading ? (
                   <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
@@ -391,7 +391,7 @@ export function AuthFlow() {
             <button
               type="button"
               onClick={goBack}
-              className="mx-auto mb-5 flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 font-mono text-[11px] text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
+              className="mx-auto mb-5 flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 font-mono text-[12px] text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
             >
               <ArrowLeft size={10} />
               {email}
@@ -424,7 +424,7 @@ export function AuthFlow() {
               <button
                 type="submit"
                 disabled={loading || !password}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-stable py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(0,212,170,0.3)] disabled:opacity-50"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-text-primary transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
               >
                 {loading ? (
                   <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
@@ -437,7 +437,7 @@ export function AuthFlow() {
               </button>
             </form>
 
-            <p className="mt-5 text-center font-mono text-[10px] text-text-dim">
+            <p className="mt-5 text-center font-mono text-[12px] text-text-dim">
               New here?{' '}
               <button
                 type="button"
@@ -472,7 +472,7 @@ export function AuthFlow() {
             <button
               type="button"
               onClick={goBack}
-              className="mx-auto mb-5 flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 font-mono text-[11px] text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
+              className="mx-auto mb-5 flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 font-mono text-[12px] text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
             >
               <ArrowLeft size={10} />
               {email}
@@ -518,7 +518,7 @@ export function AuthFlow() {
 
               {/* Password match indicator */}
               {confirmPassword && (
-                <div className="flex items-center justify-center gap-1.5 font-mono text-[9px]">
+                <div className="flex items-center justify-center gap-1.5 font-mono text-[12px]">
                   {password === confirmPassword ? (
                     <>
                       <Check size={10} className="text-stable" />
@@ -537,7 +537,7 @@ export function AuthFlow() {
               <button
                 type="submit"
                 disabled={loading || !password || !confirmPassword || password !== confirmPassword}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-stable py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(0,212,170,0.3)] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-text-primary transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
               >
                 {loading ? (
                   <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
@@ -550,7 +550,7 @@ export function AuthFlow() {
               </button>
             </form>
 
-            <p className="mt-5 text-center font-mono text-[10px] text-text-dim">
+            <p className="mt-5 text-center font-mono text-[12px] text-text-dim">
               Already have an account?{' '}
               <button
                 type="button"
@@ -592,7 +592,7 @@ export function AuthFlow() {
             <p className="mt-2 text-center font-mono text-xs text-text-muted">
               {email}
             </p>
-            <p className="mt-1 text-center font-mono text-[10px] text-text-dim">
+            <p className="mt-1 text-center font-mono text-[12px] text-text-dim">
               Redirecting to your dashboard...
             </p>
 

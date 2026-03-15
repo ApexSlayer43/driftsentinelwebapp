@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { getModeLabel, getModeIcon, getSeverityColor } from '@/lib/tokens';
+import { getModeLabel, getModeIcon } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
 import type { ViolationDetail } from '@/lib/types';
 
@@ -12,9 +12,9 @@ interface EvidenceViolationsProps {
 }
 
 /**
- * Violations tab — recent violations with severity badges,
- * mode icons, expandable detail rows.
- * Matches the existing violations page style but in compact sheet form.
+ * Violations tab — SBI (Situation-Behavior-Impact) framework cards.
+ * Header: "Pattern Detected" — never "Violation" or "Error".
+ * Amber left border per spec Section 7. Expand/collapse detail.
  */
 export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
   const [violations, setViolations] = useState<ViolationDetail[]>([]);
@@ -91,7 +91,6 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
       {violations.map((v) => {
         const modeLabel = getModeLabel(v.mode);
         const modeIcon = getModeIcon(v.mode);
-        const sevColor = getSeverityColor(v.severity);
         const isExpanded = expandedId === v.violation_id;
         const time = new Date(v.first_seen_utc).toLocaleString('en-US', {
           month: 'short',
@@ -100,54 +99,59 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
           minute: '2-digit',
           hour12: false,
         });
+        const windowStart = new Date(v.window_start_utc).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        const windowEnd = new Date(v.window_end_utc).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
         return (
           <div key={v.violation_id}>
+            {/* SBI Card — amber left border, elevated bg per spec Section 7 */}
             <button
               onClick={() => setExpandedId(isExpanded ? null : v.violation_id)}
-              className="flex w-full items-center gap-3 glass-card border-accent-violation rounded-2xl p-3.5 transition-transform hover:scale-[1.01]"
+              className="flex w-full items-center gap-3 rounded-2xl border-l-4 border-warning bg-elevated p-3.5 transition-transform hover:scale-[1.01]"
+              style={{ borderRadius: '24px' }}
             >
-              <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-text-muted" />
+              <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-warning" />
               <div className="flex-1 text-left">
-                <div className="font-mono text-[12px] font-semibold text-text-primary">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[12px] font-semibold text-warning">⚡ Pattern Detected</span>
+                </div>
+                <div className="font-mono text-[12px] font-medium text-text-primary mt-0.5">
                   {modeLabel}
                 </div>
                 <div className="font-mono text-[12px] text-text-muted">{time}</div>
               </div>
-              <span
-                className="rounded-full px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase"
-                style={{ color: sevColor, backgroundColor: `${sevColor}15` }}
-              >
-                {v.severity}
-              </span>
-              <span className="font-mono text-sm font-bold text-text-primary">
+              <span className="font-mono text-[14px] font-bold text-text-primary">
                 −{v.points}
               </span>
             </button>
 
+            {/* SBI Detail — Situation, Behavior, Impact, Forward Suggestion */}
             {isExpanded && (
-              <div className="ml-5 mt-1.5 glass-inset rounded-xl p-3.5">
-                <div className="grid grid-cols-2 gap-2.5 font-mono text-[12px]">
-                  <div>
-                    <span className="text-text-muted">Rule ID: </span>
-                    <span className="text-text-secondary">{v.rule_id}</span>
-                  </div>
-                  <div>
-                    <span className="text-text-muted">Points: </span>
-                    <span className="text-text-secondary">{v.points}</span>
-                  </div>
-                  <div>
-                    <span className="text-text-muted">Window: </span>
-                    <span className="text-text-secondary">
-                      {new Date(v.window_start_utc).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
-                      {' – '}
-                      {new Date(v.window_end_utc).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-text-muted">Evidence fills: </span>
-                    <span className="text-text-secondary">{v.evidence_event_ids.length}</span>
-                  </div>
+              <div className="ml-5 mt-1.5 rounded-xl p-3.5 space-y-2.5" style={{ background: '#1A1D27' }}>
+                {/* Situation */}
+                <div className="font-mono text-[12px]">
+                  <span className="text-text-muted uppercase tracking-wider">Situation: </span>
+                  <span className="text-text-secondary">
+                    During window {windowStart} – {windowEnd}
+                  </span>
+                </div>
+                {/* Behavior */}
+                <div className="font-mono text-[12px]">
+                  <span className="text-text-muted uppercase tracking-wider">Behavior: </span>
+                  <span className="text-text-secondary">
+                    {modeLabel} detected across {v.evidence_event_ids.length} fill{v.evidence_event_ids.length > 1 ? 's' : ''}
+                  </span>
+                </div>
+                {/* Impact */}
+                <div className="font-mono text-[12px] rounded-lg p-2.5" style={{ background: '#242836' }}>
+                  <span className="text-text-muted uppercase tracking-wider">Impact: </span>
+                  <span className="text-text-secondary">
+                    −{v.points} BSS points · Rule {v.rule_id}
+                  </span>
+                </div>
+                {/* Forward suggestion */}
+                <div className="font-mono text-[12px] text-accent-primary">
+                  Review protocol to address this pattern →
                 </div>
               </div>
             )}

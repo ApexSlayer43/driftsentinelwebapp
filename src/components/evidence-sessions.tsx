@@ -86,9 +86,9 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
 
         // Derive tier from BSS score for color
         const tier = day.bss_score >= 90 ? 'SOVEREIGN'
-          : day.bss_score >= 80 ? 'PROVEN'
-          : day.bss_score >= 65 ? 'GROUNDED'
-          : day.bss_score >= 50 ? 'DEFINED'
+          : day.bss_score >= 80 ? 'DISCIPLINED'
+          : day.bss_score >= 65 ? 'CONSISTENT'
+          : day.bss_score >= 50 ? 'DEVELOPING'
           : day.bss_score >= 30 ? 'FORMING'
           : 'DORMANT';
         const tierStyle = getTierStyle(tier);

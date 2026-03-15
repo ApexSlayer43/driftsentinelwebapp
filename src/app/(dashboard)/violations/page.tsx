@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getModeLabel, getModeIcon } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
@@ -71,10 +71,10 @@ export default function ViolationsPage() {
       {/* Violation list */}
       <div className="w-1/2 shrink-0 px-8 py-8">
         <h1 className="font-display text-2xl font-bold text-text-primary">
-          Violations
+          Forensics
         </h1>
-        <p className="mt-1 font-mono text-xs text-text-muted">
-          Behavioral deduction forensics
+        <p className="mt-1 font-mono text-[12px] text-text-muted">
+          Behavioral pattern analysis
         </p>
 
         {/* Filter bar */}
@@ -101,9 +101,9 @@ export default function ViolationsPage() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="rounded-xl liquid-glass py-12 text-center">
-              <AlertTriangle size={24} className="mx-auto text-text-dim" />
-              <p className="mt-3 font-mono text-xs text-text-muted">
-                {violations.length === 0 ? 'No violations recorded' : 'No violations match this filter'}
+              <Search size={24} className="mx-auto text-text-dim" />
+              <p className="mt-3 font-mono text-[12px] text-text-muted">
+                {violations.length === 0 ? 'No patterns detected' : 'No patterns match this filter'}
               </p>
             </div>
           ) : (
@@ -135,10 +135,10 @@ export default function ViolationsPage() {
                       <div className="font-mono text-[12px] font-semibold text-text-primary">
                         {modeLabel}
                       </div>
-                      <div className="font-mono text-[10px] text-text-muted">{time}</div>
+                      <div className="font-mono text-[12px] text-text-muted">{time}</div>
                     </div>
-                    <span className="rounded-full px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-text-muted liquid-glass-tab">
-                      {v.severity}
+                    <span className="rounded-full px-2 py-0.5 font-mono text-[12px] font-bold uppercase text-warning liquid-glass-tab">
+                      Pattern
                     </span>
                     <span className="font-mono text-sm font-bold text-text-primary">
                       -{v.points}
@@ -186,19 +186,19 @@ export default function ViolationsPage() {
           />
         ) : (
           <div className="sticky top-8 glass-card rounded-2xl p-6">
-            <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+            <h3 className="font-mono text-[12px] font-semibold uppercase tracking-[0.12em] text-text-muted">
               Summary
             </h3>
 
             <div className="mt-6 flex gap-8">
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted">Total Deductions</div>
+                <div className="font-mono text-[12px] uppercase tracking-[0.12em] text-text-muted">Total Deductions</div>
                 <div className="font-mono text-3xl font-bold text-text-primary mt-1">
                   {totalDeductions > 0 ? `−${totalDeductions}` : '—'}
                 </div>
               </div>
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted">Violations</div>
+                <div className="font-mono text-[12px] uppercase tracking-[0.12em] text-text-muted">Patterns</div>
                 <div className="font-mono text-3xl font-bold text-text-primary mt-1">
                   {violations.length}
                 </div>
@@ -206,7 +206,7 @@ export default function ViolationsPage() {
             </div>
 
             <div className="mt-6">
-              <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+              <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.12em] text-text-muted">
                 By Severity
               </div>
               <div className="mt-3 space-y-2">
@@ -223,8 +223,8 @@ export default function ViolationsPage() {
             </div>
 
             {violations.length > 0 && (
-              <p className="mt-6 font-mono text-[10px] text-text-dim text-center">
-                Select a violation to view forensic detail
+              <p className="mt-6 font-mono text-[12px] text-text-dim text-center">
+                Select a pattern to view forensic detail
               </p>
             )}
           </div>

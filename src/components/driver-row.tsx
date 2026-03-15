@@ -31,15 +31,15 @@ export function DriverRow({ driver, rank }: DriverRowProps) {
     <div
       className="flex items-center gap-3 rounded-lg glass p-3 transition-colors hover:border-border-active"
     >
-      <span className="w-4 text-center font-mono text-[9px] font-bold text-text-dim">
+      <span className="w-4 text-center font-mono text-[12px] font-bold text-text-dim">
         {rank}
       </span>
       <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-text-muted" />
       <div className="flex-1">
-        <div className="font-mono text-[11px] font-semibold text-text-primary">
+        <div className="font-mono text-[12px] font-semibold text-text-primary">
           {modeLabel}
         </div>
-        <div className="font-mono text-[8px] text-text-muted">
+        <div className="font-mono text-[12px] text-text-muted">
           Onset: {onset}
         </div>
       </div>
