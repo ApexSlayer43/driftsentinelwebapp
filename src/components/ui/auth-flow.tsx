@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 import { ArrowLeft, ArrowRight, Check, Eye, EyeOff } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { SentinelWordmark } from '@/components/sentinel-wordmark';
+import { LiquidButton } from '@/components/ui/liquid-glass-button';
 
 type AuthStep = 'email' | 'login' | 'signup' | 'success';
 
@@ -355,20 +356,21 @@ export function AuthFlow() {
                 <p className="mt-3 text-center font-mono text-xs text-breakdown">{error}</p>
               )}
 
-              <button
+              <LiquidButton
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
+                size="lg"
+                className="mt-4 w-full rounded-full font-mono text-sm font-bold text-text-primary disabled:opacity-50"
               >
                 {loading ? (
-                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
+                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-text-primary/30 border-t-text-primary" />
                 ) : (
                   <>
                     Continue
                     <ArrowRight size={14} />
                   </>
                 )}
-              </button>
+              </LiquidButton>
             </form>
           </motion.div>
         )}
@@ -421,20 +423,21 @@ export function AuthFlow() {
                 <p className="mt-3 text-center font-mono text-xs text-breakdown">{error}</p>
               )}
 
-              <button
+              <LiquidButton
                 type="submit"
                 disabled={loading || !password}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
+                size="lg"
+                className="mt-4 w-full rounded-full font-mono text-sm font-bold text-text-primary disabled:opacity-50"
               >
                 {loading ? (
-                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
+                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-text-primary/30 border-t-text-primary" />
                 ) : (
                   <>
                     Sign In
                     <ArrowRight size={14} />
                   </>
                 )}
-              </button>
+              </LiquidButton>
             </form>
 
             <p className="mt-5 text-center font-mono text-[10px] text-text-dim">
@@ -534,20 +537,21 @@ export function AuthFlow() {
                 <p className="text-center font-mono text-xs text-breakdown">{error}</p>
               )}
 
-              <button
+              <LiquidButton
                 type="submit"
                 disabled={loading || !password || !confirmPassword || password !== confirmPassword}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
+                size="lg"
+                className="w-full rounded-full font-mono text-sm font-bold text-text-primary disabled:opacity-50"
               >
                 {loading ? (
-                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
+                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-text-primary/30 border-t-text-primary" />
                 ) : (
                   <>
                     Create Account
                     <ArrowRight size={14} />
                   </>
                 )}
-              </button>
+              </LiquidButton>
             </form>
 
             <p className="mt-5 text-center font-mono text-[10px] text-text-dim">

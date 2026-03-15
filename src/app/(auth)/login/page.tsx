@@ -2,6 +2,7 @@
 
 import { AuthFlow } from '@/components/ui/auth-flow';
 import { CelestialSphere } from '@/components/ui/celestial-sphere';
+import { GlassFilter } from '@/components/ui/liquid-glass-button';
 
 export default function LoginPage() {
   return (
@@ -22,6 +23,7 @@ export default function LoginPage() {
             'radial-gradient(ellipse at center, transparent 30%, rgba(8,10,14,0.85) 75%)',
         }}
       />
+      <GlassFilter />
       <AuthFlow />
     </div>
   );
