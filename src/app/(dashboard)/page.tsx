@@ -8,6 +8,7 @@ import { VerdictLine } from '@/components/verdict-line';
 import { Sparkline } from '@/components/sparkline';
 import { Upload } from 'lucide-react';
 import { EvidenceSheet } from '@/components/evidence-sheet';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 import type { StatePayload } from '@/lib/types';
 
 /**
@@ -171,12 +172,23 @@ export default function DashboardPage() {
         {/* 1. BSS Gauge — 240° arc, score centered, tap opens evidence sheet */}
         <div
           onClick={() => setSheetOpen(true)}
-          className="cursor-pointer transition-transform hover:scale-[1.02]"
+          className="relative cursor-pointer transition-transform hover:scale-[1.02] rounded-full p-4"
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && setSheetOpen(true)}
           aria-label={`BSS Score ${data.bss_score}. Tap to view evidence.`}
         >
+          <GlowingEffect
+            spread={60}
+            glow={true}
+            disabled={false}
+            proximity={100}
+            inactiveZone={0.3}
+            borderWidth={2}
+            variant="teal-gold"
+            blur={4}
+            movementDuration={1.5}
+          />
           <BssGauge
             score={data.bss_score}
             tier={data.bss_tier}

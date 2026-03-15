@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { UserCircle, Copy, Check, TrendingUp, TrendingDown } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getTierStyle, TIER_STYLES } from '@/lib/tokens';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 import type { StatePayload } from '@/lib/types';
 
 /**
@@ -148,6 +149,17 @@ export default function TraderIdPage() {
 
         {/* ═══ PROFILE HERO CARD ═══ */}
         <div className="glass-card rounded-2xl p-10 text-center mb-5 relative overflow-hidden">
+          <GlowingEffect
+            spread={50}
+            glow={true}
+            disabled={false}
+            proximity={80}
+            inactiveZone={0.2}
+            borderWidth={2}
+            variant="teal-gold"
+            blur={4}
+            movementDuration={1.5}
+          />
           {/* Subtle radial glow */}
           <div
             className="absolute inset-0 pointer-events-none"

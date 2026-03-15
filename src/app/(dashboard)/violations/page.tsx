@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { getModeLabel, getModeIcon, getModeWeight } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
 import { ViolationDetailPanel } from '@/components/violation-detail';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
 import type { ViolationDetail } from '@/lib/types';
 
 /**
@@ -98,30 +99,43 @@ export default function ViolationsPage() {
               });
 
               return (
-                <button
-                  key={v.violation_id}
-                  onClick={() => setSelectedViolation(v)}
-                  className={`w-full text-left rounded-xl p-3.5 transition-all ${
-                    isSelected
-                      ? 'glass-card border-accent-primary bg-accent-muted shadow-[0_0_20px_rgba(0,212,170,0.05)]'
-                      : 'glass-card hover:border-border-active'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-mono text-[13px] font-semibold text-text-primary">
-                      {modeLabel}
-                    </span>
-                    <span className="font-mono text-[12px] font-bold text-warning bg-warning/10 px-2 py-0.5 rounded">
-                      -{weighted} pts
-                    </span>
-                  </div>
-                  <div className="font-mono text-[12px] text-text-muted">
-                    {time}
-                  </div>
-                  <div className="mt-1.5 font-mono text-[12px] text-text-secondary leading-relaxed line-clamp-2">
-                    Window {windowStart} – {windowEnd} · {v.evidence_event_ids.length} evidence fills · Rule {v.rule_id}
-                  </div>
-                </button>
+                <div key={v.violation_id} className="relative">
+                  {isSelected && (
+                    <GlowingEffect
+                      spread={40}
+                      glow={true}
+                      disabled={false}
+                      proximity={64}
+                      inactiveZone={0.01}
+                      borderWidth={2}
+                      variant="teal"
+                      blur={3}
+                    />
+                  )}
+                  <button
+                    onClick={() => setSelectedViolation(v)}
+                    className={`relative w-full text-left rounded-xl p-3.5 transition-all ${
+                      isSelected
+                        ? 'glass-card border-accent-primary bg-accent-muted shadow-[0_0_20px_rgba(0,212,170,0.05)]'
+                        : 'glass-card hover:border-border-active'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="font-mono text-[13px] font-semibold text-text-primary">
+                        {modeLabel}
+                      </span>
+                      <span className="font-mono text-[12px] font-bold text-warning bg-warning/10 px-2 py-0.5 rounded">
+                        -{weighted} pts
+                      </span>
+                    </div>
+                    <div className="font-mono text-[12px] text-text-muted">
+                      {time}
+                    </div>
+                    <div className="mt-1.5 font-mono text-[12px] text-text-secondary leading-relaxed line-clamp-2">
+                      Window {windowStart} – {windowEnd} · {v.evidence_event_ids.length} evidence fills · Rule {v.rule_id}
+                    </div>
+                  </button>
+                </div>
               );
             })
           )}
