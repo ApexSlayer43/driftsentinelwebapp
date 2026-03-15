@@ -157,120 +157,91 @@
   }
 }
 
-/* ── Claymorphism Panels (Invisible Interface spec Section 7) ── */
+/* ── Liquid Glass Panels (Invisible Interface spec Section 7) ── */
 
-/* Session card — primary claymorphism treatment */
-.clay-card {
-  background: #1E2433;
-  border-radius: 24px;
-  border: none;
-  box-shadow:
-    6px 6px 20px 0 rgba(0, 0, 0, 0.4),
-    inset -4px -4px 10px 0 rgba(0, 0, 0, 0.3),
-    inset 4px 4px 10px 0 rgba(255, 255, 255, 0.05);
-}
-
-/* Raised clay — for nav, evidence sheet, modals */
-.clay-raised {
-  background: #1A1D27;
-  border-radius: 24px;
-  border: none;
-  box-shadow:
-    8px 8px 24px 0 rgba(0, 0, 0, 0.5),
-    inset -3px -3px 8px 0 rgba(0, 0, 0, 0.25),
-    inset 3px 3px 8px 0 rgba(255, 255, 255, 0.04);
-}
-
-/* Elevated clay — for tooltips, overlays */
-.clay-elevated {
-  background: #242836;
-  border-radius: 20px;
-  border: none;
-  box-shadow:
-    4px 4px 16px 0 rgba(0, 0, 0, 0.35),
-    inset -2px -2px 6px 0 rgba(0, 0, 0, 0.2),
-    inset 2px 2px 6px 0 rgba(255, 255, 255, 0.04);
-}
-
-/* Inset clay — for input fields, recessed areas */
-.clay-inset {
-  background: #161922;
-  border-radius: 16px;
-  border: none;
-  box-shadow:
-    inset 4px 4px 12px 0 rgba(0, 0, 0, 0.4),
-    inset -2px -2px 6px 0 rgba(255, 255, 255, 0.03);
-}
-
-/* Clay tab buttons — evidence sheet tabs */
-.clay-tab {
-  background: #1E2433;
-  border-radius: 999px;
-  border: none;
-  box-shadow:
-    3px 3px 10px 0 rgba(0, 0, 0, 0.3),
-    inset -2px -2px 6px 0 rgba(0, 0, 0, 0.2),
-    inset 2px 2px 6px 0 rgba(255, 255, 255, 0.04);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.clay-tab:hover {
-  background: #242836;
-  box-shadow:
-    2px 2px 8px 0 rgba(0, 0, 0, 0.25),
-    inset -2px -2px 6px 0 rgba(0, 0, 0, 0.2),
-    inset 2px 2px 6px 0 rgba(255, 255, 255, 0.06);
-}
-.clay-tab-active {
-  background: #242836;
-  border-radius: 999px;
-  border: none;
-  box-shadow:
-    inset 3px 3px 10px 0 rgba(0, 0, 0, 0.35),
-    inset -2px -2px 6px 0 rgba(255, 255, 255, 0.04),
-    0 0 12px rgba(99, 102, 241, 0.08);
-}
-
-/* ── Legacy glass classes — mapped to clay ── */
+/* Base glass — backdrop blur + semi-transparent surface */
 .glass,
-.glass-raised,
 .liquid-glass {
-  background: #1A1D27;
+  background: rgba(26, 29, 39, 0.75);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 24px;
-  border: none;
-  box-shadow:
-    8px 8px 24px 0 rgba(0, 0, 0, 0.5),
-    inset -3px -3px 8px 0 rgba(0, 0, 0, 0.25),
-    inset 3px 3px 8px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Raised glass — nav bars, evidence sheet, modals */
+.glass-raised,
+.liquid-glass-raised {
+  background: rgba(26, 29, 39, 0.85);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Glass card — session cards, data tiles */
+.glass-card {
+  background: rgba(30, 36, 51, 0.65);
+  backdrop-filter: blur(12px) saturate(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.10);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Elevated glass — tooltips, overlays, popovers */
+.glass-elevated {
+  background: rgba(36, 40, 54, 0.80);
+  backdrop-filter: blur(20px) saturate(1.25);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+/* Inset glass — input fields, recessed areas */
+.glass-inset {
+  background: rgba(15, 17, 23, 0.60);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 .glass-input {
-  background: #161922;
+  background: rgba(15, 17, 23, 0.60);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 16px;
-  border: none;
-  box-shadow:
-    inset 4px 4px 12px 0 rgba(0, 0, 0, 0.4),
-    inset -2px -2px 6px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.25);
 }
+
+/* Glass tab buttons — evidence sheet tabs */
 .liquid-glass-tab {
-  background: #1E2433;
+  background: rgba(30, 36, 51, 0.50);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 999px;
-  border: none;
-  box-shadow:
-    3px 3px 10px 0 rgba(0, 0, 0, 0.3),
-    inset -2px -2px 6px 0 rgba(0, 0, 0, 0.2),
-    inset 2px 2px 6px 0 rgba(255, 255, 255, 0.04);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .liquid-glass-tab:hover {
-  background: #242836;
+  background: rgba(36, 40, 54, 0.65);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 .liquid-glass-tab-active {
-  background: #242836;
+  background: rgba(36, 40, 54, 0.80);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: 999px;
-  border: none;
-  box-shadow:
-    inset 3px 3px 10px 0 rgba(0, 0, 0, 0.35),
-    inset -2px -2px 6px 0 rgba(255, 255, 255, 0.04),
-    0 0 12px rgba(99, 102, 241, 0.08);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.08);
 }
 
 /* ── 4px Left Border Accents (spec Section 7 — session quality) ── */

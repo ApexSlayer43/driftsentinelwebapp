@@ -74,7 +74,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
       </button>
 
       {/* Violation header — clay card with 4px left border accent */}
-      <div className="clay-card border-accent-violation rounded-2xl p-5">
+      <div className="glass-card border-accent-violation rounded-2xl p-5">
         <div className="flex items-start gap-3">
           <DynamicIcon name={modeIcon} size={18} className="mt-0.5 shrink-0 text-text-muted" />
           <div className="flex-1">
@@ -115,7 +115,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
           <div className="h-4 w-4 animate-spin rounded-full border-2 border-positive border-t-transparent" />
         </div>
       ) : fills.length > 0 ? (
-        <div className="clay-card rounded-2xl p-4">
+        <div className="glass-card rounded-2xl p-4">
           <h4 className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
             Evidence Orbital
           </h4>
@@ -125,7 +125,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
 
       {/* Fill-level data table */}
       {fills.length > 0 && (
-        <div className="clay-card rounded-2xl p-4">
+        <div className="glass-card rounded-2xl p-4">
           <h4 className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
             Fill Timeline
           </h4>
@@ -139,7 +139,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
               return (
                 <div
                   key={fill.event_id}
-                  className="flex items-center gap-3 clay-inset rounded-xl px-3 py-2"
+                  className="flex items-center gap-3 glass-inset rounded-xl px-3 py-2"
                 >
                   <span
                     className="rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold"

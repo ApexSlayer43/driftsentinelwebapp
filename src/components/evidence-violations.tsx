@@ -105,7 +105,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
           <div key={v.violation_id}>
             <button
               onClick={() => setExpandedId(isExpanded ? null : v.violation_id)}
-              className="flex w-full items-center gap-3 clay-card border-accent-violation rounded-2xl p-3.5 transition-transform hover:scale-[1.01]"
+              className="flex w-full items-center gap-3 glass-card border-accent-violation rounded-2xl p-3.5 transition-transform hover:scale-[1.01]"
             >
               <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-text-muted" />
               <div className="flex-1 text-left">
@@ -126,7 +126,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
             </button>
 
             {isExpanded && (
-              <div className="ml-5 mt-1.5 clay-inset rounded-xl p-3.5">
+              <div className="ml-5 mt-1.5 glass-inset rounded-xl p-3.5">
                 <div className="grid grid-cols-2 gap-2.5 font-mono text-[12px]">
                   <div>
                     <span className="text-text-muted">Rule ID: </span>

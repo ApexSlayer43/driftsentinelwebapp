@@ -52,9 +52,9 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
         onClick={onClose}
       />
 
-      {/* Sheet — clay-raised per spec Section 7 */}
+      {/* Sheet — liquid-glass-raised per spec Section 7 */}
       <div
-        className="absolute bottom-0 left-0 right-0 clay-raised rounded-t-3xl"
+        className="absolute bottom-0 left-0 right-0 liquid-glass-raised rounded-t-3xl"
         style={{
           maxHeight: '65vh',
           animation: 'sheetSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -79,8 +79,8 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
               onClick={() => setActiveTab(tab)}
               className={`rounded-full px-4 py-1.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] transition-all ${
                 activeTab === tab
-                  ? 'clay-tab-active text-text-primary'
-                  : 'clay-tab text-text-muted hover:text-text-secondary'
+                  ? 'liquid-glass-tab-active text-text-primary'
+                  : 'liquid-glass-tab text-text-muted hover:text-text-secondary'
               }`}
             >
               {TAB_LABELS[tab]}

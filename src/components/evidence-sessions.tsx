@@ -99,7 +99,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
         return (
           <div
             key={day.daily_score_id}
-            className={`clay-card ${borderAccent} rounded-2xl p-3.5 transition-transform hover:scale-[1.01]`}
+            className={`glass-card ${borderAccent} rounded-2xl p-3.5 transition-transform hover:scale-[1.01]`}
           >
             <div className="flex items-center justify-between">
               <div>
@@ -130,7 +130,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
             </div>
 
             {day.violation_count > 0 && (
-              <div className="mt-2.5 clay-inset rounded-xl px-3 py-2 font-mono text-[12px] text-warning">
+              <div className="mt-2.5 glass-inset rounded-xl px-3 py-2 font-mono text-[12px] text-warning">
                 {day.violation_count} pattern{day.violation_count > 1 ? 's' : ''} detected · −{day.violation_count * 10} points
               </div>
             )}
