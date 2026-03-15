@@ -84,7 +84,7 @@ export function AuthFlow() {
       useWorker: true,
     });
     // Teal and white themed bursts
-    const colors = ['#6366F1', '#818CF8', '#E2E8F0', '#94A3B8'];
+    const colors = ['#00D4AA', '#33DDBB', '#E2E8F0', '#94A3B8'];
     myConfetti({
       particleCount: 80,
       spread: 80,
@@ -358,7 +358,7 @@ export function AuthFlow() {
               <button
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-text-primary transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-text-primary transition-all hover:shadow-[0_0_24px_rgba(0,212,170,0.3)] disabled:opacity-50"
               >
                 {loading ? (
                   <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
@@ -424,7 +424,7 @@ export function AuthFlow() {
               <button
                 type="submit"
                 disabled={loading || !password}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-text-primary transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-text-primary transition-all hover:shadow-[0_0_24px_rgba(0,212,170,0.3)] disabled:opacity-50"
               >
                 {loading ? (
                   <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
@@ -537,7 +537,7 @@ export function AuthFlow() {
               <button
                 type="submit"
                 disabled={loading || !password || !confirmPassword || password !== confirmPassword}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-text-primary transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-text-primary transition-all hover:shadow-[0_0_24px_rgba(0,212,170,0.3)] disabled:opacity-50"
               >
                 {loading ? (
                   <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />

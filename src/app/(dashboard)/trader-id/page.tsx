@@ -183,14 +183,14 @@ export default function TraderIdPage() {
                 <polyline
                   points={sparkPoints}
                   fill="none"
-                  stroke="#6366F1"
+                  stroke="#00D4AA"
                   strokeWidth="2"
                   strokeLinejoin="round"
                   strokeLinecap="round"
                 />
                 <polyline
                   points={`0,${sparkH} ${sparkPoints} ${sparkW},${sparkH}`}
-                  fill="rgba(99,102,241,0.10)"
+                  fill="rgba(0,212,170,0.10)"
                   stroke="none"
                 />
               </svg>

@@ -101,7 +101,7 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
           <span className="text-text-muted">BSS</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#6366F1' }} />
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#00D4AA' }} />
           <span className="text-text-muted">DSI</span>
         </div>
       </div>
@@ -148,10 +148,10 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
           <Line
             type="monotone"
             dataKey="dsi"
-            stroke="#6366F1"
+            stroke="#00D4AA"
             strokeWidth={2}
-            dot={{ fill: '#6366F1', r: 3, strokeWidth: 0 }}
-            activeDot={{ r: 5, stroke: '#6366F1', strokeWidth: 2, fill: '#1A1D27' }}
+            dot={{ fill: '#00D4AA', r: 3, strokeWidth: 0 }}
+            activeDot={{ r: 5, stroke: '#00D4AA', strokeWidth: 2, fill: '#1A1D27' }}
             name="DSI"
           />
         </LineChart>
