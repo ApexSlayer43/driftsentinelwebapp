@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { BssOrb } from '@/components/bss-orb';
+import { BssGauge } from '@/components/bss-gauge';
+import { GaugeSkeleton } from '@/components/gauge-skeleton';
+import { VerdictLine } from '@/components/verdict-line';
+import { Sparkline } from '@/components/sparkline';
 import { ViolationRow } from '@/components/violation-row';
 import { DriverRow } from '@/components/driver-row';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { Upload } from 'lucide-react';
-import { getInsight } from '@/lib/insights';
 import type { StatePayload } from '@/lib/types';
 
 /** Data freshness indicator — LIVE / STALE / ERROR */
@@ -79,8 +81,6 @@ export default function DashboardPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      // Single source of truth: Express backend via /api/state proxy
-      // All scoring (DSI, BSS, violations, onboarding) computed server-side
       const res = await fetch('/api/state');
 
       if (res.status === 401) {
@@ -119,36 +119,33 @@ export default function DashboardPage() {
     );
   }, [data]);
 
+  // ── Loading state ──
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="text-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-stable border-t-transparent mx-auto" />
-          <p className="mt-3 font-mono text-xs text-text-muted">Loading state...</p>
-        </div>
+        <GaugeSkeleton size="lg" />
       </div>
     );
   }
 
+  // ── No data state ──
   if (!data) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
-        {/* BSS label */}
         <div className="mb-6">
           <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
             Behavioral Stability Score
           </span>
         </div>
 
-        {/* BSS Orb at 50, DORMANT */}
-        <BssOrb
+        <BssGauge
           score={50}
           tier="DORMANT"
           state="BUILDING"
-          yesterdayScore={undefined}
+          delta={0}
+          yesterdayScore={50}
           size="lg"
           isBuilding={false}
-          buildProgress={undefined}
         />
 
         <p className="mt-6 font-mono text-sm text-text-muted">
@@ -166,15 +163,7 @@ export default function DashboardPage() {
     );
   }
 
-  const insight = getInsight(data);
   const effectiveState = data.onboarding.is_building ? 'BUILDING' : data.drift.state;
-
-  const insightColorMap = {
-    positive: 'text-stable',
-    warning: 'text-drift',
-    caution: 'text-compromised',
-    neutral: 'text-text-secondary',
-  };
 
   return (
     <div className="relative flex min-h-full flex-col overflow-auto">
@@ -183,9 +172,9 @@ export default function DashboardPage() {
         <UtcClock />
       </div>
 
-      {/* Signal Mode: Always visible */}
+      {/* ── SURFACE LAYER: 5-Element Signal Display ── */}
       <div className={`flex flex-col items-center justify-center transition-all duration-500 ${showDetails ? 'pt-8 pb-4' : 'flex-1'}`}>
-        {/* BSS label + data freshness */}
+        {/* 1. BSS label + data freshness */}
         <div className="mb-6 flex flex-col items-center gap-1.5">
           <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
             Behavioral Stability Score
@@ -193,23 +182,36 @@ export default function DashboardPage() {
           <DataFreshnessIndicator computedAt={data.drift.computed_at} />
         </div>
 
-        {/* BSS Orb */}
-        <BssOrb
+        {/* 2. BSS Gauge (replaces BssOrb) — 240° arc, delta inside */}
+        <BssGauge
           score={data.bss_score}
           tier={data.bss_tier}
           state={effectiveState}
-          yesterdayScore={undefined}
+          delta={data.bss_delta ?? 0}
+          yesterdayScore={data.bss_yesterday ?? 50}
           size={showDetails ? 'sm' : 'lg'}
           isBuilding={data.onboarding.is_building}
           buildProgress={data.onboarding.is_building ? data.onboarding.baseline_progress : undefined}
         />
 
-        {/* Insight */}
-        <p className={`mt-4 max-w-md text-center font-mono text-sm ${insightColorMap[insight.tone]}`}>
-          {insight.text}
-        </p>
+        {/* 3. 7-Day Sparkline */}
+        {data.bss_sparkline && data.bss_sparkline.length >= 2 && (
+          <div className="mt-3">
+            <Sparkline
+              data={data.bss_sparkline}
+              tier={data.bss_tier}
+              width={showDetails ? 100 : 140}
+              height={showDetails ? 24 : 36}
+            />
+          </div>
+        )}
 
-        {/* Toggle */}
+        {/* 4. Verdict Line */}
+        <div className="mt-4">
+          <VerdictLine data={data} />
+        </div>
+
+        {/* 5. Detail Toggle */}
         <button
           onClick={() => setShowDetails(!showDetails)}
           className="mt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted transition-colors hover:text-text-secondary"
@@ -224,7 +226,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* Detail Mode: Bento grid */}
+      {/* ── DETAIL MODE: Bento Grid ── */}
       {showDetails && (
         <div className="animate-in slide-in-from-bottom-4 mx-6 mb-6">
           <ul className="grid grid-cols-1 grid-rows-none gap-4 md:grid-cols-12 md:grid-rows-3 lg:gap-4 xl:grid-rows-2">

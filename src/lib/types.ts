@@ -63,6 +63,9 @@ export interface StatePayload {
   bss_streak: number;
   bss_alpha: number;
   bss_decay_applied: boolean;
+  bss_delta: number;
+  bss_yesterday: number;
+  bss_sparkline: number[];
   dsi_score: number;
   dsi_state: string;
   violations_today: ViolationToday[];
