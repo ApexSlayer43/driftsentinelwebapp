@@ -39,7 +39,7 @@ function timeAgo(dateStr: string): string {
 }
 
 function getSeverityColor(severity: string): string {
-  if (severity === 'INFO') return '#00D4AA';
+  if (severity === 'INFO') return '#22D3EE';
   return SEVERITY_COLORS[severity as keyof typeof SEVERITY_COLORS] ?? '#8A9BB8';
 }
 
@@ -194,7 +194,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
                 <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.15em] text-text-primary">
                   Notifications
                 </h2>
-                <p className="mt-0.5 font-mono text-[9px] text-text-dim">
+                <p className="mt-0.5 font-mono text-[12px] text-text-dim">
                   {notifications.length} event{notifications.length !== 1 ? 's' : ''} · last 7 days
                 </p>
               </div>
@@ -210,13 +210,13 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
             <div className="flex-1 overflow-auto px-3 py-3" style={{ maxHeight: 'calc(100% - 60px)' }}>
               {loading ? (
                 <div className="flex items-center justify-center py-12">
-                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-text-dim/30 border-t-stable" />
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-text-dim/30 border-t-positive" />
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16">
                   <Shield size={24} className="mb-3 text-text-dim" />
-                  <p className="font-mono text-[11px] text-text-muted">All clear</p>
-                  <p className="mt-1 font-mono text-[9px] text-text-dim">No events in the last 7 days</p>
+                  <p className="font-mono text-[12px] text-text-muted">All clear</p>
+                  <p className="mt-1 font-mono text-[12px] text-text-dim">No events in the last 7 days</p>
                 </div>
               ) : (
                 <div className="space-y-1.5">
@@ -244,14 +244,14 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
                           {/* Content */}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2">
-                              <p className="truncate font-mono text-[11px] font-semibold text-text-primary">
+                              <p className="truncate font-mono text-[12px] font-semibold text-text-primary">
                                 {notif.title}
                               </p>
-                              <span className="shrink-0 font-mono text-[8px] text-text-dim">
+                              <span className="shrink-0 font-mono text-[10px] text-text-dim">
                                 {timeAgo(notif.timestamp)}
                               </span>
                             </div>
-                            <p className="mt-0.5 font-mono text-[9px] text-text-muted">
+                            <p className="mt-0.5 font-mono text-[12px] text-text-muted">
                               {notif.description}
                             </p>
                           </div>

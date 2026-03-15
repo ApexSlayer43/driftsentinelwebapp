@@ -184,13 +184,13 @@ export function SentinelChat() {
         >
           {/* Header */}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-border-dim">
-            <Bot size={14} className="text-stable" />
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-text-muted">
+            <Bot size={14} className="text-positive" />
+            <span className="font-mono text-[12px] font-bold uppercase tracking-[0.15em] text-text-muted">
               Senti
             </span>
             <div className="ml-auto flex items-center gap-1.5">
               <div className="h-1.5 w-1.5 rounded-full bg-stable animate-pulse" />
-              <span className="font-mono text-[7px] text-text-dim">
+              <span className="font-mono text-[12px] text-text-dim">
                 {isStreaming ? 'Analyzing' : 'Active'}
               </span>
             </div>
@@ -233,7 +233,7 @@ export function SentinelChat() {
                   </div>
                 ) : (
                   <div
-                    className={`max-w-[85%] rounded-xl px-3 py-2 font-mono text-[10px] leading-relaxed ${
+                    className={`max-w-[85%] rounded-xl px-3 py-2 font-mono text-[12px] leading-relaxed ${
                       msg.role === 'sentinel'
                         ? 'glass text-text-secondary'
                         : 'liquid-glass-tab-active text-text-primary'
@@ -254,12 +254,12 @@ export function SentinelChat() {
               onKeyDown={handleKeyDown}
               placeholder="Ask about your data..."
               disabled={isStreaming}
-              className="flex-1 bg-transparent font-mono text-[10px] text-text-primary placeholder-text-dim outline-none disabled:opacity-50"
+              className="flex-1 bg-transparent font-mono text-[12px] text-text-primary placeholder-text-dim outline-none disabled:opacity-50"
             />
             <button
               onClick={handleSend}
               disabled={isStreaming || !input.trim()}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors liquid-glass-tab hover:liquid-glass-tab-active text-text-muted hover:text-stable disabled:opacity-30 disabled:pointer-events-none"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors liquid-glass-tab hover:liquid-glass-tab-active text-text-muted hover:text-positive disabled:opacity-30 disabled:pointer-events-none"
             >
               {isStreaming ? (
                 <Loader2 size={12} className="animate-spin" />
@@ -277,10 +277,10 @@ export function SentinelChat() {
         onClick={() => setOpen(!open)}
         style={{
           background:
-            'radial-gradient(circle at 30% 30%, rgba(0, 212, 170, 0.9), rgba(0, 184, 148, 0.8))',
+            'radial-gradient(circle at 30% 30%, rgba(34, 211, 238, 0.9), rgba(6, 182, 212, 0.8))',
           boxShadow: open
-            ? '0 0 15px rgba(0, 212, 170, 0.4), 0 0 30px rgba(0, 212, 170, 0.2)'
-            : '0 0 20px rgba(0, 212, 170, 0.6), 0 0 40px rgba(0, 212, 170, 0.3), 0 0 60px rgba(0, 212, 170, 0.15)',
+            ? '0 0 15px rgba(34, 211, 238, 0.4), 0 0 30px rgba(34, 211, 238, 0.2)'
+            : '0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.3), 0 0 60px rgba(34, 211, 238, 0.15)',
         }}
       >
         {/* Highlight */}
@@ -295,7 +295,7 @@ export function SentinelChat() {
         {!open && (
           <div
             className="absolute inset-0 rounded-full animate-ping pointer-events-none"
-            style={{ backgroundColor: 'rgba(0, 212, 170, 0.2)' }}
+            style={{ backgroundColor: 'rgba(34, 211, 238, 0.2)' }}
           />
         )}
       </button>

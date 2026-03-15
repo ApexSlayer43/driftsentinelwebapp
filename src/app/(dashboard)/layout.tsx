@@ -130,7 +130,7 @@ export default function DashboardLayout({
               className={cn(
                 'group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200',
                 isActive
-                  ? 'text-stable liquid-glass-tab-active'
+                  ? 'text-positive liquid-glass-tab-active'
                   : 'text-text-muted hover:text-text-secondary liquid-glass-tab'
               )}
             >
@@ -148,7 +148,7 @@ export default function DashboardLayout({
             router.refresh();
           }}
           title="Sign out"
-          className="group relative flex h-10 w-10 items-center justify-center rounded-xl text-text-muted transition-all duration-200 hover:text-breakdown liquid-glass-tab"
+          className="group relative flex h-10 w-10 items-center justify-center rounded-xl text-text-muted transition-all duration-200 hover:text-negative liquid-glass-tab"
         >
           <LogOut size={18} />
         </button>

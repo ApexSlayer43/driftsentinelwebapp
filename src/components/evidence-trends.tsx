@@ -25,7 +25,7 @@ interface TrendPoint {
 
 /**
  * Trends tab — 7-day BSS + DSI dual-line chart.
- * BSS in tier-green (#00D4AA), DSI in indigo.
+ * BSS in tier-green (#22D3EE), DSI in indigo.
  * Dark theme matching the existing design system.
  */
 export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
@@ -79,7 +79,7 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
   if (loading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-stable border-t-transparent" />
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-positive border-t-transparent" />
       </div>
     );
   }
@@ -95,13 +95,13 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
   return (
     <div>
       {/* Legend */}
-      <div className="mb-4 flex items-center gap-4 font-mono text-[9px]">
+      <div className="mb-4 flex items-center gap-4 font-mono text-[12px]">
         <div className="flex items-center gap-1.5">
-          <div className="h-2 w-2 rounded-full bg-stable" />
+          <div className="h-2 w-2 rounded-full bg-positive" />
           <span className="text-text-muted">BSS</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#4A9EE5' }} />
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#6366F1' }} />
           <span className="text-text-muted">DSI</span>
         </div>
       </div>
@@ -127,31 +127,31 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#111720',
+              backgroundColor: '#1A1D27',
               border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '8px',
               fontFamily: 'var(--font-mono)',
               fontSize: '10px',
             }}
-            labelStyle={{ color: '#E8EDF5' }}
-            itemStyle={{ color: '#8A9BB8' }}
+            labelStyle={{ color: '#E2E8F0' }}
+            itemStyle={{ color: '#94A3B8' }}
           />
           <Line
             type="monotone"
             dataKey="bss"
-            stroke="#00D4AA"
+            stroke="#22D3EE"
             strokeWidth={2}
-            dot={{ fill: '#00D4AA', r: 3, strokeWidth: 0 }}
-            activeDot={{ r: 5, stroke: '#00D4AA', strokeWidth: 2, fill: '#111720' }}
+            dot={{ fill: '#22D3EE', r: 3, strokeWidth: 0 }}
+            activeDot={{ r: 5, stroke: '#22D3EE', strokeWidth: 2, fill: '#1A1D27' }}
             name="BSS"
           />
           <Line
             type="monotone"
             dataKey="dsi"
-            stroke="#4A9EE5"
+            stroke="#6366F1"
             strokeWidth={2}
-            dot={{ fill: '#4A9EE5', r: 3, strokeWidth: 0 }}
-            activeDot={{ r: 5, stroke: '#4A9EE5', strokeWidth: 2, fill: '#111720' }}
+            dot={{ fill: '#6366F1', r: 3, strokeWidth: 0 }}
+            activeDot={{ r: 5, stroke: '#6366F1', strokeWidth: 2, fill: '#1A1D27' }}
             name="DSI"
           />
         </LineChart>
@@ -161,7 +161,7 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
       <div className="mt-4 grid grid-cols-3 gap-3">
         <TrendStat
           label="BSS Range"
-          value={`${Math.min(...data.map(d => d.bss))} \u2013 ${Math.max(...data.map(d => d.bss))}`}
+          value={`${Math.min(...data.map(d => d.bss))} – ${Math.max(...data.map(d => d.bss))}`}
         />
         <TrendStat
           label="Avg BSS"
@@ -179,7 +179,7 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
 function TrendStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg glass-raised p-2.5 text-center">
-      <div className="font-mono text-[7px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+      <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">
         {label}
       </div>
       <div className="mt-1 font-mono text-sm font-bold text-text-primary">

@@ -96,13 +96,13 @@ export default function IngestPage() {
         onDrop={handleDrop}
         className={`mt-6 flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-12 transition-colors ${
           dragOver
-            ? 'border-stable bg-stable/[0.04]'
+            ? 'border-positive bg-stable/[0.04]'
             : 'border-border-subtle glass hover:border-border-active'
         }`}
       >
         {uploading ? (
           <>
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-stable border-t-transparent" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-positive border-t-transparent" />
             <p className="mt-3 font-mono text-sm text-text-secondary">Processing...</p>
           </>
         ) : (
@@ -111,10 +111,10 @@ export default function IngestPage() {
             <p className="mt-3 font-mono text-sm text-text-secondary">
               Upload your trade history CSV
             </p>
-            <p className="mt-1 font-mono text-[10px] text-text-muted">
+            <p className="mt-1 font-mono text-[12px] text-text-muted">
               or click to browse
             </p>
-            <p className="mt-3 font-mono text-[9px] text-text-dim">
+            <p className="mt-3 font-mono text-[12px] text-text-dim">
               Currently supports Tradovate CSV exports
             </p>
             <input
@@ -130,38 +130,38 @@ export default function IngestPage() {
 
       {/* Result */}
       {result && (
-        <div className="mt-4 rounded-xl border border-stable/20 bg-stable/[0.04] p-4">
+        <div className="mt-4 rounded-xl border border-positive/20 bg-positive/[0.04] p-4">
           <div className="flex items-center gap-2">
-            <CheckCircle size={16} className="text-stable" />
-            <span className="font-mono text-sm font-semibold text-stable">Upload Complete</span>
+            <CheckCircle size={16} className="text-positive" />
+            <span className="font-mono text-sm font-semibold text-positive">Upload Complete</span>
           </div>
           <div className="mt-2 grid grid-cols-3 gap-4">
             <div>
-              <div className="font-mono text-[8px] uppercase tracking-[0.15em] text-text-muted">Accepted</div>
-              <div className="font-display text-xl font-bold text-stable">{result.accepted}</div>
+              <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Accepted</div>
+              <div className="font-display text-xl font-bold text-positive">{result.accepted}</div>
             </div>
             <div>
-              <div className="font-mono text-[8px] uppercase tracking-[0.15em] text-text-muted">Duplicate</div>
+              <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Duplicate</div>
               <div className="font-display text-xl font-bold text-text-secondary">{result.duplicate}</div>
             </div>
             <div>
-              <div className="font-mono text-[8px] uppercase tracking-[0.15em] text-text-muted">Rejected</div>
-              <div className="font-display text-xl font-bold text-breakdown">{result.rejected}</div>
+              <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Rejected</div>
+              <div className="font-display text-xl font-bold text-negative">{result.rejected}</div>
             </div>
           </div>
         </div>
       )}
 
       {error && (
-        <div className="mt-4 flex items-center gap-2 rounded-xl border border-breakdown/20 bg-breakdown/[0.04] p-4">
-          <XCircle size={16} className="text-breakdown" />
-          <span className="font-mono text-sm text-breakdown">{error}</span>
+        <div className="mt-4 flex items-center gap-2 rounded-xl border border-negative/20 bg-negative/[0.04] p-4">
+          <XCircle size={16} className="text-negative" />
+          <span className="font-mono text-sm text-negative">{error}</span>
         </div>
       )}
 
       {/* Recent uploads */}
       <div className="mt-8">
-        <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+        <h3 className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted">
           Recent Uploads
         </h3>
         {recentRuns.length === 0 ? (
@@ -174,23 +174,23 @@ export default function IngestPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border-dim glass-raised">
-                  <th className="px-4 py-2 text-left font-mono text-[7px] font-semibold uppercase tracking-[0.15em] text-text-dim">File</th>
-                  <th className="px-4 py-2 text-left font-mono text-[7px] font-semibold uppercase tracking-[0.15em] text-text-dim">Date</th>
-                  <th className="px-4 py-2 text-right font-mono text-[7px] font-semibold uppercase tracking-[0.15em] text-text-dim">Accepted</th>
-                  <th className="px-4 py-2 text-right font-mono text-[7px] font-semibold uppercase tracking-[0.15em] text-text-dim">Dup</th>
-                  <th className="px-4 py-2 text-right font-mono text-[7px] font-semibold uppercase tracking-[0.15em] text-text-dim">Rejected</th>
+                  <th className="px-4 py-2 text-left font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-dim">File</th>
+                  <th className="px-4 py-2 text-left font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-dim">Date</th>
+                  <th className="px-4 py-2 text-right font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-dim">Accepted</th>
+                  <th className="px-4 py-2 text-right font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-dim">Dup</th>
+                  <th className="px-4 py-2 text-right font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-dim">Rejected</th>
                 </tr>
               </thead>
               <tbody>
                 {recentRuns.map((run) => (
                   <tr key={run.ingest_run_id} className="border-b border-border-dim hover:bg-raised">
-                    <td className="px-4 py-2.5 font-mono text-[10px] text-text-secondary">{run.file_name}</td>
-                    <td className="px-4 py-2.5 font-mono text-[10px] text-text-muted">
+                    <td className="px-4 py-2.5 font-mono text-[12px] text-text-secondary">{run.file_name}</td>
+                    <td className="px-4 py-2.5 font-mono text-[12px] text-text-muted">
                       {new Date(run.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono text-[10px] text-stable">{run.accepted_count}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-[10px] text-text-muted">{run.dup_count}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-[10px] text-breakdown">{run.reject_count}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[12px] text-positive">{run.accepted_count}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[12px] text-text-muted">{run.dup_count}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[12px] text-negative">{run.reject_count}</td>
                   </tr>
                 ))}
               </tbody>

@@ -84,7 +84,7 @@ export function AuthFlow() {
       useWorker: true,
     });
     // Teal and white themed bursts
-    const colors = ['#00D4AA', '#00B894', '#E8EDF5', '#8A9BB8'];
+    const colors = ['#22D3EE', '#06B6D4', '#E2E8F0', '#94A3B8'];
     myConfetti({
       particleCount: 80,
       spread: 80,
@@ -358,7 +358,7 @@ export function AuthFlow() {
               <button
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-stable py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(0,212,170,0.3)] disabled:opacity-50"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
               >
                 {loading ? (
                   <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
@@ -424,7 +424,7 @@ export function AuthFlow() {
               <button
                 type="submit"
                 disabled={loading || !password}
-                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-stable py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(0,212,170,0.3)] disabled:opacity-50"
+                className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
               >
                 {loading ? (
                   <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
@@ -537,7 +537,7 @@ export function AuthFlow() {
               <button
                 type="submit"
                 disabled={loading || !password || !confirmPassword || password !== confirmPassword}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-stable py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(0,212,170,0.3)] disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-accent-primary py-3 font-mono text-sm font-bold text-void transition-all hover:shadow-[0_0_24px_rgba(99,102,241,0.3)] disabled:opacity-50"
               >
                 {loading ? (
                   <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-void/30 border-t-void" />
@@ -581,7 +581,7 @@ export function AuthFlow() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.1 }}
-              className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-stable/20 bg-stable/5"
+              className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-stable/20 bg-accent-primary/5"
             >
               <Check size={24} className="text-stable" />
             </motion.div>
@@ -599,7 +599,7 @@ export function AuthFlow() {
             {/* Loading bar */}
             <div className="mt-4 h-0.5 w-32 overflow-hidden rounded-full bg-white/[0.06]">
               <motion.div
-                className="h-full bg-stable"
+                className="h-full bg-accent-primary"
                 initial={{ width: 0 }}
                 animate={{ width: '100%' }}
                 transition={{ duration: 1.8, ease: 'easeInOut' }}
@@ -619,9 +619,9 @@ export function AuthFlow() {
         >
           <TextLoop />
           <div className="flex items-center gap-2 opacity-20">
-            <div className="h-px w-8 bg-stable" />
-            <div className="h-1 w-1 rounded-full bg-stable" />
-            <div className="h-px w-8 bg-stable" />
+            <div className="h-px w-8 bg-accent-primary" />
+            <div className="h-1 w-1 rounded-full bg-accent-primary" />
+            <div className="h-px w-8 bg-accent-primary" />
           </div>
         </motion.div>
       )}

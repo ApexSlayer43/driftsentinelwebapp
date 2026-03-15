@@ -178,7 +178,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-stable border-t-transparent" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-positive border-t-transparent" />
       </div>
     );
   }
@@ -193,7 +193,7 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-stable px-4 py-2 font-mono text-sm font-bold text-void transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg bg-accent-primary px-4 py-2 font-mono text-sm font-bold text-void transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           <Save size={14} />
           {saving ? 'Saving...' : saved ? 'Saved' : 'Save Changes'}
@@ -207,26 +207,26 @@ export default function SettingsPage() {
           className="group flex items-center justify-between rounded-xl glass p-6 transition-colors hover:bg-raised/30"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-stable/10">
-              <Shield size={16} className="text-stable" />
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-primary/10">
+              <Shield size={16} className="text-positive" />
             </div>
             <div>
               <h3 className="font-display text-sm font-bold text-text-primary">Protocol</h3>
-              <p className="mt-0.5 font-mono text-[10px] text-text-muted">
+              <p className="mt-0.5 font-mono text-[12px] text-text-muted">
                 Upload and manage your trading protocol rules
               </p>
             </div>
           </div>
-          <ExternalLink size={14} className="text-text-dim group-hover:text-stable transition-colors" />
+          <ExternalLink size={14} className="text-text-dim group-hover:text-positive transition-colors" />
         </Link>
 
         {/* Trading Rules */}
         <div className="rounded-xl glass p-6">
           <h3 className="font-display text-sm font-bold text-text-primary">Trading Rules</h3>
-          <p className="mt-1 font-mono text-[10px] text-text-muted">Define your maximum position sizes and activity limits</p>
+          <p className="mt-1 font-mono text-[12px] text-text-muted">Define your maximum position sizes and activity limits</p>
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 block font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+              <label className="mb-1.5 block font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-muted">
                 Max Contracts
               </label>
               <input
@@ -234,11 +234,11 @@ export default function SettingsPage() {
                 min={1}
                 value={maxContracts}
                 onChange={(e) => setMaxContracts(parseInt(e.target.value) || 1)}
-                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-stable"
+                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
               />
             </div>
             <div>
-              <label className="mb-1.5 block font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+              <label className="mb-1.5 block font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-muted">
                 Max Fills Per Day
               </label>
               <input
@@ -246,7 +246,7 @@ export default function SettingsPage() {
                 min={1}
                 value={maxFillsPerDay}
                 onChange={(e) => setMaxFillsPerDay(parseInt(e.target.value) || 20)}
-                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-stable"
+                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
               />
             </div>
           </div>
@@ -257,11 +257,11 @@ export default function SettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-display text-sm font-bold text-text-primary">Session Windows</h3>
-              <p className="mt-1 font-mono text-[10px] text-text-muted">Define when you trade. Fills outside these windows are flagged.</p>
+              <p className="mt-1 font-mono text-[12px] text-text-muted">Define when you trade. Fills outside these windows are flagged.</p>
             </div>
             <button
               onClick={addSession}
-              className="flex items-center gap-1 font-mono text-[10px] text-stable hover:underline"
+              className="flex items-center gap-1 font-mono text-[12px] text-positive hover:underline"
             >
               <Plus size={12} /> Add Session
             </button>
@@ -277,20 +277,20 @@ export default function SettingsPage() {
                     placeholder="Session name"
                     value={session.name}
                     onChange={(e) => updateSession(i, 'name', e.target.value)}
-                    className="w-32 rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[10px] text-text-primary outline-none focus:border-stable"
+                    className="w-32 rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
                   />
                   <input
                     type="time"
                     value={session.start_utc}
                     onChange={(e) => updateSession(i, 'start_utc', e.target.value)}
-                    className="rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[10px] text-text-primary outline-none focus:border-stable"
+                    className="rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
                   />
-                  <span className="font-mono text-[10px] text-text-muted">to</span>
+                  <span className="font-mono text-[12px] text-text-muted">to</span>
                   <input
                     type="time"
                     value={session.end_utc}
                     onChange={(e) => updateSession(i, 'end_utc', e.target.value)}
-                    className="rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[10px] text-text-primary outline-none focus:border-stable"
+                    className="rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
                   />
                   <div className="flex-1 flex gap-1">
                     {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day) => (
@@ -302,9 +302,9 @@ export default function SettingsPage() {
                             : [...session.days, day];
                           updateSession(i, 'days', days);
                         }}
-                        className={`rounded px-1.5 py-0.5 font-mono text-[8px] font-bold ${
+                        className={`rounded px-1.5 py-0.5 font-mono text-[12px] font-bold ${
                           session.days.includes(day)
-                            ? 'bg-stable/20 text-stable'
+                            ? 'bg-accent-primary/20 text-positive'
                             : 'bg-elevated text-text-dim'
                         }`}
                       >
@@ -312,7 +312,7 @@ export default function SettingsPage() {
                       </button>
                     ))}
                   </div>
-                  <button onClick={() => removeSession(i)} className="text-text-dim hover:text-breakdown">
+                  <button onClick={() => removeSession(i)} className="text-text-dim hover:text-negative">
                     <Trash2 size={12} />
                   </button>
                 </div>
@@ -324,10 +324,10 @@ export default function SettingsPage() {
         {/* Baseline Configuration */}
         <div className="rounded-xl glass p-6">
           <h3 className="font-display text-sm font-bold text-text-primary">Baseline Configuration</h3>
-          <p className="mt-1 font-mono text-[10px] text-text-muted">Controls how many fills are needed to establish your trading baseline</p>
+          <p className="mt-1 font-mono text-[12px] text-text-muted">Controls how many fills are needed to establish your trading baseline</p>
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1.5 block font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+              <label className="mb-1.5 block font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-muted">
                 Baseline Window Fills
               </label>
               <input
@@ -335,11 +335,11 @@ export default function SettingsPage() {
                 min={10}
                 value={baselineWindowFills}
                 onChange={(e) => setBaselineWindowFills(parseInt(e.target.value) || 50)}
-                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-stable"
+                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
               />
             </div>
             <div>
-              <label className="mb-1.5 block font-mono text-[9px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+              <label className="mb-1.5 block font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-muted">
                 Scoring Window Fills
               </label>
               <input
@@ -347,7 +347,7 @@ export default function SettingsPage() {
                 min={5}
                 value={scoringWindowFills}
                 onChange={(e) => setScoringWindowFills(parseInt(e.target.value) || 20)}
-                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-stable"
+                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
               />
             </div>
           </div>
@@ -356,7 +356,7 @@ export default function SettingsPage() {
         {/* Connect Extension */}
         <div className="rounded-xl glass p-6">
           <h3 className="font-display text-sm font-bold text-text-primary">Chrome Extension</h3>
-          <p className="mt-1 font-mono text-[10px] text-text-muted">
+          <p className="mt-1 font-mono text-[12px] text-text-muted">
             Connect the Drift Sentinel extension for real-time monitoring
           </p>
 
@@ -364,7 +364,7 @@ export default function SettingsPage() {
             {extStatus === 'loading' && (
               <div className="flex items-center gap-2 rounded-lg glass-raised p-3">
                 <Loader2 size={14} className="animate-spin text-text-muted" />
-                <span className="font-mono text-[10px] text-text-muted">Detecting extension...</span>
+                <span className="font-mono text-[12px] text-text-muted">Detecting extension...</span>
               </div>
             )}
 
@@ -375,15 +375,15 @@ export default function SettingsPage() {
                     <Puzzle size={16} className="text-text-dim" />
                   </div>
                   <div>
-                    <div className="font-mono text-[10px] font-semibold text-text-secondary">Extension not detected</div>
-                    <div className="font-mono text-[8px] text-text-dim">Install the Chrome extension for live monitoring</div>
+                    <div className="font-mono text-[12px] font-semibold text-text-secondary">Extension not detected</div>
+                    <div className="font-mono text-[12px] text-text-dim">Install the Chrome extension for live monitoring</div>
                   </div>
                 </div>
                 <a
                   href="https://github.com/ApexSlayer43/drift-sentinel-extension"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 rounded-lg bg-elevated px-3 py-1.5 font-mono text-[10px] font-semibold text-text-secondary hover:text-stable transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg bg-elevated px-3 py-1.5 font-mono text-[12px] font-semibold text-text-secondary hover:text-positive transition-colors"
                 >
                   <ExternalLink size={10} /> Install Extension
                 </a>
@@ -397,14 +397,14 @@ export default function SettingsPage() {
                     <Unplug size={16} className="text-amber-400" />
                   </div>
                   <div>
-                    <div className="font-mono text-[10px] font-semibold text-text-secondary">Extension detected</div>
-                    <div className="font-mono text-[8px] text-text-dim">Connect to enable real-time behavioral monitoring</div>
+                    <div className="font-mono text-[12px] font-semibold text-text-secondary">Extension detected</div>
+                    <div className="font-mono text-[12px] text-text-dim">Connect to enable real-time behavioral monitoring</div>
                   </div>
                 </div>
                 <button
                   onClick={connectExtension}
                   disabled={extStatus === 'connecting'}
-                  className="flex items-center gap-1.5 rounded-lg bg-stable px-3 py-1.5 font-mono text-[10px] font-bold text-void transition-opacity hover:opacity-90 disabled:opacity-50"
+                  className="flex items-center gap-1.5 rounded-lg bg-accent-primary px-3 py-1.5 font-mono text-[12px] font-bold text-void transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
                   {extStatus === 'connecting' ? (
                     <><Loader2 size={10} className="animate-spin" /> Connecting...</>
@@ -418,17 +418,17 @@ export default function SettingsPage() {
             {extStatus === 'connected' && (
               <div className="flex items-center justify-between rounded-lg glass-raised p-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-stable/10">
-                    <Plug size={16} className="text-stable" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-primary/10">
+                    <Plug size={16} className="text-positive" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-stable animate-pulse" />
-                    <div className="font-mono text-[10px] font-semibold text-stable">Extension Connected</div>
+                    <div className="h-1.5 w-1.5 rounded-full bg-accent-primary animate-pulse" />
+                    <div className="font-mono text-[12px] font-semibold text-positive">Extension Connected</div>
                   </div>
                 </div>
                 <button
                   onClick={disconnectExtension}
-                  className="flex items-center gap-1 font-mono text-[10px] text-text-dim hover:text-breakdown transition-colors"
+                  className="flex items-center gap-1 font-mono text-[12px] text-text-dim hover:text-negative transition-colors"
                 >
                   <Unplug size={10} /> Disconnect
                 </button>
@@ -438,7 +438,7 @@ export default function SettingsPage() {
             {extError && (
               <div className="flex items-center gap-2 rounded-lg border border-breakdown/20 bg-breakdown/[0.04] px-3 py-2">
                 <X size={12} className="text-breakdown shrink-0" />
-                <span className="font-mono text-[9px] text-breakdown">{extError}</span>
+                <span className="font-mono text-[12px] text-breakdown">{extError}</span>
               </div>
             )}
           </div>

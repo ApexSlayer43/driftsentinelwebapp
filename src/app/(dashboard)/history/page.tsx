@@ -157,7 +157,7 @@ export default function HistoryPage() {
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`rounded-full px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.1em] transition-colors ${
+              className={`rounded-full px-3 py-1 font-mono text-[12px] font-bold uppercase tracking-[0.1em] transition-colors ${
                 range === r
                   ? 'liquid-glass-tab-active text-text-primary'
                   : 'liquid-glass-tab text-text-muted hover:text-text-secondary'
@@ -173,7 +173,7 @@ export default function HistoryPage() {
       <div className="flex-1 min-h-0 relative">
         {loading ? (
           <div className="flex h-full items-center justify-center">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-stable border-t-transparent" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-positive border-t-transparent" />
           </div>
         ) : (
           <RadialOrbitalTimeline timelineData={timelineData} />
