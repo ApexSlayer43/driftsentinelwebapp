@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Clock, Layers } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { getModeLabel, getModeIcon } from '@/lib/tokens';
+import { getModeLabel, getModeIcon, getModeWeight } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
 import { EvidenceOrbital } from '@/components/evidence-orbital';
 import type { ViolationDetail as ViolationDetailType, FillCanonical } from '@/lib/types';
@@ -24,6 +24,8 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
 
   const modeLabel = getModeLabel(violation.mode);
   const modeIcon = getModeIcon(violation.mode);
+  const modeWeight = getModeWeight(violation.mode);
+  const weightedPoints = Math.round(violation.points * modeWeight);
 
   useEffect(() => {
     async function loadFills() {
@@ -134,7 +136,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
                 Impact
               </div>
               <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
-                {violation.points} violation points assessed (weighted by mode before BSS calculation). Pattern severity classified as {violation.severity}.
+                {violation.points} raw pts × {modeWeight}x mode weight = {weightedPoints} weighted points deducted from DSI. Pattern severity: {violation.severity}.
               </div>
             </div>
           </div>
@@ -146,13 +148,21 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
         <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
           Impact Metrics
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 gap-3">
           <div className="glass-inset rounded-xl p-4 text-center">
-            <div className="font-mono text-[20px] font-bold text-[#EF4444]">
+            <div className="font-mono text-[20px] font-bold text-text-secondary">
               -{violation.points}
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
-              Violation Pts
+              Raw Pts
+            </div>
+          </div>
+          <div className="glass-inset rounded-xl p-4 text-center">
+            <div className="font-mono text-[20px] font-bold text-[#EF4444]">
+              -{weightedPoints}
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
+              DSI Impact
             </div>
           </div>
           <div className="glass-inset rounded-xl p-4 text-center">

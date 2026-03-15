@@ -62,6 +62,22 @@ export function getSeverityColor(severity: string) {
   return SEVERITY_COLORS[severity as keyof typeof SEVERITY_COLORS] ?? SEVERITY_COLORS.LOW;
 }
 
+// DSI mode weights — mirrors backend/src/engine/dsi.ts
+// These are the multipliers applied to raw violation points before DSI calculation
+export const MODE_WEIGHTS: Record<string, number> = {
+  OFF_SESSION: 1.5,
+  OVERSIZE: 1.3,
+  FREQUENCY: 1.0,
+  BASELINE_SHIFT: 0.7,
+  HESITATION: 1.0,
+  REVENGE_ENTRY: 1.3,
+  SIZE_ESCALATION: 1.3,
+};
+
+export function getModeWeight(mode: string) {
+  return MODE_WEIGHTS[mode] ?? 1.0;
+}
+
 export function getModeLabel(mode: string) {
   return MODE_LABELS[mode] ?? mode;
 }

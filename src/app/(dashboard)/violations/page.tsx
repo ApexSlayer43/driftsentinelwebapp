@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Clock, Layers } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { getModeLabel, getModeIcon } from '@/lib/tokens';
+import { getModeLabel, getModeIcon, getModeWeight } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
 import { ViolationDetailPanel } from '@/components/violation-detail';
 import type { ViolationDetail } from '@/lib/types';
@@ -83,6 +83,7 @@ export default function ViolationsPage() {
           ) : (
             violations.map((v) => {
               const modeLabel = getModeLabel(v.mode);
+              const weighted = Math.round(v.points * getModeWeight(v.mode));
               const isSelected = selectedViolation?.violation_id === v.violation_id;
               const time = new Date(v.first_seen_utc).toLocaleString('en-US', {
                 month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
@@ -111,7 +112,7 @@ export default function ViolationsPage() {
                       {modeLabel}
                     </span>
                     <span className="font-mono text-[12px] font-bold text-warning bg-warning/10 px-2 py-0.5 rounded">
-                      -{v.points} pts
+                      -{weighted} pts
                     </span>
                   </div>
                   <div className="font-mono text-[12px] text-text-muted">
