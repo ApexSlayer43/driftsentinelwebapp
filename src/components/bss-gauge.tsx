@@ -28,11 +28,11 @@ export function BssGauge({
   const tierStyle = getTierStyle(tier);
   const stateStyle = getStateStyle(state);
 
-  const dimension = size === 'lg' ? 280 : 180;
+  const dimension = size === 'lg' ? 380 : 180;
   const cx = dimension / 2;
   const cy = dimension / 2;
   const radius = (dimension / 2) - 24;
-  const strokeWidth = size === 'lg' ? 8 : 5;
+  const strokeWidth = size === 'lg' ? 10 : 5;
 
   // Arc calculation: 240° sweep from -210° to +30° (bottom gap)
   const startAngle = 150; // degrees from 3-o'clock, clockwise
@@ -170,13 +170,13 @@ export function BssGauge({
         {/* Score number — JetBrains Mono */}
         <text
           x={cx}
-          y={cy - (size === 'lg' ? 6 : 2)}
+          y={cy - (size === 'lg' ? 10 : 2)}
           textAnchor="middle"
           dominantBaseline="central"
           fill="#E8EDF5"
           fontFamily="var(--font-mono)"
           fontWeight="700"
-          fontSize={size === 'lg' ? 52 : 32}
+          fontSize={size === 'lg' ? 72 : 32}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
           {isBuilding ? `${Math.round(progressValue * 100)}%` : animatedScore}
@@ -186,13 +186,13 @@ export function BssGauge({
         {!isBuilding && (
           <text
             x={cx}
-            y={cy + (size === 'lg' ? 28 : 18)}
+            y={cy + (size === 'lg' ? 38 : 18)}
             textAnchor="middle"
             dominantBaseline="central"
             fill={deltaColor}
             fontFamily="var(--font-mono)"
             fontWeight="500"
-            fontSize={size === 'lg' ? 13 : 10}
+            fontSize={size === 'lg' ? 16 : 10}
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
             {deltaSymbol} {deltaText}
