@@ -19,14 +19,14 @@
   --color-raised: #242836;
   --color-elevated: #2E3346;
 
-  /* Behavioral Signals — colorblind-safe (spec Section 5) */
-  --color-positive: #22D3EE;
+  /* Behavioral Signals — brand teal */
+  --color-positive: #00D4AA;
   --color-negative: #FB923C;
   --color-warning: #F59E0B;
   --color-neutral: #94A3B8;
 
   /* Legacy aliases — components still reference these */
-  --color-stable: #22D3EE;
+  --color-stable: #00D4AA;
   --color-drift: #F59E0B;
   --color-compromised: #FB923C;
   --color-breakdown: #FB923C;
@@ -126,7 +126,7 @@
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.08);
   --ring: #6366F1;
-  --chart-1: #22D3EE;
+  --chart-1: #00D4AA;
   --chart-2: #F59E0B;
   --chart-3: #FB923C;
   --chart-4: #A78BFA;

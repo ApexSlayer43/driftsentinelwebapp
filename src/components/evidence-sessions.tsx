@@ -81,8 +81,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
       {scores.map((day) => {
         const isClean = day.violation_count === 0;
 
-        // 4px left border accent per spec Section 7
-        const borderAccent = isClean ? 'border-accent-clean' : 'border-accent-violation';
+        // Clean glass — consistent styling
 
         // Derive tier from BSS score for color
         const tier = day.bss_score >= 90 ? 'SOVEREIGN'
@@ -99,7 +98,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
         return (
           <div
             key={day.daily_score_id}
-            className={`glass-card ${borderAccent} rounded-2xl p-3.5 transition-transform hover:scale-[1.01]`}
+            className="glass-card rounded-2xl p-3.5 transition-transform hover:scale-[1.01]"
           >
             <div className="flex items-center justify-between">
               <div>

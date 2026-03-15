@@ -1,7 +1,7 @@
 // State styles — used by BSS orb, badges, cards
 // Aligned to Invisible Interface spec Section 5
 export const STATE_STYLES = {
-  STABLE:        { solid: '#22D3EE', bg: 'rgba(34,211,238,0.07)', border: 'rgba(34,211,238,0.18)' },
+  STABLE:        { solid: '#00D4AA', bg: 'rgba(0,212,170,0.07)', border: 'rgba(0,212,170,0.18)' },
   DRIFT_FORMING: { solid: '#F59E0B', bg: 'rgba(245,158,11,0.07)', border: 'rgba(245,158,11,0.18)' },
   COMPROMISED:   { solid: '#FB923C', bg: 'rgba(251,146,60,0.07)', border: 'rgba(251,146,60,0.18)' },
   BREAKDOWN:     { solid: '#FB923C', bg: 'rgba(251,146,60,0.09)', border: 'rgba(251,146,60,0.22)' },

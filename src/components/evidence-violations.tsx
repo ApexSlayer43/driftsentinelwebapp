@@ -104,16 +104,14 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
 
         return (
           <div key={v.violation_id}>
-            {/* SBI Card — amber left border, elevated bg per spec Section 7 */}
             <button
               onClick={() => setExpandedId(isExpanded ? null : v.violation_id)}
-              className="flex w-full items-center gap-3 rounded-2xl border-l-4 border-warning bg-elevated p-3.5 transition-transform hover:scale-[1.01]"
-              style={{ borderRadius: '24px' }}
+              className="flex w-full items-center gap-3 glass-card rounded-2xl p-3.5 transition-transform hover:scale-[1.01]"
             >
-              <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-warning" />
+              <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-text-muted" />
               <div className="flex-1 text-left">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[12px] font-semibold text-warning">⚡ Pattern Detected</span>
+                <div className="font-mono text-[12px] font-semibold text-text-secondary">
+                  Pattern Detected
                 </div>
                 <div className="font-mono text-[12px] font-medium text-text-primary mt-0.5">
                   {modeLabel}
@@ -125,33 +123,21 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
               </span>
             </button>
 
-            {/* SBI Detail — Situation, Behavior, Impact, Forward Suggestion */}
             {isExpanded && (
-              <div className="ml-5 mt-1.5 rounded-xl p-3.5 space-y-2.5" style={{ background: '#1A1D27' }}>
-                {/* Situation */}
+              <div className="ml-5 mt-1.5 glass-inset rounded-xl p-3.5 space-y-2.5">
                 <div className="font-mono text-[12px]">
-                  <span className="text-text-muted uppercase tracking-wider">Situation: </span>
-                  <span className="text-text-secondary">
-                    During window {windowStart} – {windowEnd}
-                  </span>
+                  <span className="text-text-muted">Window: </span>
+                  <span className="text-text-secondary">{windowStart} – {windowEnd}</span>
                 </div>
-                {/* Behavior */}
                 <div className="font-mono text-[12px]">
-                  <span className="text-text-muted uppercase tracking-wider">Behavior: </span>
+                  <span className="text-text-muted">Behavior: </span>
                   <span className="text-text-secondary">
-                    {modeLabel} detected across {v.evidence_event_ids.length} fill{v.evidence_event_ids.length > 1 ? 's' : ''}
+                    {modeLabel} across {v.evidence_event_ids.length} fill{v.evidence_event_ids.length > 1 ? 's' : ''}
                   </span>
                 </div>
-                {/* Impact */}
-                <div className="font-mono text-[12px] rounded-lg p-2.5" style={{ background: '#242836' }}>
-                  <span className="text-text-muted uppercase tracking-wider">Impact: </span>
-                  <span className="text-text-secondary">
-                    −{v.points} BSS points · Rule {v.rule_id}
-                  </span>
-                </div>
-                {/* Forward suggestion */}
-                <div className="font-mono text-[12px] text-accent-primary">
-                  Review protocol to address this pattern →
+                <div className="font-mono text-[12px]">
+                  <span className="text-text-muted">Impact: </span>
+                  <span className="text-text-secondary">−{v.points} BSS points · Rule {v.rule_id}</span>
                 </div>
               </div>
             )}

@@ -39,7 +39,7 @@ function timeAgo(dateStr: string): string {
 }
 
 function getSeverityColor(severity: string): string {
-  if (severity === 'INFO') return '#22D3EE';
+  if (severity === 'INFO') return '#00D4AA';
   return SEVERITY_COLORS[severity as keyof typeof SEVERITY_COLORS] ?? '#8A9BB8';
 }
 

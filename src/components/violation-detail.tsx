@@ -73,19 +73,17 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
         ← Back to list
       </button>
 
-      {/* Violation header — clay card with 4px left border accent */}
-      <div className="glass-card border-accent-violation rounded-2xl p-5">
+      {/* Violation header */}
+      <div className="glass-card rounded-2xl p-5">
         <div className="flex items-start gap-3">
           <DynamicIcon name={modeIcon} size={18} className="mt-0.5 shrink-0 text-text-muted" />
           <div className="flex-1">
-            <h3 className="font-mono text-[14px] font-bold text-text-primary">{modeLabel}</h3>
+            <div className="font-mono text-[12px] text-text-secondary">Pattern Detected</div>
+            <h3 className="font-mono text-[14px] font-bold text-text-primary mt-0.5">{modeLabel}</h3>
             <div className="mt-1 font-mono text-[12px] text-text-muted">{time}</div>
           </div>
-          <span
-            className="rounded-full px-2.5 py-0.5 font-mono text-[12px] font-bold uppercase"
-            style={{ color: sevColor, backgroundColor: `${sevColor}15` }}
-          >
-            {violation.severity}
+          <span className="rounded-full px-2.5 py-0.5 font-mono text-[12px] font-bold text-text-muted glass-inset">
+            −{violation.points} pts
           </span>
         </div>
 
@@ -134,7 +132,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
               const fillTime = new Date(fill.timestamp_utc).toLocaleTimeString('en-US', {
                 hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
               });
-              const sideColor = fill.side === 'BUY' ? '#22D3EE' : '#FB923C';
+              const sideColor = fill.side === 'BUY' ? '#00D4AA' : '#FB923C';
 
               return (
                 <div
