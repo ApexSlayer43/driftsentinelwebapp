@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
-import { LiquidGlassCard } from '@/components/ui/liquid-glass-card';
 import { EvidenceSessions } from './evidence-sessions';
 import { EvidenceViolations } from './evidence-violations';
 import { EvidenceTrends } from './evidence-trends';
@@ -53,12 +52,9 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
         onClick={onClose}
       />
 
-      {/* Sheet — LiquidGlassCard raised variant with SVG distortion */}
-      <LiquidGlassCard
-        variant="raised"
-        animate={false}
-        className="absolute bottom-0 left-0 right-0"
-        borderRadius="24px 24px 0 0"
+      {/* Sheet — liquid-glass-raised per spec Section 7 */}
+      <div
+        className="absolute bottom-0 left-0 right-0 liquid-glass-raised rounded-t-3xl"
         style={{
           maxHeight: '65vh',
           animation: 'sheetSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -101,7 +97,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
           {activeTab === 'violations' && <EvidenceViolations accountRef={accountRef} />}
           {activeTab === 'trends' && <EvidenceTrends accountRef={accountRef} />}
         </div>
-      </LiquidGlassCard>
+      </div>
 
       <style>{`
         @keyframes sheetSlideUp {

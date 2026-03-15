@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Bot, X, Loader2 } from 'lucide-react';
-import { LiquidGlassCard } from '@/components/ui/liquid-glass-card';
 
 interface Message {
   id: string;
@@ -172,20 +171,19 @@ export function SentinelChat() {
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      {/* Chat panel — LiquidGlassCard with SVG distortion */}
+      {/* Chat panel */}
       {open && (
         <div
           ref={panelRef}
-          className="absolute bottom-16 right-0 w-80"
+          className="absolute bottom-16 right-0 w-80 flex flex-col rounded-2xl liquid-glass overflow-hidden"
           style={{
             maxHeight: '400px',
             animation: 'sentinel-pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
             transformOrigin: 'bottom right',
           }}
         >
-          <LiquidGlassCard variant="elevated" animate={false} className="flex flex-col overflow-hidden" borderRadius="24px" style={{ maxHeight: '400px' }}>
           {/* Header */}
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.04]">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-border-dim">
             <Bot size={14} className="text-positive" />
             <span className="font-mono text-[12px] font-bold uppercase tracking-[0.15em] text-text-muted">
               Senti
@@ -217,7 +215,7 @@ export function SentinelChat() {
               >
                 {/* Typing indicator for empty streaming sentinel message */}
                 {msg.role === 'sentinel' && msg.text === '' && isStreaming ? (
-                  <div className="max-w-[85%] rounded-xl px-3 py-2 glass-inset">
+                  <div className="max-w-[85%] rounded-xl px-3 py-2 glass">
                     <div className="flex items-center gap-1">
                       <span
                         className="h-1.5 w-1.5 rounded-full bg-stable animate-bounce"
@@ -237,7 +235,7 @@ export function SentinelChat() {
                   <div
                     className={`max-w-[85%] rounded-xl px-3 py-2 font-mono text-[12px] leading-relaxed ${
                       msg.role === 'sentinel'
-                        ? 'glass-inset text-text-secondary'
+                        ? 'glass text-text-secondary'
                         : 'liquid-glass-tab-active text-text-primary'
                     }`}
                   >
@@ -249,7 +247,7 @@ export function SentinelChat() {
           </div>
 
           {/* Input */}
-          <div className="flex items-center gap-2 border-t border-white/[0.04] px-3 py-2">
+          <div className="flex items-center gap-2 border-t border-border-dim px-3 py-2">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -270,7 +268,6 @@ export function SentinelChat() {
               )}
             </button>
           </div>
-          </LiquidGlassCard>
         </div>
       )}
 

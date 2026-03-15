@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertTriangle, TrendingDown, TrendingUp, Shield, Activity } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { SEVERITY_COLORS, MODE_LABELS } from '@/lib/tokens';
-import { LiquidGlassCard } from '@/components/ui/liquid-glass-card';
 
 // ─── Types ───
 interface Notification {
@@ -181,15 +180,14 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
             onClick={onClose}
           />
 
-          {/* Panel — LiquidGlassCard elevated variant with SVG distortion */}
+          {/* Panel */}
           <motion.div
             initial={{ x: -320, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -320, opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed left-24 top-4 bottom-4 z-50 w-[340px] overflow-hidden"
+            className="fixed left-24 top-4 bottom-4 z-50 w-[340px] overflow-hidden rounded-2xl liquid-glass"
           >
-          <LiquidGlassCard variant="elevated" animate={false} className="h-full" borderRadius="24px">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-white/[0.04] px-5 py-4">
               <div>
@@ -264,7 +262,6 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
                 </div>
               )}
             </div>
-          </LiquidGlassCard>
           </motion.div>
         </>
       )}

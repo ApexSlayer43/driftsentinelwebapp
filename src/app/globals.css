@@ -157,182 +157,160 @@
   }
 }
 
-/* ── Liquid Glass Panels (21st.dev shadow stack + Invisible Interface spec §7) ──
- *
- * Shadow architecture from 21st.dev LiquidButton dark mode:
- *   - Razor-thin inset highlights at 0.6–0.85 opacity with NEGATIVE spread
- *   - Creates visible glass edge refraction against dark backgrounds
- *   - Inner glow layers at 0.06–0.12 for depth
- *   - Outer ambient + drop shadow for lift
- *
- * The SVG <filter id="container-glass"> is rendered once via <GlassFilter /> in layout.tsx.
- */
-
-/* Base glass — backdrop blur + semi-transparent surface */
-.glass,
-.liquid-glass {
-  background: rgba(26, 29, 39, 0.75);
-  backdrop-filter: blur(16px) saturate(1.2);
-  -webkit-backdrop-filter: blur(16px) saturate(1.2);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 24px;
+/* ── Liquid Glass Panels ──────────────────────────── */
+.glass {
+  background: rgba(17, 23, 32, 0.30);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow:
-    0 0 8px rgba(0, 0, 0, 0.03),
-    0 2px 6px rgba(0, 0, 0, 0.08),
-    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.09),
-    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.85),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.6),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.6),
-    inset 0 0 6px 6px rgba(255, 255, 255, 0.12),
-    inset 0 0 2px 2px rgba(255, 255, 255, 0.06),
-    0 0 12px rgba(0, 0, 0, 0.15);
+    0 0 6px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
+    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.35),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.2),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.2),
+    inset 0 0 6px 6px rgba(255, 255, 255, 0.02),
+    0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Raised glass — nav bars, evidence sheet, modals */
 .glass-raised,
 .liquid-glass-raised {
-  background: rgba(26, 29, 39, 0.85);
-  backdrop-filter: blur(24px) saturate(1.3);
-  -webkit-backdrop-filter: blur(24px) saturate(1.3);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  box-shadow:
-    0 0 10px rgba(0, 0, 0, 0.05),
-    0 4px 12px rgba(0, 0, 0, 0.12),
-    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.12),
-    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.9),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.65),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.65),
-    inset 0 0 8px 8px rgba(255, 255, 255, 0.14),
-    inset 0 0 3px 3px rgba(255, 255, 255, 0.08),
-    0 0 16px rgba(0, 0, 0, 0.2);
-}
-
-/* Glass card — session cards, data tiles */
-.glass-card {
-  background: rgba(30, 36, 51, 0.55);
-  backdrop-filter: blur(12px) saturate(1.15);
-  -webkit-backdrop-filter: blur(12px) saturate(1.15);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 24px;
-  box-shadow:
-    0 0 6px rgba(0, 0, 0, 0.03),
-    0 2px 6px rgba(0, 0, 0, 0.08),
-    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.07),
-    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.7),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.5),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.5),
-    inset 0 0 5px 5px rgba(255, 255, 255, 0.1),
-    inset 0 0 2px 2px rgba(255, 255, 255, 0.05),
-    0 0 10px rgba(0, 0, 0, 0.12);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.10);
-  box-shadow:
-    0 0 8px rgba(0, 0, 0, 0.04),
-    0 4px 10px rgba(0, 0, 0, 0.12),
-    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.1),
-    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.85),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.6),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.6),
-    inset 0 0 6px 6px rgba(255, 255, 255, 0.14),
-    inset 0 0 2px 2px rgba(255, 255, 255, 0.07),
-    0 0 14px rgba(0, 0, 0, 0.18);
-}
-
-/* Elevated glass — tooltips, overlays, popovers */
-.glass-elevated {
-  background: rgba(36, 40, 54, 0.70);
-  backdrop-filter: blur(20px) saturate(1.25);
-  -webkit-backdrop-filter: blur(20px) saturate(1.25);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 20px;
-  box-shadow:
-    0 0 12px rgba(0, 0, 0, 0.06),
-    0 6px 16px rgba(0, 0, 0, 0.15),
-    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.1),
-    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.9),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.65),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.65),
-    inset 0 0 8px 8px rgba(255, 255, 255, 0.14),
-    inset 0 0 3px 3px rgba(255, 255, 255, 0.08),
-    0 0 18px rgba(0, 0, 0, 0.22);
-}
-
-/* Inset glass — input fields, recessed areas */
-.glass-inset {
-  background: rgba(15, 17, 23, 0.55);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 16px;
-  box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 2px 2px 0.5px -2.5px rgba(255, 255, 255, 0.5),
-    inset -2px -2px 0.5px -2.5px rgba(255, 255, 255, 0.5),
-    inset 0 0 4px 4px rgba(255, 255, 255, 0.06);
-}
-.glass-input {
-  background: rgba(15, 17, 23, 0.55);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  border-radius: 16px;
-  box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 2px 2px 0.5px -2.5px rgba(255, 255, 255, 0.5),
-    inset -2px -2px 0.5px -2.5px rgba(255, 255, 255, 0.5),
-    inset 0 0 4px 4px rgba(255, 255, 255, 0.06);
-}
-
-/* Glass tab buttons — evidence sheet tabs, nav items */
-.liquid-glass-tab {
-  background: rgba(30, 36, 51, 0.50);
+  background: rgba(22, 30, 42, 0.25);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 999px;
+  border-radius: 24px;
   box-shadow:
-    0 0 4px rgba(0, 0, 0, 0.03),
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    inset 2px 2px 0.5px -2.5px rgba(255, 255, 255, 0.07),
-    inset -2px -2px 0.5px -2.5px rgba(255, 255, 255, 0.6),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.4),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.4),
-    inset 0 0 4px 4px rgba(255, 255, 255, 0.08),
-    inset 0 0 1px 1px rgba(255, 255, 255, 0.04);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    0 0 4px rgba(0, 0, 0, 0.02),
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    inset 2px 2px 0.5px -2.5px rgba(255, 255, 255, 0.04),
+    inset -2px -2px 0.5px -2.5px rgba(255, 255, 255, 0.28),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.15),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.15),
+    inset 0 0 4px 4px rgba(255, 255, 255, 0.02),
+    0 0 6px rgba(0, 0, 0, 0.08);
 }
-.liquid-glass-tab:hover {
-  background: rgba(36, 40, 54, 0.65);
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 0 6px rgba(0, 0, 0, 0.04),
-    0 2px 6px rgba(0, 0, 0, 0.1),
-    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.09),
-    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.75),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.55),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.55),
-    inset 0 0 5px 5px rgba(255, 255, 255, 0.1),
-    inset 0 0 2px 2px rgba(255, 255, 255, 0.05),
-    0 0 10px rgba(0, 0, 0, 0.12);
-}
-.liquid-glass-tab-active {
-  background: rgba(36, 40, 54, 0.80);
+
+.glass-card {
+  background: rgba(17, 23, 32, 0.28);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 24px;
   box-shadow:
-    0 0 12px rgba(99, 102, 241, 0.12),
+    0 0 5px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.05),
+    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.04),
+    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.3),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.18),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.18),
+    inset 0 0 5px 5px rgba(255, 255, 255, 0.02),
+    0 0 8px rgba(0, 0, 0, 0.08);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
+    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.35),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.2),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.2),
+    inset 0 0 6px 6px rgba(255, 255, 255, 0.02),
+    0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.glass-elevated {
+  background: rgba(22, 30, 42, 0.30);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.02),
     0 2px 6px rgba(0, 0, 0, 0.08),
-    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.1),
-    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.85),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.6),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.6),
-    inset 0 0 6px 6px rgba(255, 255, 255, 0.12),
-    inset 0 0 2px 2px rgba(255, 255, 255, 0.06);
+    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
+    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.38),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.22),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.22),
+    inset 0 0 6px 6px rgba(255, 255, 255, 0.03),
+    0 0 12px rgba(0, 0, 0, 0.12);
+}
+
+.glass-inset {
+  background: rgba(28, 37, 53, 0.20);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  box-shadow:
+    inset 2px 2px 0.5px -2px rgba(255, 255, 255, 0.03),
+    inset -2px -2px 0.5px -2px rgba(255, 255, 255, 0.2),
+    inset 0 0 4px 3px rgba(255, 255, 255, 0.015),
+    0 0 4px rgba(0, 0, 0, 0.06);
+}
+
+.glass-input {
+  background: rgba(28, 37, 53, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow:
+    inset 2px 2px 0.5px -2px rgba(255, 255, 255, 0.03),
+    inset -2px -2px 0.5px -2px rgba(255, 255, 255, 0.2),
+    inset 0 0 4px 3px rgba(255, 255, 255, 0.015),
+    0 0 4px rgba(0, 0, 0, 0.06);
+}
+
+/* Liquid glass — full effect for nav and featured elements */
+.liquid-glass {
+  background: rgba(17, 23, 32, 0.28);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
+    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.4),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.25),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.25),
+    inset 0 0 6px 6px rgba(255, 255, 255, 0.04),
+    inset 0 0 2px 2px rgba(255, 255, 255, 0.02),
+    0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Liquid glass nav tab buttons */
+.liquid-glass-tab {
+  background: rgba(255, 255, 255, 0.015);
+  box-shadow:
+    inset 1px 1px 0.5px -1px rgba(255, 255, 255, 0.12),
+    inset -1px -1px 0.5px -1px rgba(255, 255, 255, 0.12);
+  transition: all 0.3s ease;
+}
+.liquid-glass-tab:hover {
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow:
+    0 0 4px rgba(0, 0, 0, 0.02),
+    inset 2px 2px 0.5px -2px rgba(255, 255, 255, 0.08),
+    inset -2px -2px 0.5px -2px rgba(255, 255, 255, 0.25),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.12),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.12),
+    inset 0 0 4px 3px rgba(255, 255, 255, 0.02),
+    0 0 6px rgba(0, 0, 0, 0.06);
+}
+.liquid-glass-tab-active {
+  background: rgba(0, 212, 170, 0.04);
+  box-shadow:
+    0 0 6px rgba(0, 0, 0, 0.02),
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
+    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.4),
+    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.25),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.25),
+    inset 0 0 6px 6px rgba(255, 255, 255, 0.03),
+    0 0 10px rgba(0, 212, 170, 0.05);
 }
 
 /* ── 4px Left Border Accents (spec Section 7 — session quality) ── */
