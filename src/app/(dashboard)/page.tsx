@@ -10,6 +10,7 @@ import { ViolationRow } from '@/components/violation-row';
 import { DriverRow } from '@/components/driver-row';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { Upload } from 'lucide-react';
+import { EvidenceSheet } from '@/components/evidence-sheet';
 import type { StatePayload } from '@/lib/types';
 
 /** Data freshness indicator — LIVE / STALE / ERROR */
@@ -75,6 +76,7 @@ function UtcClock() {
 
 export default function DashboardPage() {
   const [showDetails, setShowDetails] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [data, setData] = useState<StatePayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -182,17 +184,25 @@ export default function DashboardPage() {
           <DataFreshnessIndicator computedAt={data.drift.computed_at} />
         </div>
 
-        {/* 2. BSS Gauge (replaces BssOrb) — 240° arc, delta inside */}
-        <BssGauge
-          score={data.bss_score}
-          tier={data.bss_tier}
-          state={effectiveState}
-          delta={data.bss_delta ?? 0}
-          yesterdayScore={data.bss_yesterday ?? 50}
-          size={showDetails ? 'sm' : 'lg'}
-          isBuilding={data.onboarding.is_building}
-          buildProgress={data.onboarding.is_building ? data.onboarding.baseline_progress : undefined}
-        />
+        {/* 2. BSS Gauge (replaces BssOrb) — 240° arc, delta inside. Click opens Evidence Sheet */}
+        <div
+          onClick={() => setSheetOpen(true)}
+          className="cursor-pointer transition-transform hover:scale-[1.02]"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && setSheetOpen(true)}
+        >
+          <BssGauge
+            score={data.bss_score}
+            tier={data.bss_tier}
+            state={effectiveState}
+            delta={data.bss_delta ?? 0}
+            yesterdayScore={data.bss_yesterday ?? 50}
+            size={showDetails ? 'sm' : 'lg'}
+            isBuilding={data.onboarding.is_building}
+            buildProgress={data.onboarding.is_building ? data.onboarding.baseline_progress : undefined}
+          />
+        </div>
 
         {/* 3. 7-Day Sparkline */}
         {data.bss_sparkline && data.bss_sparkline.length >= 2 && (
@@ -225,6 +235,13 @@ export default function DashboardPage() {
           </p>
         )}
       </div>
+
+      {/* ── EVIDENCE SHEET: Opens from gauge tap ── */}
+      <EvidenceSheet
+        isOpen={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        accountRef={data.account_ref}
+      />
 
       {/* ── DETAIL MODE: Bento Grid ── */}
       {showDetails && (
