@@ -134,7 +134,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
                 Impact
               </div>
               <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
-                {violation.points} points deducted from BSS. Pattern severity classified as {violation.severity}.
+                {violation.points} violation points assessed (weighted by mode before BSS calculation). Pattern severity classified as {violation.severity}.
               </div>
             </div>
           </div>
@@ -152,7 +152,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
               -{violation.points}
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
-              BSS Impact
+              Violation Pts
             </div>
           </div>
           <div className="glass-inset rounded-xl p-4 text-center">
