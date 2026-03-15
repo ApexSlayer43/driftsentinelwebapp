@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Clock, Layers } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { getModeLabel, getModeIcon, getSeverityColor } from '@/lib/tokens';
+import { getModeLabel, getModeIcon } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
 import { EvidenceOrbital } from '@/components/evidence-orbital';
 import type { ViolationDetail as ViolationDetailType, FillCanonical } from '@/lib/types';
@@ -13,9 +14,9 @@ interface ViolationDetailProps {
 }
 
 /**
- * Forensic detail panel for a single violation.
- * Shows: violation summary, evidence orbital (fill visualization),
- * and the raw fill-level data table.
+ * Forensic detail panel — SBI analysis, impact metrics, session context,
+ * recurrence tracker, evidence orbital, and fill timeline.
+ * Matches the Drift Sentinel Forensics preview design.
  */
 export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps) {
   const [fills, setFills] = useState<FillCanonical[]>([]);
@@ -23,7 +24,6 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
 
   const modeLabel = getModeLabel(violation.mode);
   const modeIcon = getModeIcon(violation.mode);
-  const sevColor = getSeverityColor(violation.severity);
 
   useEffect(() => {
     async function loadFills() {
@@ -48,12 +48,11 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
     loadFills();
   }, [violation.evidence_event_ids]);
 
-  const time = new Date(violation.first_seen_utc).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
+  const dateStr = new Date(violation.first_seen_utc).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+  });
+  const timeStr = new Date(violation.first_seen_utc).toLocaleTimeString('en-US', {
+    hour: '2-digit', minute: '2-digit', hour12: false,
   });
 
   const windowStart = new Date(violation.window_start_utc).toLocaleTimeString('en-US', {
@@ -63,71 +62,166 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
     hour: '2-digit', minute: '2-digit', hour12: false,
   });
 
+  // Compute window duration in minutes
+  const windowMs = new Date(violation.window_end_utc).getTime() - new Date(violation.window_start_utc).getTime();
+  const windowMinutes = Math.round(windowMs / 60000);
+
   return (
-    <div className="flex flex-col gap-5">
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        className="self-start font-mono text-[12px] uppercase tracking-[0.12em] text-text-muted transition-colors hover:text-text-secondary"
-      >
-        ← Back to list
-      </button>
-
-      {/* Violation header */}
-      <div className="glass-card rounded-2xl p-5">
-        <div className="flex items-start gap-3">
-          <DynamicIcon name={modeIcon} size={18} className="mt-0.5 shrink-0 text-text-muted" />
-          <div className="flex-1">
-            <div className="font-mono text-[12px] text-text-secondary">Pattern Detected</div>
-            <h3 className="font-mono text-[14px] font-bold text-text-primary mt-0.5">{modeLabel}</h3>
-            <div className="mt-1 font-mono text-[12px] text-text-muted">{time}</div>
-          </div>
-          <span className="rounded-full px-2.5 py-0.5 font-mono text-[12px] font-bold text-text-muted glass-inset">
-            −{violation.points} pts
-          </span>
+    <div className="flex flex-col gap-6 max-w-3xl">
+      {/* ═══ HEADER ═══ */}
+      <div>
+        <div className="font-mono text-[12px] uppercase tracking-[0.2em] text-text-muted mb-2">
+          Pattern Detected
         </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3 font-mono text-[12px]">
-          <div>
-            <span className="text-text-muted">Points: </span>
-            <span className="font-bold text-text-primary">−{violation.points}</span>
+        <h2 className="font-mono text-[22px] font-bold text-text-primary mb-2">
+          {modeLabel}
+        </h2>
+        <div className="flex items-center gap-4 font-mono text-[12px] text-text-muted">
+          <div className="flex items-center gap-1.5">
+            <Clock size={14} />
+            {dateStr} · {timeStr} EST
           </div>
-          <div>
-            <span className="text-text-muted">Rule: </span>
-            <span className="text-text-secondary">{violation.rule_id}</span>
-          </div>
-          <div>
-            <span className="text-text-muted">Window: </span>
-            <span className="text-text-secondary">{windowStart} – {windowEnd}</span>
-          </div>
-          <div>
-            <span className="text-text-muted">Evidence: </span>
-            <span className="text-text-secondary">{violation.evidence_event_ids.length} fills</span>
+          <div className="flex items-center gap-1.5">
+            <Layers size={14} />
+            Rule {violation.rule_id}
           </div>
         </div>
       </div>
 
-      {/* Evidence Orbital — SVG visualization of fills around the violation */}
+      {/* ═══ SBI ANALYSIS ═══ */}
+      <div>
+        <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
+          SBI Analysis
+        </div>
+        <div className="glass-card rounded-2xl p-5 space-y-4">
+          {/* Situation */}
+          <div className="flex gap-3">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-[rgba(96,165,250,0.10)] text-[#60A5FA] font-mono text-[12px] font-bold">
+              S
+            </div>
+            <div className="flex-1">
+              <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-1">
+                Situation (Window)
+              </div>
+              <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
+                {violation.evidence_event_ids.length} fills executed over {windowMinutes} minutes between {windowStart}–{windowEnd} EST.
+              </div>
+            </div>
+          </div>
+
+          {/* Behavior */}
+          <div className="flex gap-3">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-[rgba(245,158,11,0.10)] text-[#F59E0B] font-mono text-[12px] font-bold">
+              B
+            </div>
+            <div className="flex-1">
+              <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-1">
+                Behavior
+              </div>
+              <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
+                {modeLabel} pattern detected. Violation triggered under rule {violation.rule_id} with severity {violation.severity}. {violation.evidence_event_ids.length} evidence fills flagged within the analysis window.
+              </div>
+            </div>
+          </div>
+
+          {/* Impact */}
+          <div className="flex gap-3">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-[rgba(239,68,68,0.10)] text-[#EF4444] font-mono text-[12px] font-bold">
+              I
+            </div>
+            <div className="flex-1">
+              <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-1">
+                Impact
+              </div>
+              <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
+                {violation.points} points deducted from BSS. Pattern severity classified as {violation.severity}.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ IMPACT METRICS ═══ */}
+      <div>
+        <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
+          Impact Metrics
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="glass-inset rounded-xl p-4 text-center">
+            <div className="font-mono text-[20px] font-bold text-[#EF4444]">
+              -{violation.points}
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
+              BSS Impact
+            </div>
+          </div>
+          <div className="glass-inset rounded-xl p-4 text-center">
+            <div className="font-mono text-[20px] font-bold text-warning">
+              {violation.severity}
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
+              Severity
+            </div>
+          </div>
+          <div className="glass-inset rounded-xl p-4 text-center">
+            <div className="font-mono text-[20px] font-bold text-text-secondary">
+              {violation.evidence_event_ids.length}
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
+              Evidence Fills
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ SESSION CONTEXT ═══ */}
+      <div>
+        <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
+          Session Context
+        </div>
+        <div className="glass-card rounded-2xl p-4 flex gap-5 flex-wrap">
+          <div className="flex flex-col gap-0.5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted">Duration</span>
+            <span className="font-mono text-[13px] font-semibold text-text-primary">{windowMinutes} min</span>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted">Entries</span>
+            <span className="font-mono text-[13px] font-semibold text-text-primary">{violation.evidence_event_ids.length}</span>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted">Window</span>
+            <span className="font-mono text-[13px] font-semibold text-text-primary">{windowStart} – {windowEnd}</span>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted">Rule</span>
+            <span className="font-mono text-[13px] font-semibold text-text-primary">{violation.rule_id}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ EVIDENCE ORBITAL ═══ */}
       {loading ? (
         <div className="flex justify-center py-8">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-positive border-t-transparent" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent-primary border-t-transparent" />
         </div>
       ) : fills.length > 0 ? (
-        <div className="glass-card rounded-2xl p-4">
-          <h4 className="mb-3 font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+        <div>
+          <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
             Evidence Orbital
-          </h4>
-          <EvidenceOrbital violation={violation} fills={fills} />
+          </div>
+          <div className="glass-card rounded-2xl p-4">
+            <EvidenceOrbital violation={violation} fills={fills} />
+          </div>
         </div>
       ) : null}
 
-      {/* Fill-level data table */}
+      {/* ═══ FILL TIMELINE ═══ */}
       {fills.length > 0 && (
-        <div className="glass-card rounded-2xl p-4">
-          <h4 className="mb-3 font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+        <div>
+          <div className="font-mono text-[12px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
             Fill Timeline
-          </h4>
-          <div className="space-y-1.5">
+          </div>
+          <div className="glass-card rounded-2xl p-4 space-y-1.5">
             {fills.map((fill) => {
               const fillTime = new Date(fill.timestamp_utc).toLocaleTimeString('en-US', {
                 hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
