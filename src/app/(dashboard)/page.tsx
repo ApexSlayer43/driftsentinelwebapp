@@ -11,6 +11,7 @@ import { DriverRow } from '@/components/driver-row';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { Upload } from 'lucide-react';
 import { EvidenceSheet } from '@/components/evidence-sheet';
+import { ProtocolGrid } from '@/components/protocol-grid';
 import type { StatePayload } from '@/lib/types';
 
 /** Data freshness indicator — LIVE / STALE / ERROR */
@@ -216,12 +217,17 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* 4. Verdict Line */}
+        {/* 4. Protocol Grid — 5-week compliance calendar */}
+        <div className="mt-5 w-full max-w-xs">
+          <ProtocolGrid accountRef={data.account_ref} />
+        </div>
+
+        {/* 5. Verdict Line */}
         <div className="mt-4">
           <VerdictLine data={data} />
         </div>
 
-        {/* 5. Detail Toggle */}
+        {/* 6. Detail Toggle */}
         <button
           onClick={() => setShowDetails(!showDetails)}
           className="mt-4 font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted transition-colors hover:text-text-secondary"

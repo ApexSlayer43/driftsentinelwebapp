@@ -39,7 +39,7 @@
   /* Text */
   --color-text-primary: #E8EDF5;
   --color-text-secondary: #8A9BB8;
-  --color-text-muted: #4A5568;
+  --color-text-muted: #566478;
   --color-text-dim: #2D3748;
 
   /* Borders */
@@ -245,6 +245,76 @@ button, a, [role="button"], .interactive, [data-clickable] {
 
 input[type="text"], input[type="email"], input[type="password"], input[type="number"], textarea {
   cursor: text;
+}
+
+/* ── Typography Utilities ──────────────────────────── */
+
+/* Numeric displays — tabular lining for aligned columns */
+.number-display {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Mono labels — small uppercase tracking */
+.label-small {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.label-medium {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* Display font — Syne for large headings */
+.heading-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Ensure all score/metric elements use tabular nums */
+[data-score],
+[data-metric],
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Reduced Motion ──────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Evidence sheet — instant open instead of slide */
+  .evidence-sheet-animated {
+    animation: none !important;
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+  }
+
+  /* Pulse animations — just show static */
+  .animate-pulse {
+    animation: none !important;
+  }
+
+  /* Spin loaders — show static indicator instead */
+  .animate-spin {
+    animation: none !important;
+  }
 }
 
 /* ── Custom scrollbar ──────────────────────────── */
