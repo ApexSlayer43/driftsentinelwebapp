@@ -5,6 +5,7 @@ import { AlertTriangle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getModeLabel, getModeIcon } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
+import { ViolationDetailPanel } from '@/components/violation-detail';
 import type { ViolationDetail } from '@/lib/types';
 
 type SeverityFilter = 'ALL' | 'LOW' | 'MED' | 'HIGH' | 'CRITICAL';
@@ -15,6 +16,7 @@ export default function ViolationsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<SeverityFilter>('ALL');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedViolation, setSelectedViolation] = useState<ViolationDetail | null>(null);
 
   useEffect(() => {
     async function loadViolations() {
@@ -120,8 +122,13 @@ export default function ViolationsPage() {
               return (
                 <div key={v.violation_id}>
                   <button
-                    onClick={() => setExpandedId(isExpanded ? null : v.violation_id)}
-                    className="flex w-full items-center gap-3 rounded-xl glass p-3 transition-colors hover:border-border-active"
+                    onClick={() => {
+                      setExpandedId(isExpanded ? null : v.violation_id);
+                      setSelectedViolation(v);
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-xl glass p-3 transition-colors hover:border-border-active ${
+                      selectedViolation?.violation_id === v.violation_id ? 'border-border-active' : ''
+                    }`}
                   >
                     <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-text-muted" />
                     <div className="flex-1 text-left">
@@ -170,45 +177,58 @@ export default function ViolationsPage() {
         </div>
       </div>
 
-      {/* Daily summary */}
-      <div className="flex-1 py-8 pr-8">
-        <div className="sticky top-8 rounded-2xl liquid-glass p-6">
-          <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-text-muted">
-            Summary
-          </h3>
+      {/* Right panel: Detail view or Summary */}
+      <div className="flex-1 py-8 pr-8 overflow-y-auto">
+        {selectedViolation ? (
+          <ViolationDetailPanel
+            violation={selectedViolation}
+            onBack={() => setSelectedViolation(null)}
+          />
+        ) : (
+          <div className="sticky top-8 rounded-2xl liquid-glass p-6">
+            <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+              Summary
+            </h3>
 
-          <div className="mt-6 flex gap-8">
-            <div>
-              <div className="font-mono text-[8px] uppercase tracking-[0.15em] text-text-muted">Total Deductions</div>
-              <div className="font-mono text-3xl font-bold text-text-primary mt-1">
-                {totalDeductions > 0 ? `-${totalDeductions}` : '\u2014'}
+            <div className="mt-6 flex gap-8">
+              <div>
+                <div className="font-mono text-[8px] uppercase tracking-[0.15em] text-text-muted">Total Deductions</div>
+                <div className="font-mono text-3xl font-bold text-text-primary mt-1">
+                  {totalDeductions > 0 ? `-${totalDeductions}` : '\u2014'}
+                </div>
+              </div>
+              <div>
+                <div className="font-mono text-[8px] uppercase tracking-[0.15em] text-text-muted">Violations</div>
+                <div className="font-mono text-3xl font-bold text-text-primary mt-1">
+                  {violations.length}
+                </div>
               </div>
             </div>
-            <div>
-              <div className="font-mono text-[8px] uppercase tracking-[0.15em] text-text-muted">Violations</div>
-              <div className="font-mono text-3xl font-bold text-text-primary mt-1">
-                {violations.length}
+
+            <div className="mt-6">
+              <div className="font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+                By Severity
+              </div>
+              <div className="mt-3 space-y-2">
+                {(['CRITICAL', 'HIGH', 'MED', 'LOW'] as const).map((sev) => {
+                  const count = sevCounts[sev] || 0;
+                  return (
+                    <div key={sev} className="flex items-center justify-between font-mono text-[9px]">
+                      <span className="text-text-muted">{sev}</span>
+                      <span className="text-text-primary">{count}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          </div>
 
-          <div className="mt-6">
-            <div className="font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-text-muted">
-              By Severity
-            </div>
-            <div className="mt-3 space-y-2">
-              {(['CRITICAL', 'HIGH', 'MED', 'LOW'] as const).map((sev) => {
-                const count = sevCounts[sev] || 0;
-                return (
-                  <div key={sev} className="flex items-center justify-between font-mono text-[9px]">
-                    <span className="text-text-muted">{sev}</span>
-                    <span className="text-text-primary">{count}</span>
-                  </div>
-                );
-              })}
-            </div>
+            {violations.length > 0 && (
+              <p className="mt-6 font-mono text-[8px] text-text-dim text-center">
+                Select a violation to view forensic detail
+              </p>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

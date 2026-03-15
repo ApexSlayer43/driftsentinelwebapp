@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { getModeLabel, getModeIcon, getSeverityColor } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
@@ -79,6 +80,14 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
 
   return (
     <div className="space-y-2">
+      {/* Link to full forensics */}
+      <Link
+        href="/violations"
+        className="block text-center font-mono text-[9px] uppercase tracking-[0.12em] text-stable transition-colors hover:text-text-primary"
+      >
+        View full forensics \u2192
+      </Link>
+
       {violations.map((v) => {
         const modeLabel = getModeLabel(v.mode);
         const modeIcon = getModeIcon(v.mode);
