@@ -11,36 +11,57 @@
   --font-mono: var(--font-mono);
   --font-display: var(--font-display);
 
-  /* Surfaces */
-  --color-void: #080A0E;
-  --color-surface: #111720;
-  --color-raised: #161E2A;
-  --color-elevated: #1C2535;
+  /* ── Invisible Interface Color System ── */
 
-  /* Behavioral states */
-  --color-stable: #00D4AA;
-  --color-drift: #F5A623;
-  --color-compromised: #FF6B35;
-  --color-breakdown: #FF3B5C;
-  --color-building: #5A6A85;
+  /* Backgrounds (spec Section 5) */
+  --color-void: #0F1117;
+  --color-surface: #1A1D27;
+  --color-raised: #242836;
+  --color-elevated: #2E3346;
 
-  /* Severity */
-  --color-sev-low: #8A9BB8;
-  --color-sev-med: #F5A623;
-  --color-sev-high: #FF6B35;
-  --color-sev-crit: #FF3B5C;
+  /* Behavioral Signals — colorblind-safe (spec Section 5) */
+  --color-positive: #22D3EE;
+  --color-negative: #FB923C;
+  --color-warning: #F59E0B;
+  --color-neutral: #94A3B8;
 
-  /* BSS Tiers */
-  --color-tier-unranked: #5A6A85;
-  --color-tier-draft: #8A9BB8;
-  --color-tier-tested: #00D4AA;
+  /* Legacy aliases — components still reference these */
+  --color-stable: #22D3EE;
+  --color-drift: #F59E0B;
+  --color-compromised: #FB923C;
+  --color-breakdown: #FB923C;
+  --color-building: #6B7280;
+
+  /* Accent — indigo (spec Section 5) */
+  --color-accent-primary: #6366F1;
+  --color-accent-hover: #818CF8;
+  --color-accent-muted: #312E81;
+
+  /* Severity — mapped to behavioral signals */
+  --color-sev-low: #94A3B8;
+  --color-sev-med: #F59E0B;
+  --color-sev-high: #FB923C;
+  --color-sev-crit: #FB923C;
+
+  /* BSS Tier Colors (spec Section 5 — gaming loot rarity) */
+  --color-tier-dormant: #6B7280;
+  --color-tier-forming: #60A5FA;
+  --color-tier-developing: #34D399;
+  --color-tier-consistent: #A78BFA;
+  --color-tier-disciplined: #F59E0B;
+  --color-tier-sovereign: #FFD700;
+
+  /* Legacy tier aliases */
+  --color-tier-unranked: #6B7280;
+  --color-tier-draft: #60A5FA;
+  --color-tier-tested: #34D399;
   --color-tier-verified: #FFD700;
 
-  /* Text */
-  --color-text-primary: #E8EDF5;
-  --color-text-secondary: #8A9BB8;
-  --color-text-muted: #566478;
-  --color-text-dim: #2D3748;
+  /* Text (spec Section 5) */
+  --color-text-primary: #E2E8F0;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+  --color-text-dim: #334155;
 
   /* Borders */
   --color-border-dim: rgba(255, 255, 255, 0.04);
@@ -87,38 +108,38 @@
 }
 
 :root {
-  --background: #080A0E;
-  --foreground: #E8EDF5;
-  --card: #111720;
-  --card-foreground: #E8EDF5;
-  --popover: #111720;
-  --popover-foreground: #E8EDF5;
-  --primary: #00D4AA;
-  --primary-foreground: #080A0E;
-  --secondary: #161E2A;
-  --secondary-foreground: #E8EDF5;
-  --muted: #161E2A;
-  --muted-foreground: #8A9BB8;
-  --accent: #1C2535;
-  --accent-foreground: #E8EDF5;
-  --destructive: #FF3B5C;
+  --background: #0F1117;
+  --foreground: #E2E8F0;
+  --card: #1A1D27;
+  --card-foreground: #E2E8F0;
+  --popover: #1A1D27;
+  --popover-foreground: #E2E8F0;
+  --primary: #6366F1;
+  --primary-foreground: #E2E8F0;
+  --secondary: #242836;
+  --secondary-foreground: #E2E8F0;
+  --muted: #242836;
+  --muted-foreground: #94A3B8;
+  --accent: #2E3346;
+  --accent-foreground: #E2E8F0;
+  --destructive: #FB923C;
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.08);
-  --ring: #00D4AA;
-  --chart-1: #00D4AA;
-  --chart-2: #F5A623;
-  --chart-3: #FF6B35;
-  --chart-4: #FF3B5C;
-  --chart-5: #5A6A85;
+  --ring: #6366F1;
+  --chart-1: #22D3EE;
+  --chart-2: #F59E0B;
+  --chart-3: #FB923C;
+  --chart-4: #A78BFA;
+  --chart-5: #6B7280;
   --radius: 0.625rem;
-  --sidebar: #111720;
-  --sidebar-foreground: #E8EDF5;
-  --sidebar-primary: #00D4AA;
-  --sidebar-primary-foreground: #080A0E;
-  --sidebar-accent: #161E2A;
-  --sidebar-accent-foreground: #E8EDF5;
+  --sidebar: #1A1D27;
+  --sidebar-foreground: #E2E8F0;
+  --sidebar-primary: #6366F1;
+  --sidebar-primary-foreground: #E2E8F0;
+  --sidebar-accent: #242836;
+  --sidebar-accent-foreground: #E2E8F0;
   --sidebar-border: rgba(255, 255, 255, 0.04);
-  --sidebar-ring: #00D4AA;
+  --sidebar-ring: #6366F1;
 }
 
 @layer base {
@@ -132,111 +153,144 @@
   html {
     @apply font-mono;
     scrollbar-width: thin;
-    scrollbar-color: #1C2535 transparent;
+    scrollbar-color: #242836 transparent;
   }
 }
 
-/* ── Liquid Glass Panels ──────────────────────────── */
-.glass {
-  background: rgba(17, 23, 32, 0.30);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+/* ── Claymorphism Panels (Invisible Interface spec Section 7) ── */
+
+/* Session card — primary claymorphism treatment */
+.clay-card {
+  background: #1E2433;
+  border-radius: 24px;
+  border: none;
   box-shadow:
-    0 0 6px rgba(0, 0, 0, 0.02),
-    0 2px 4px rgba(0, 0, 0, 0.06),
-    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
-    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.35),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.2),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.2),
-    inset 0 0 6px 6px rgba(255, 255, 255, 0.02),
-    0 0 10px rgba(0, 0, 0, 0.1);
+    6px 6px 20px 0 rgba(0, 0, 0, 0.4),
+    inset -4px -4px 10px 0 rgba(0, 0, 0, 0.3),
+    inset 4px 4px 10px 0 rgba(255, 255, 255, 0.05);
 }
 
-.glass-raised {
-  background: rgba(22, 30, 42, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+/* Raised clay — for nav, evidence sheet, modals */
+.clay-raised {
+  background: #1A1D27;
+  border-radius: 24px;
+  border: none;
   box-shadow:
-    0 0 4px rgba(0, 0, 0, 0.02),
-    0 1px 3px rgba(0, 0, 0, 0.05),
-    inset 2px 2px 0.5px -2.5px rgba(255, 255, 255, 0.04),
-    inset -2px -2px 0.5px -2.5px rgba(255, 255, 255, 0.28),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.15),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.15),
-    inset 0 0 4px 4px rgba(255, 255, 255, 0.02),
-    0 0 6px rgba(0, 0, 0, 0.08);
+    8px 8px 24px 0 rgba(0, 0, 0, 0.5),
+    inset -3px -3px 8px 0 rgba(0, 0, 0, 0.25),
+    inset 3px 3px 8px 0 rgba(255, 255, 255, 0.04);
 }
 
-.glass-input {
-  background: rgba(28, 37, 53, 0.25);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+/* Elevated clay — for tooltips, overlays */
+.clay-elevated {
+  background: #242836;
+  border-radius: 20px;
+  border: none;
   box-shadow:
-    inset 2px 2px 0.5px -2px rgba(255, 255, 255, 0.03),
-    inset -2px -2px 0.5px -2px rgba(255, 255, 255, 0.2),
-    inset 0 0 4px 3px rgba(255, 255, 255, 0.015),
-    0 0 4px rgba(0, 0, 0, 0.06);
+    4px 4px 16px 0 rgba(0, 0, 0, 0.35),
+    inset -2px -2px 6px 0 rgba(0, 0, 0, 0.2),
+    inset 2px 2px 6px 0 rgba(255, 255, 255, 0.04);
 }
 
-/* Liquid glass — full effect for nav and featured elements */
+/* Inset clay — for input fields, recessed areas */
+.clay-inset {
+  background: #161922;
+  border-radius: 16px;
+  border: none;
+  box-shadow:
+    inset 4px 4px 12px 0 rgba(0, 0, 0, 0.4),
+    inset -2px -2px 6px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* Clay tab buttons — evidence sheet tabs */
+.clay-tab {
+  background: #1E2433;
+  border-radius: 999px;
+  border: none;
+  box-shadow:
+    3px 3px 10px 0 rgba(0, 0, 0, 0.3),
+    inset -2px -2px 6px 0 rgba(0, 0, 0, 0.2),
+    inset 2px 2px 6px 0 rgba(255, 255, 255, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.clay-tab:hover {
+  background: #242836;
+  box-shadow:
+    2px 2px 8px 0 rgba(0, 0, 0, 0.25),
+    inset -2px -2px 6px 0 rgba(0, 0, 0, 0.2),
+    inset 2px 2px 6px 0 rgba(255, 255, 255, 0.06);
+}
+.clay-tab-active {
+  background: #242836;
+  border-radius: 999px;
+  border: none;
+  box-shadow:
+    inset 3px 3px 10px 0 rgba(0, 0, 0, 0.35),
+    inset -2px -2px 6px 0 rgba(255, 255, 255, 0.04),
+    0 0 12px rgba(99, 102, 241, 0.08);
+}
+
+/* ── Legacy glass classes — mapped to clay ── */
+.glass,
+.glass-raised,
 .liquid-glass {
-  background: rgba(17, 23, 32, 0.28);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: #1A1D27;
+  border-radius: 24px;
+  border: none;
   box-shadow:
-    0 0 6px rgba(0, 0, 0, 0.02),
-    0 2px 4px rgba(0, 0, 0, 0.06),
-    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
-    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.4),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.25),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.25),
-    inset 0 0 6px 6px rgba(255, 255, 255, 0.04),
-    inset 0 0 2px 2px rgba(255, 255, 255, 0.02),
-    0 0 10px rgba(0, 0, 0, 0.1);
+    8px 8px 24px 0 rgba(0, 0, 0, 0.5),
+    inset -3px -3px 8px 0 rgba(0, 0, 0, 0.25),
+    inset 3px 3px 8px 0 rgba(255, 255, 255, 0.04);
 }
-
-/* Liquid glass nav tab buttons */
-.liquid-glass-tab {
-  background: rgba(255, 255, 255, 0.015);
+.glass-input {
+  background: #161922;
+  border-radius: 16px;
+  border: none;
   box-shadow:
-    inset 1px 1px 0.5px -1px rgba(255, 255, 255, 0.12),
-    inset -1px -1px 0.5px -1px rgba(255, 255, 255, 0.12);
-  transition: all 0.3s ease;
+    inset 4px 4px 12px 0 rgba(0, 0, 0, 0.4),
+    inset -2px -2px 6px 0 rgba(255, 255, 255, 0.03);
+}
+.liquid-glass-tab {
+  background: #1E2433;
+  border-radius: 999px;
+  border: none;
+  box-shadow:
+    3px 3px 10px 0 rgba(0, 0, 0, 0.3),
+    inset -2px -2px 6px 0 rgba(0, 0, 0, 0.2),
+    inset 2px 2px 6px 0 rgba(255, 255, 255, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .liquid-glass-tab:hover {
-  background: rgba(255, 255, 255, 0.03);
-  box-shadow:
-    0 0 4px rgba(0, 0, 0, 0.02),
-    inset 2px 2px 0.5px -2px rgba(255, 255, 255, 0.08),
-    inset -2px -2px 0.5px -2px rgba(255, 255, 255, 0.25),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.12),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.12),
-    inset 0 0 4px 3px rgba(255, 255, 255, 0.02),
-    0 0 6px rgba(0, 0, 0, 0.06);
+  background: #242836;
 }
 .liquid-glass-tab-active {
-  background: rgba(0, 212, 170, 0.04);
+  background: #242836;
+  border-radius: 999px;
+  border: none;
   box-shadow:
-    0 0 6px rgba(0, 0, 0, 0.02),
-    0 2px 4px rgba(0, 0, 0, 0.06),
-    inset 3px 3px 0.5px -3.5px rgba(255, 255, 255, 0.05),
-    inset -3px -3px 0.5px -3.5px rgba(255, 255, 255, 0.4),
-    inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.25),
-    inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.25),
-    inset 0 0 6px 6px rgba(255, 255, 255, 0.03),
-    0 0 10px rgba(0, 212, 170, 0.05);
+    inset 3px 3px 10px 0 rgba(0, 0, 0, 0.35),
+    inset -2px -2px 6px 0 rgba(255, 255, 255, 0.04),
+    0 0 12px rgba(99, 102, 241, 0.08);
+}
+
+/* ── 4px Left Border Accents (spec Section 7 — session quality) ── */
+.border-accent-clean {
+  border-left: 4px solid #34D399;
+}
+.border-accent-violation {
+  border-left: 4px solid #F59E0B;
+}
+.border-accent-severe {
+  border-left: 4px solid #FB923C;
 }
 
 /* ── Precision Crosshair Cursor ──────────────────────────── */
 body {
-  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14" stroke="%234A5568" stroke-width="1"/><line x1="2" y1="8" x2="14" y2="8" stroke="%234A5568" stroke-width="1"/></svg>') 8 8, crosshair;
+  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14" stroke="%2364748B" stroke-width="1"/><line x1="2" y1="8" x2="14" y2="8" stroke="%2364748B" stroke-width="1"/></svg>') 8 8, crosshair;
 }
 
 button, a, [role="button"], .interactive, [data-clickable] {
-  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14" stroke="%234A5568" stroke-width="1"/><line x1="2" y1="8" x2="14" y2="8" stroke="%234A5568" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="%2300D4AA"/></svg>') 8 8, pointer;
+  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14" stroke="%2364748B" stroke-width="1"/><line x1="2" y1="8" x2="14" y2="8" stroke="%2364748B" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="%236366F1"/></svg>') 8 8, pointer;
 }
 
 .bss-orb {
@@ -247,26 +301,30 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
   cursor: text;
 }
 
-/* ── Typography Utilities ──────────────────────────── */
+/* ── Typography (spec Section 6 — Minor Third scale, 14px base) ── */
+
+/* Type scale */
+.text-score { font-size: 48px; font-family: var(--font-mono); font-weight: 700; }
+.text-3xl-display { font-size: 35px; }
+.text-2xl-display { font-size: 29px; }
+.text-xl-display { font-size: 24px; }
+.text-lg-display { font-size: 20px; }
+.text-md-display { font-size: 17px; }
+.text-base-display { font-size: 14px; }
+.text-sm-display { font-size: 12px; }
+.text-xs-display { font-size: 10px; }
 
 /* Numeric displays — tabular lining for aligned columns */
 .number-display {
   font-family: var(--font-mono);
   font-weight: 700;
-  font-variant-numeric: tabular-nums lining-nums;
+  font-variant-numeric: tabular-nums lining-nums slashed-zero;
+  font-feature-settings: "tnum" 1, "lnum" 1, "zero" 1;
   letter-spacing: -0.01em;
 }
 
-/* Mono labels — small uppercase tracking */
+/* Label utilities — spec minimum 12px */
 .label-small {
-  font-family: var(--font-mono);
-  font-size: 8px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-}
-
-.label-medium {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
@@ -274,7 +332,15 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
   letter-spacing: 0.15em;
 }
 
-/* Display font — Syne for large headings */
+.label-medium {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* Display font — Space Grotesk for headers */
 .heading-display {
   font-family: var(--font-display);
   font-weight: 700;
@@ -288,7 +354,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Reduced Motion ──────────────────────────── */
+/* ── Reduced Motion (spec Section 4 — non-negotiable) ── */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -299,19 +365,10 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
     scroll-behavior: auto !important;
   }
 
-  /* Evidence sheet — instant open instead of slide */
-  .evidence-sheet-animated {
-    animation: none !important;
-    transform: translateY(0) !important;
-    opacity: 1 !important;
-  }
-
-  /* Pulse animations — just show static */
   .animate-pulse {
     animation: none !important;
   }
 
-  /* Spin loaders — show static indicator instead */
   .animate-spin {
     animation: none !important;
   }
@@ -320,5 +377,5 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
 /* ── Custom scrollbar ──────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #1C2535; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #2D3748; }
+::-webkit-scrollbar-thumb { background: #242836; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #2E3346; }

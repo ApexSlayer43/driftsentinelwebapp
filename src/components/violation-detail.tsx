@@ -68,31 +68,31 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
       {/* Back button */}
       <button
         onClick={onBack}
-        className="self-start font-mono text-[9px] uppercase tracking-[0.12em] text-text-muted transition-colors hover:text-text-secondary"
+        className="self-start font-mono text-[12px] uppercase tracking-[0.12em] text-text-muted transition-colors hover:text-text-secondary"
       >
-        \u2190 Back to list
+        ← Back to list
       </button>
 
-      {/* Violation header */}
-      <div className="rounded-xl liquid-glass p-5">
+      {/* Violation header — clay card with 4px left border accent */}
+      <div className="clay-card border-accent-violation rounded-2xl p-5">
         <div className="flex items-start gap-3">
           <DynamicIcon name={modeIcon} size={18} className="mt-0.5 shrink-0 text-text-muted" />
           <div className="flex-1">
-            <h3 className="font-mono text-sm font-bold text-text-primary">{modeLabel}</h3>
-            <div className="mt-1 font-mono text-[9px] text-text-muted">{time}</div>
+            <h3 className="font-mono text-[14px] font-bold text-text-primary">{modeLabel}</h3>
+            <div className="mt-1 font-mono text-[12px] text-text-muted">{time}</div>
           </div>
           <span
-            className="rounded-full px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase"
+            className="rounded-full px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase"
             style={{ color: sevColor, backgroundColor: `${sevColor}15` }}
           >
             {violation.severity}
           </span>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-3 font-mono text-[9px]">
+        <div className="mt-4 grid grid-cols-2 gap-3 font-mono text-[12px]">
           <div>
             <span className="text-text-muted">Points: </span>
-            <span className="font-bold text-text-primary">-{violation.points}</span>
+            <span className="font-bold text-text-primary">−{violation.points}</span>
           </div>
           <div>
             <span className="text-text-muted">Rule: </span>
@@ -100,7 +100,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
           </div>
           <div>
             <span className="text-text-muted">Window: </span>
-            <span className="text-text-secondary">{windowStart} \u2013 {windowEnd}</span>
+            <span className="text-text-secondary">{windowStart} – {windowEnd}</span>
           </div>
           <div>
             <span className="text-text-muted">Evidence: </span>
@@ -112,11 +112,11 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
       {/* Evidence Orbital — SVG visualization of fills around the violation */}
       {loading ? (
         <div className="flex justify-center py-8">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-stable border-t-transparent" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-positive border-t-transparent" />
         </div>
       ) : fills.length > 0 ? (
-        <div className="rounded-xl liquid-glass p-4">
-          <h4 className="mb-3 font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+        <div className="clay-card rounded-2xl p-4">
+          <h4 className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
             Evidence Orbital
           </h4>
           <EvidenceOrbital violation={violation} fills={fills} />
@@ -125,8 +125,8 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
 
       {/* Fill-level data table */}
       {fills.length > 0 && (
-        <div className="rounded-xl liquid-glass p-4">
-          <h4 className="mb-3 font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-text-muted">
+        <div className="clay-card rounded-2xl p-4">
+          <h4 className="mb-3 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-text-muted">
             Fill Timeline
           </h4>
           <div className="space-y-1.5">
@@ -134,26 +134,26 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
               const fillTime = new Date(fill.timestamp_utc).toLocaleTimeString('en-US', {
                 hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
               });
-              const sideColor = fill.side === 'BUY' ? '#00D4AA' : '#FF3B5C';
+              const sideColor = fill.side === 'BUY' ? '#22D3EE' : '#FB923C';
 
               return (
                 <div
                   key={fill.event_id}
-                  className="flex items-center gap-3 rounded-lg glass-raised px-3 py-2"
+                  className="flex items-center gap-3 clay-inset rounded-xl px-3 py-2"
                 >
                   <span
-                    className="rounded-full px-1.5 py-0.5 font-mono text-[7px] font-bold"
+                    className="rounded-full px-1.5 py-0.5 font-mono text-[10px] font-bold"
                     style={{ color: sideColor, backgroundColor: `${sideColor}15` }}
                   >
                     {fill.side}
                   </span>
-                  <span className="font-mono text-[9px] text-text-muted">{fillTime}</span>
-                  <span className="font-mono text-[9px] text-text-secondary">{fill.contract}</span>
-                  <span className="ml-auto font-mono text-[9px] font-bold text-text-primary">
+                  <span className="font-mono text-[12px] text-text-muted">{fillTime}</span>
+                  <span className="font-mono text-[12px] text-text-secondary">{fill.contract}</span>
+                  <span className="ml-auto font-mono text-[12px] font-bold text-text-primary">
                     {fill.qty} @ {fill.price}
                   </span>
                   {fill.off_session && (
-                    <span className="rounded-full bg-drift/10 px-1.5 py-0.5 font-mono text-[6px] font-bold text-drift">
+                    <span className="rounded-full bg-warning/10 px-1.5 py-0.5 font-mono text-[10px] font-bold text-warning">
                       OFF
                     </span>
                   )}

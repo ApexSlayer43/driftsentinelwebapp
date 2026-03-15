@@ -52,9 +52,9 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
         onClick={onClose}
       />
 
-      {/* Sheet */}
+      {/* Sheet — clay-raised per spec Section 7 */}
       <div
-        className="absolute bottom-0 left-0 right-0 rounded-t-2xl border-t border-border-subtle liquid-glass"
+        className="absolute bottom-0 left-0 right-0 clay-raised rounded-t-3xl"
         style={{
           maxHeight: '65vh',
           animation: 'sheetSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -65,22 +65,22 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
           <div className="h-1 w-10 rounded-full bg-text-dim" />
           <button
             onClick={onClose}
-            className="rounded-full p-1 transition-colors hover:bg-elevated"
+            className="rounded-full p-1.5 transition-colors hover:bg-elevated"
           >
             <X size={14} className="text-text-muted" />
           </button>
         </div>
 
-        {/* Tab bar */}
-        <div className="flex gap-1 px-5 pb-3">
+        {/* Tab bar — clay tabs per spec */}
+        <div className="flex gap-1.5 px-5 pb-3">
           {TABS.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`rounded-full px-4 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] transition-colors ${
+              className={`rounded-full px-4 py-1.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] transition-all ${
                 activeTab === tab
-                  ? 'liquid-glass-tab-active text-text-primary'
-                  : 'liquid-glass-tab text-text-muted hover:text-text-secondary'
+                  ? 'clay-tab-active text-text-primary'
+                  : 'clay-tab text-text-muted hover:text-text-secondary'
               }`}
             >
               {TAB_LABELS[tab]}

@@ -64,7 +64,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
   if (loading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-stable border-t-transparent" />
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-positive border-t-transparent" />
       </div>
     );
   }
@@ -72,8 +72,8 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
   if (violations.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="font-mono text-xs text-text-muted">No violations in the last 7 days</p>
-        <p className="mt-1 font-mono text-[9px] text-stable">Clean record</p>
+        <p className="font-mono text-[14px] text-text-muted">No patterns detected in the last 7 days</p>
+        <p className="mt-1 font-mono text-[12px] text-positive">Clean record</p>
       </div>
     );
   }
@@ -83,9 +83,9 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
       {/* Link to full forensics */}
       <Link
         href="/violations"
-        className="block text-center font-mono text-[9px] uppercase tracking-[0.12em] text-stable transition-colors hover:text-text-primary"
+        className="block text-center font-mono text-[12px] uppercase tracking-[0.12em] text-accent-primary transition-colors hover:text-accent-hover"
       >
-        View full forensics \u2192
+        View full forensics →
       </Link>
 
       {violations.map((v) => {
@@ -105,29 +105,29 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
           <div key={v.violation_id}>
             <button
               onClick={() => setExpandedId(isExpanded ? null : v.violation_id)}
-              className="flex w-full items-center gap-3 rounded-xl glass p-3 transition-colors hover:border-border-active"
+              className="flex w-full items-center gap-3 clay-card border-accent-violation rounded-2xl p-3.5 transition-transform hover:scale-[1.01]"
             >
               <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-text-muted" />
               <div className="flex-1 text-left">
-                <div className="font-mono text-[11px] font-semibold text-text-primary">
+                <div className="font-mono text-[12px] font-semibold text-text-primary">
                   {modeLabel}
                 </div>
-                <div className="font-mono text-[8px] text-text-muted">{time}</div>
+                <div className="font-mono text-[12px] text-text-muted">{time}</div>
               </div>
               <span
-                className="rounded-full px-2 py-0.5 font-mono text-[7px] font-bold uppercase"
+                className="rounded-full px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase"
                 style={{ color: sevColor, backgroundColor: `${sevColor}15` }}
               >
                 {v.severity}
               </span>
               <span className="font-mono text-sm font-bold text-text-primary">
-                -{v.points}
+                −{v.points}
               </span>
             </button>
 
             {isExpanded && (
-              <div className="ml-5 mt-1 rounded-xl liquid-glass p-3">
-                <div className="grid grid-cols-2 gap-2 font-mono text-[9px]">
+              <div className="ml-5 mt-1.5 clay-inset rounded-xl p-3.5">
+                <div className="grid grid-cols-2 gap-2.5 font-mono text-[12px]">
                   <div>
                     <span className="text-text-muted">Rule ID: </span>
                     <span className="text-text-secondary">{v.rule_id}</span>
@@ -140,7 +140,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
                     <span className="text-text-muted">Window: </span>
                     <span className="text-text-secondary">
                       {new Date(v.window_start_utc).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
-                      {' \u2013 '}
+                      {' – '}
                       {new Date(v.window_end_utc).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
                     </span>
                   </div>

@@ -119,7 +119,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
   if (loading) {
     return (
       <div className="flex justify-center py-4">
-        <div className="h-3 w-3 animate-spin rounded-full border-2 border-stable border-t-transparent" />
+        <div className="h-3 w-3 animate-spin rounded-full border-2 border-positive border-t-transparent" />
       </div>
     );
   }
@@ -223,7 +223,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
       <div className="flex items-center gap-4 font-mono text-[8px] text-text-muted">
         <span>{cleanDays}/{totalDays} clean days</span>
         {streak > 0 && (
-          <span className="text-stable">{streak}d streak</span>
+          <span className="text-positive">{streak}d streak</span>
         )}
         <div className="ml-auto flex items-center gap-1.5">
           <span className="text-text-dim">Less</span>

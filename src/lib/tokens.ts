@@ -1,26 +1,28 @@
 // State styles — used by BSS orb, badges, cards
+// Aligned to Invisible Interface spec Section 5
 export const STATE_STYLES = {
-  STABLE:        { solid: '#00D4AA', bg: 'rgba(0,212,170,0.07)', border: 'rgba(0,212,170,0.18)' },
-  DRIFT_FORMING: { solid: '#F5A623', bg: 'rgba(245,166,35,0.07)', border: 'rgba(245,166,35,0.18)' },
-  COMPROMISED:   { solid: '#FF6B35', bg: 'rgba(255,107,53,0.07)', border: 'rgba(255,107,53,0.18)' },
-  BREAKDOWN:     { solid: '#FF3B5C', bg: 'rgba(255,59,92,0.09)', border: 'rgba(255,59,92,0.22)' },
-  BUILDING:      { solid: '#5A6A85', bg: 'rgba(90,106,133,0.07)', border: 'rgba(90,106,133,0.18)' },
+  STABLE:        { solid: '#22D3EE', bg: 'rgba(34,211,238,0.07)', border: 'rgba(34,211,238,0.18)' },
+  DRIFT_FORMING: { solid: '#F59E0B', bg: 'rgba(245,158,11,0.07)', border: 'rgba(245,158,11,0.18)' },
+  COMPROMISED:   { solid: '#FB923C', bg: 'rgba(251,146,60,0.07)', border: 'rgba(251,146,60,0.18)' },
+  BREAKDOWN:     { solid: '#FB923C', bg: 'rgba(251,146,60,0.09)', border: 'rgba(251,146,60,0.22)' },
+  BUILDING:      { solid: '#6B7280', bg: 'rgba(107,114,128,0.07)', border: 'rgba(107,114,128,0.18)' },
 } as const;
 
+// Tier colors — gaming loot rarity (spec Section 5)
 export const TIER_STYLES = {
-  DORMANT:    { color: '#5A6A85', glow: 'rgba(90,106,133,0.10)' },
-  FORMING:    { color: '#8A9BB8', glow: 'rgba(138,155,184,0.12)' },
-  DEFINED:    { color: '#4A9EE5', glow: 'rgba(74,158,229,0.14)' },
-  GROUNDED:   { color: '#00D4AA', glow: 'rgba(0,212,170,0.14)' },
-  PROVEN:     { color: '#F5A623', glow: 'rgba(245,166,35,0.16)' },
+  DORMANT:    { color: '#6B7280', glow: 'rgba(107,114,128,0.10)' },
+  FORMING:    { color: '#60A5FA', glow: 'rgba(96,165,250,0.12)' },
+  DEFINED:    { color: '#34D399', glow: 'rgba(52,211,153,0.14)' },
+  GROUNDED:   { color: '#A78BFA', glow: 'rgba(167,139,250,0.14)' },
+  PROVEN:     { color: '#F59E0B', glow: 'rgba(245,158,11,0.16)' },
   SOVEREIGN:  { color: '#FFD700', glow: 'rgba(255,215,0,0.18)' },
 } as const;
 
 export const SEVERITY_COLORS = {
-  LOW: '#8A9BB8',
-  MED: '#F5A623',
-  HIGH: '#FF6B35',
-  CRITICAL: '#FF3B5C',
+  LOW: '#94A3B8',
+  MED: '#F59E0B',
+  HIGH: '#FB923C',
+  CRITICAL: '#FB923C',
 } as const;
 
 export const MODE_LABELS: Record<string, string> = {
