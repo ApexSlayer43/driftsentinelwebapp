@@ -171,9 +171,9 @@ export default function SessionsPage() {
         </div>
       )}
 
-      {/* Pulse Strip */}
+      {/* Pulse Strip — inline, not a full-width bar */}
       <div className="px-8 py-2 shrink-0">
-        <h2 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-2">
+        <h2 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-1.5">
           Session Pulse
         </h2>
         <SessionPulseStrip
@@ -183,12 +183,12 @@ export default function SessionsPage() {
         />
       </div>
 
-      {/* Main content grid: Heatmap + Upload Cadence */}
-      <div className="px-8 py-3 flex-1 min-h-0">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 h-full">
+      {/* Heatmap + Upload Cadence — shrink-to-fit, not flex-1 */}
+      <div className="px-8 py-3 shrink-0">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4">
           {/* Heatmap */}
           <div className="relative">
-            <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border-subtle p-2 md:rounded-[1.5rem] md:p-3">
+            <div className="relative rounded-[1.25rem] border-[0.75px] border-border-subtle p-2 md:rounded-[1.5rem] md:p-3">
               <GlowingEffect
                 spread={40}
                 glow={true}
@@ -197,7 +197,7 @@ export default function SessionsPage() {
                 inactiveZone={0.01}
                 borderWidth={3}
               />
-              <div className="relative h-full overflow-hidden rounded-xl border-[0.75px] border-border-dim">
+              <div className="relative overflow-hidden rounded-xl border-[0.75px] border-border-dim">
                 <SessionHeatmap
                   sessions={sessions}
                   selectedId={selectedSession?.session_id ?? null}
@@ -210,8 +210,8 @@ export default function SessionsPage() {
           </div>
 
           {/* Upload Cadence */}
-          <div className="relative min-h-[300px]">
-            <div className="relative h-full rounded-[1.25rem] border-[0.75px] border-border-subtle p-2 md:rounded-[1.5rem] md:p-3">
+          <div className="relative">
+            <div className="relative rounded-[1.25rem] border-[0.75px] border-border-subtle p-2 md:rounded-[1.5rem] md:p-3">
               <GlowingEffect
                 spread={40}
                 glow={true}
@@ -220,7 +220,7 @@ export default function SessionsPage() {
                 inactiveZone={0.01}
                 borderWidth={3}
               />
-              <div className="relative h-full overflow-hidden rounded-xl border-[0.75px] border-border-dim">
+              <div className="relative overflow-hidden rounded-xl border-[0.75px] border-border-dim">
                 <UploadCadenceBar uploads={uploads} />
               </div>
             </div>

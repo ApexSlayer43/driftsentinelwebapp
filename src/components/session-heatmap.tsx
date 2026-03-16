@@ -13,7 +13,7 @@ interface SessionHeatmapProps {
   onMonthChange: (d: Date) => void;
 }
 
-const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 export function SessionHeatmap({ sessions, selectedId, onSelect, month, onMonthChange }: SessionHeatmapProps) {
   const sessionMap = useMemo(() => {
@@ -27,7 +27,7 @@ export function SessionHeatmap({ sessions, selectedId, onSelect, month, onMonthC
   const { weeks, monthLabel } = useMemo(() => {
     const year = month.getFullYear();
     const mo = month.getMonth();
-    const label = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(month);
+    const label = new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(month);
 
     const firstDay = new Date(year, mo, 1);
     let startDow = firstDay.getDay() - 1;
@@ -75,44 +75,44 @@ export function SessionHeatmap({ sessions, selectedId, onSelect, month, onMonthC
   }
 
   return (
-    <div className="rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] p-5">
-      {/* Month navigation */}
-      <div className="flex items-center justify-between mb-5">
+    <div className="rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] p-4">
+      {/* Month navigation — compact */}
+      <div className="flex items-center justify-between mb-3">
         <button
           onClick={prevMonth}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-all text-text-muted hover:text-text-secondary"
+          className="flex h-6 w-6 items-center justify-center rounded-md bg-white/[0.03] hover:bg-white/[0.06] transition-all text-text-muted hover:text-text-secondary"
         >
-          <ChevronLeft size={14} />
+          <ChevronLeft size={12} />
         </button>
-        <h3 className="font-mono text-sm font-bold uppercase tracking-[0.15em] text-text-primary">
+        <h3 className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-text-primary">
           {monthLabel}
         </h3>
         <button
           onClick={nextMonth}
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-all text-text-muted hover:text-text-secondary"
+          className="flex h-6 w-6 items-center justify-center rounded-md bg-white/[0.03] hover:bg-white/[0.06] transition-all text-text-muted hover:text-text-secondary"
         >
-          <ChevronRight size={14} />
+          <ChevronRight size={12} />
         </button>
       </div>
 
       {/* Day headers */}
-      <div className="grid grid-cols-7 gap-1.5 mb-2">
-        {DAY_LABELS.map((d) => (
-          <div key={d} className="text-center py-1">
-            <span className="font-mono text-[8px] font-semibold uppercase tracking-[0.15em] text-text-dim">
+      <div className="grid grid-cols-7 gap-1 mb-1">
+        {DAY_LABELS.map((d, i) => (
+          <div key={i} className="text-center">
+            <span className="font-mono text-[7px] font-semibold uppercase tracking-wider text-text-dim">
               {d}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Calendar grid */}
-      <div className="grid gap-1.5">
+      {/* Calendar grid — compact fixed-height cells */}
+      <div className="grid gap-1">
         {weeks.map((week, wi) => (
-          <div key={wi} className="grid grid-cols-7 gap-1.5">
+          <div key={wi} className="grid grid-cols-7 gap-1">
             {week.map((dateStr, di) => {
               if (!dateStr) {
-                return <div key={`empty-${wi}-${di}`} className="aspect-square rounded-lg" />;
+                return <div key={`empty-${wi}-${di}`} className="h-8 rounded-md" />;
               }
 
               const session = sessionMap.get(dateStr);
@@ -124,10 +124,10 @@ export function SessionHeatmap({ sessions, selectedId, onSelect, month, onMonthC
                 return (
                   <div
                     key={dateStr}
-                    className={`aspect-square rounded-lg flex items-center justify-center transition-colors ${
+                    className={`h-8 rounded-md flex items-center justify-center transition-colors ${
                       isToday
                         ? 'border border-white/[0.12] bg-white/[0.02]'
-                        : 'border border-white/[0.03] bg-white/[0.01]'
+                        : 'bg-white/[0.01]'
                     }`}
                   >
                     <span className={`font-mono text-[9px] ${isToday ? 'text-text-muted font-semibold' : 'text-text-dim'}`}>
@@ -143,23 +143,20 @@ export function SessionHeatmap({ sessions, selectedId, onSelect, month, onMonthC
                 <button
                   key={dateStr}
                   onClick={() => onSelect(session)}
-                  className={`aspect-square rounded-lg flex flex-col items-center justify-center transition-all duration-300 border ${
-                    isSelected ? 'scale-110 z-10' : 'hover:scale-105 hover:z-10'
+                  className={`h-8 rounded-md flex items-center justify-center transition-all duration-200 border ${
+                    isSelected ? 'scale-105 z-10' : 'hover:scale-105 hover:z-10'
                   }`}
                   style={{
                     backgroundColor: style.bg,
-                    borderColor: isSelected ? style.color : style.border,
+                    borderColor: isSelected ? style.color : 'transparent',
                     boxShadow: isSelected
-                      ? `0 0 16px ${style.bg}, 0 0 4px ${style.color}30`
+                      ? `0 0 8px ${style.bg}, 0 0 2px ${style.color}40`
                       : 'none',
                   }}
                   title={`${dateStr} — ${style.label} (${session.fills_count} fills)`}
                 >
-                  <span className="font-mono text-[10px] font-bold" style={{ color: style.color }}>
+                  <span className="font-mono text-[9px] font-bold" style={{ color: style.color }}>
                     {dayNum}
-                  </span>
-                  <span className="font-mono text-[7px] text-text-muted mt-0.5">
-                    {session.fills_count}f
                   </span>
                 </button>
               );
@@ -168,24 +165,21 @@ export function SessionHeatmap({ sessions, selectedId, onSelect, month, onMonthC
         ))}
       </div>
 
-      {/* Stats summary — improved */}
+      {/* Stats footer — inline */}
       {sessions.length > 0 && (
-        <div className="mt-5 pt-3 border-t border-white/[0.04] flex items-center justify-between">
-          <span className="font-mono text-[9px] text-text-muted uppercase tracking-wider">
+        <div className="mt-3 pt-2 border-t border-white/[0.04] flex items-center justify-between">
+          <span className="font-mono text-[8px] text-text-dim">
             {sessions.length} sessions
           </span>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {(['CLEAN', 'MINOR', 'DEGRADED', 'COMPROMISED', 'BREAKDOWN'] as const).map((q) => {
               const count = sessions.filter((s) => s.session_quality === q).length;
               if (count === 0) return null;
               const style = getSessionQualityStyle(q);
               return (
-                <div key={q} className="flex items-center gap-1.5">
-                  <span
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: style.color }}
-                  />
-                  <span className="font-mono text-[9px] font-semibold" style={{ color: style.color }}>
+                <div key={q} className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: style.color }} />
+                  <span className="font-mono text-[8px] font-semibold" style={{ color: style.color }}>
                     {count}
                   </span>
                 </div>
