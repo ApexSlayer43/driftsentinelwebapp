@@ -26,11 +26,28 @@ interface PdfResult {
   ingest: { fills_new?: number; fills_duplicate?: number; fills_rejected?: number } | null;
 }
 
+interface CsvResult {
+  summary: {
+    grossPnl: number;
+    totalTrades: number;
+    winningTrades: number;
+    losingTrades: number;
+    winRate: number;
+    contracts: string[];
+  };
+  trades_parsed: number;
+  date_range: { start: string; end: string } | null;
+  fills_generated: number;
+  fills_new: number;
+  fills_duplicate: number;
+  fills_rejected: number;
+}
+
 export default function IngestPage() {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [mode, setMode] = useState<UploadMode>('pdf');
-  const [csvResult, setCsvResult] = useState<{ accepted: number; duplicate: number; rejected: number } | null>(null);
+  const [csvResult, setCsvResult] = useState<CsvResult | null>(null);
   const [pdfResult, setPdfResult] = useState<PdfResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [recentRuns, setRecentRuns] = useState<IngestRun[]>([]);
@@ -99,12 +116,8 @@ export default function IngestPage() {
           throw new Error(errBody?.error || `Upload failed: ${res.status}`);
         }
 
-        const data = await res.json();
-        setCsvResult({
-          accepted: data.fills_new ?? 0,
-          duplicate: data.fills_duplicate ?? 0,
-          rejected: data.fills_rejected ?? 0,
-        });
+        const data: CsvResult = await res.json();
+        setCsvResult(data);
         setMode('csv');
       }
     } catch (err) {
@@ -132,7 +145,7 @@ export default function IngestPage() {
         Upload
       </h1>
       <p className="mt-1 font-mono text-xs text-text-muted">
-        Import your trading data — Performance PDF or Position History CSV
+        Import your trading data — Performance PDF or Performance CSV
       </p>
 
       {/* Format toggle */}
@@ -157,7 +170,7 @@ export default function IngestPage() {
           }`}
         >
           <FileSpreadsheet size={12} />
-          Position CSV
+          Performance CSV
         </button>
       </div>
 
@@ -189,7 +202,7 @@ export default function IngestPage() {
             <p className="mt-3 font-mono text-sm text-text-secondary">
               {mode === 'pdf'
                 ? 'Drop your Tradovate Performance PDF here'
-                : 'Drop your Position History CSV here'}
+                : 'Drop your Tradovate Performance CSV here'}
             </p>
             <p className="mt-1 font-mono text-[12px] text-text-muted">
               or click to browse
@@ -197,7 +210,7 @@ export default function IngestPage() {
             <p className="mt-3 font-mono text-[12px] text-text-dim">
               {mode === 'pdf'
                 ? 'Extracts trades, summary stats, and P&L data automatically'
-                : 'Supports Tradovate Position History CSV exports'}
+                : 'Supports Tradovate Performance CSV exports'}
             </p>
             <input
               type="file"
@@ -261,23 +274,45 @@ export default function IngestPage() {
 
       {/* CSV Result */}
       {csvResult && (
-        <GlowPanel className="mt-4 p-4 border border-positive/20 bg-positive/[0.04]">
-          <div className="flex items-center gap-2">
+        <GlowPanel className="mt-4 p-5 border border-positive/20 bg-positive/[0.04]">
+          <div className="flex items-center gap-2 mb-3">
             <CheckCircle size={16} className="text-positive" />
-            <span className="font-mono text-sm font-semibold text-positive">Upload Complete</span>
+            <span className="font-mono text-sm font-semibold text-positive">
+              Performance CSV Parsed — {csvResult.trades_parsed} Trades
+            </span>
           </div>
-          <div className="mt-2 grid grid-cols-3 gap-4">
-            <div>
-              <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Accepted</div>
-              <div className="font-display text-xl font-bold text-positive">{csvResult.accepted}</div>
-            </div>
-            <div>
-              <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Duplicate</div>
-              <div className="font-display text-xl font-bold text-text-secondary">{csvResult.duplicate}</div>
-            </div>
-            <div>
-              <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Rejected</div>
-              <div className="font-display text-xl font-bold text-negative">{csvResult.rejected}</div>
+
+          {csvResult.date_range && (
+            <p className="font-mono text-[11px] text-text-muted mb-3">
+              Date range: {csvResult.date_range.start} → {csvResult.date_range.end}
+            </p>
+          )}
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+            <PdfStat label="Gross P/L" value={`$${csvResult.summary.grossPnl.toFixed(2)}`} color={csvResult.summary.grossPnl >= 0 ? '#FFFFFF' : '#8891A0'} />
+            <PdfStat label="Win Rate" value={`${csvResult.summary.winRate}%`} color={csvResult.summary.winRate >= 50 ? '#FFFFFF' : '#8891A0'} />
+            <PdfStat label="Winning" value={String(csvResult.summary.winningTrades)} />
+            <PdfStat label="Losing" value={String(csvResult.summary.losingTrades)} />
+            <PdfStat label="Trades" value={String(csvResult.summary.totalTrades)} />
+            <PdfStat label="Fills" value={String(csvResult.fills_generated)} />
+            <PdfStat label="Contracts" value={csvResult.summary.contracts.join(', ')} />
+          </div>
+
+          <div className="border-t border-border-dim pt-3 mt-3">
+            <p className="font-mono text-[10px] uppercase tracking-wider text-text-muted mb-2">Pipeline Result</p>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Accepted</div>
+                <div className="font-display text-xl font-bold text-positive">{csvResult.fills_new}</div>
+              </div>
+              <div>
+                <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Duplicate</div>
+                <div className="font-display text-xl font-bold text-text-secondary">{csvResult.fills_duplicate}</div>
+              </div>
+              <div>
+                <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Rejected</div>
+                <div className="font-display text-xl font-bold text-negative">{csvResult.fills_rejected}</div>
+              </div>
             </div>
           </div>
         </GlowPanel>
