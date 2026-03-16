@@ -80,7 +80,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5 max-w-md">
       {scores.map((day) => {
         // Derive tier from BSS score for color
         const tier = day.bss_score >= 90 ? 'SOVEREIGN'
@@ -100,7 +100,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
             className="p-2.5"
             outerClassName="p-1"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-[11px] font-medium text-text-primary">
