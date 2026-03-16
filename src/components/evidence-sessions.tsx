@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { getTierStyle } from '@/lib/tokens';
-import { GlowCard } from '@/components/ui/glow-card';
+import { GlowPanel } from '@/components/ui/glow-panel';
 import type { DailyScore } from '@/lib/types';
 
 interface EvidenceSessionsProps {
@@ -95,9 +95,9 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
         const delta = day.bss_score - day.bss_previous;
 
         return (
-          <GlowCard
+          <GlowPanel
             key={day.daily_score_id}
-            className="glass-card rounded-2xl p-3.5"
+            className="p-3.5"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -138,7 +138,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
                 {day.violation_count} pattern{day.violation_count > 1 ? 's' : ''} detected
               </div>
             )}
-          </GlowCard>
+          </GlowPanel>
         );
       })}
     </div>

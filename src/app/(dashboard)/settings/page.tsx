@@ -5,7 +5,7 @@ import { Save, Plus, Trash2, X, Shield, Plug, Unplug, ExternalLink, Loader2, Puz
 import { createClient } from '@/lib/supabase/client';
 import type { SessionConfig } from '@/lib/types';
 import Link from 'next/link';
-import { GlowCard } from '@/components/ui/glow-card';
+import { GlowPanel } from '@/components/ui/glow-panel';
 
 // ── Main page ──────────────────────────────────────────────────
 export default function SettingsPage() {
@@ -203,10 +203,10 @@ export default function SettingsPage() {
 
       <div className="mt-8 grid gap-6">
         {/* Protocol — managed on dedicated page */}
-        <GlowCard className="rounded-xl">
+        <GlowPanel className="">
           <Link
             href="/protocol"
-            className="group flex items-center justify-between rounded-xl glass p-6 transition-colors hover:bg-raised/30"
+            className="group flex items-center justify-between rounded-xl p-6 transition-colors hover:bg-raised/30"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-primary/10">
@@ -221,10 +221,10 @@ export default function SettingsPage() {
             </div>
             <ExternalLink size={14} className="text-text-dim group-hover:text-positive transition-colors" />
           </Link>
-        </GlowCard>
+        </GlowPanel>
 
         {/* Trading Rules */}
-        <GlowCard className="rounded-xl glass p-6">
+        <GlowPanel className="p-6">
           <h3 className="font-display text-sm font-bold text-text-primary">Trading Rules</h3>
           <p className="mt-1 font-mono text-[12px] text-text-muted">Define your maximum position sizes and activity limits</p>
           <div className="mt-4 grid grid-cols-2 gap-4">
@@ -253,10 +253,10 @@ export default function SettingsPage() {
               />
             </div>
           </div>
-        </GlowCard>
+        </GlowPanel>
 
         {/* Session Windows */}
-        <GlowCard className="rounded-xl glass p-6">
+        <GlowPanel className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-display text-sm font-bold text-text-primary">Session Windows</h3>
@@ -322,10 +322,10 @@ export default function SettingsPage() {
               ))
             )}
           </div>
-        </GlowCard>
+        </GlowPanel>
 
         {/* Baseline Configuration */}
-        <GlowCard className="rounded-xl glass p-6">
+        <GlowPanel className="p-6">
           <h3 className="font-display text-sm font-bold text-text-primary">Baseline Configuration</h3>
           <p className="mt-1 font-mono text-[12px] text-text-muted">Controls how many fills are needed to establish your trading baseline</p>
           <div className="mt-4 grid grid-cols-2 gap-4">
@@ -354,10 +354,10 @@ export default function SettingsPage() {
               />
             </div>
           </div>
-        </GlowCard>
+        </GlowPanel>
 
         {/* Connect Extension */}
-        <GlowCard className="rounded-xl glass p-6">
+        <GlowPanel className="p-6">
           <h3 className="font-display text-sm font-bold text-text-primary">Chrome Extension</h3>
           <p className="mt-1 font-mono text-[12px] text-text-muted">
             Connect the Drift Sentinel extension for real-time monitoring
@@ -445,7 +445,7 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
-        </GlowCard>
+        </GlowPanel>
       </div>
     </div>
   );

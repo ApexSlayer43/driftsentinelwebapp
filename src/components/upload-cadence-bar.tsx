@@ -10,7 +10,7 @@ interface UploadCadenceBarProps {
 export function UploadCadenceBar({ uploads }: UploadCadenceBarProps) {
   if (uploads.length === 0) {
     return (
-      <div className="rounded-xl liquid-glass p-5 h-full flex flex-col">
+      <div className="rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] p-5 h-full flex flex-col">
         <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
           Upload Cadence
         </h3>
@@ -28,7 +28,7 @@ export function UploadCadenceBar({ uploads }: UploadCadenceBarProps) {
   const maxGap = Math.max(...ordered.map((u) => u.gap_hours ?? 0), 1);
 
   return (
-    <div className="rounded-xl liquid-glass p-5 h-full flex flex-col">
+    <div className="rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] p-5 h-full flex flex-col">
       <h3 className="font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
         Upload Cadence
       </h3>
@@ -71,7 +71,7 @@ export function UploadCadenceBar({ uploads }: UploadCadenceBarProps) {
               </div>
 
               {/* Hover detail */}
-              <div className="hidden group-hover:block absolute left-14 bottom-full mb-1 z-50 rounded-lg liquid-glass px-3 py-1.5 whitespace-nowrap pointer-events-none">
+              <div className="hidden group-hover:block absolute left-14 bottom-full mb-1 z-50 rounded-lg bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] px-3 py-1.5 whitespace-nowrap pointer-events-none">
                 <p className="font-mono text-[8px] text-text-primary">
                   {style.label} — {upload.trade_count} trades, {upload.session_count} sessions
                 </p>

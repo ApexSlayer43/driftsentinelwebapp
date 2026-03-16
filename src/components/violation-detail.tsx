@@ -5,7 +5,7 @@ import { Clock, Layers, ArrowLeft } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getModeLabel, getModeIcon, getModeWeight } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
-import { GlowCard } from '@/components/ui/glow-card';
+import { GlowPanel } from '@/components/ui/glow-panel';
 import type { ViolationDetail as ViolationDetailType, FillCanonical } from '@/lib/types';
 
 interface ViolationDetailProps {
@@ -109,7 +109,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
       </div>
 
       {/* ═══ SBI ANALYSIS ═══ */}
-      <GlowCard className="glass-card rounded-2xl p-5 space-y-4 border-l-4 border-warning">
+      <GlowPanel className="p-5 space-y-4 border-l-4 border-warning">
         {/* Situation */}
         <div>
           <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-1">
@@ -149,27 +149,27 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
             Review your protocol settings for {modeLabel.toLowerCase()} detection thresholds. Consider adding a cooldown rule.
           </div>
         </div>
-      </GlowCard>
+      </GlowPanel>
 
       {/* ═══ IMPACT METRICS — 4-column grid ═══ */}
       <div className="grid grid-cols-4 gap-2.5">
-        <GlowCard className="glass-inset rounded-xl p-3 text-center">
+        <GlowPanel className="p-3 text-center">
           <div className="font-mono text-[17px] font-bold text-[#FB923C]" style={{ fontVariantNumeric: 'tabular-nums' }}>
             -{violation.points}
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-0.5">
             DSI Penalty
           </div>
-        </GlowCard>
-        <GlowCard className="glass-inset rounded-xl p-3 text-center">
+        </GlowPanel>
+        <GlowPanel className="p-3 text-center">
           <div className="font-mono text-[17px] font-bold text-text-secondary" style={{ fontVariantNumeric: 'tabular-nums' }}>
             ×{modeWeight}
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-0.5">
             Mode Weight
           </div>
-        </GlowCard>
-        <GlowCard className="glass-inset rounded-xl p-3 text-center">
+        </GlowPanel>
+        <GlowPanel className="p-3 text-center">
           <div className={`font-mono text-[17px] font-bold ${
             violation.severity === 'CRITICAL' ? 'text-[#EF4444]' :
             violation.severity === 'HIGH' ? 'text-[#FB923C]' : 'text-[#F59E0B]'
@@ -179,15 +179,15 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
           <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-0.5">
             Severity
           </div>
-        </GlowCard>
-        <GlowCard className="glass-inset rounded-xl p-3 text-center">
+        </GlowPanel>
+        <GlowPanel className="p-3 text-center">
           <div className="font-mono text-[17px] font-bold text-text-secondary" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {violation.evidence_event_ids.length}
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-0.5">
             Evidence
           </div>
-        </GlowCard>
+        </GlowPanel>
       </div>
 
       {/* ═══ FILL TIMELINE — trade-level evidence ═══ */}

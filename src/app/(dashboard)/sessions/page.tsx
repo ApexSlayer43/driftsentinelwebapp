@@ -122,8 +122,8 @@ export default function SessionsPage() {
               onClick={() => setRange(r)}
               className={`rounded-full px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.1em] transition-colors ${
                 range === r
-                  ? 'liquid-glass-tab-active text-text-primary'
-                  : 'liquid-glass-tab text-text-muted hover:text-text-secondary'
+                  ? 'bg-white/[0.06] text-text-primary'
+                  : 'hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary'
               }`}
             >
               {r}
@@ -217,7 +217,7 @@ export default function SessionsPage() {
 
 function StatCard({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-xl liquid-glass px-4 py-3">
+    <div className="flex flex-col items-center gap-1 rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] px-4 py-3">
       <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.18em] text-text-muted">
         {label}
       </span>

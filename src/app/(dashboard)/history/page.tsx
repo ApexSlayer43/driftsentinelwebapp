@@ -159,8 +159,8 @@ export default function HistoryPage() {
               onClick={() => setRange(r)}
               className={`rounded-full px-3 py-1 font-mono text-[12px] font-bold uppercase tracking-[0.1em] transition-colors ${
                 range === r
-                  ? 'liquid-glass-tab-active text-text-primary'
-                  : 'liquid-glass-tab text-text-muted hover:text-text-secondary'
+                  ? 'bg-white/[0.06] text-text-primary'
+                  : 'hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary'
               }`}
             >
               {r}

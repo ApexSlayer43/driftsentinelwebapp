@@ -297,7 +297,7 @@ export default function SentiPage() {
         {/* New conversation button — top of sidebar */}
         <button
           onClick={resetConversation}
-          className="flex items-center gap-2 rounded-xl px-3 py-2.5 font-mono text-[11px] text-text-muted transition-all hover:text-positive liquid-glass"
+          className="flex items-center gap-2 rounded-xl px-3 py-2.5 font-mono text-[11px] text-text-muted transition-all hover:text-positive bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04]"
         >
           <RotateCcw size={12} />
           New conversation

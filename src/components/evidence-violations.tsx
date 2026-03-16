@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { getModeLabel, getModeIcon } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
-import { GlowCard } from '@/components/ui/glow-card';
+import { GlowPanel } from '@/components/ui/glow-panel';
 import type { ViolationDetail } from '@/lib/types';
 
 interface EvidenceViolationsProps {
@@ -104,10 +104,10 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
         const windowEnd = new Date(v.window_end_utc).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
         return (
-          <GlowCard key={v.violation_id} className="rounded-2xl">
+          <GlowPanel key={v.violation_id} className="">
             <button
               onClick={() => setExpandedId(isExpanded ? null : v.violation_id)}
-              className="flex w-full items-center gap-3 glass-card rounded-2xl p-3.5 transition-transform hover:scale-[1.01]"
+              className="flex w-full items-center gap-3 rounded-2xl p-3.5 transition-transform hover:scale-[1.01]"
             >
               <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-text-muted" />
               <div className="flex-1 text-left">
@@ -146,7 +146,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
                 </div>
               </div>
             )}
-          </GlowCard>
+          </GlowPanel>
         );
       })}
     </div>

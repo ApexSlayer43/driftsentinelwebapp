@@ -18,7 +18,6 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Particles } from '@/components/ui/particles';
-import { GlassFilter } from '@/components/ui/liquid-glass-button';
 import { MenuContainer, MenuItem } from '@/components/ui/fluid-menu';
 import LiveEye from '@/components/live-eye';
 import { createClient } from '@/lib/supabase/client';
@@ -134,8 +133,6 @@ export default function DashboardLayout({
         size={0.4}
         staticity={50}
       />
-      <GlassFilter />
-
       {/* Fluid nav — fixed top-right */}
       <div className="fixed top-5 right-5 z-50">
         <MenuContainer>

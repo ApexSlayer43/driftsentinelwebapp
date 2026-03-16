@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Upload, CheckCircle, XCircle, Copy, FileText, FileSpreadsheet } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { GlowCard } from '@/components/ui/glow-card';
+import { GlowPanel } from '@/components/ui/glow-panel';
 import type { IngestRun } from '@/lib/types';
 
 type UploadMode = 'csv' | 'pdf';
@@ -212,7 +212,7 @@ export default function IngestPage() {
 
       {/* PDF Result */}
       {pdfResult && (
-        <GlowCard className="mt-4 rounded-xl border border-positive/20 bg-positive/[0.04] p-5">
+        <GlowPanel className="mt-4 p-5 border border-positive/20 bg-positive/[0.04]">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle size={16} className="text-positive" />
             <span className="font-mono text-sm font-semibold text-positive">
@@ -256,12 +256,12 @@ export default function IngestPage() {
               </div>
             </div>
           )}
-        </GlowCard>
+        </GlowPanel>
       )}
 
       {/* CSV Result */}
       {csvResult && (
-        <GlowCard className="mt-4 rounded-xl border border-positive/20 bg-positive/[0.04] p-4">
+        <GlowPanel className="mt-4 p-4 border border-positive/20 bg-positive/[0.04]">
           <div className="flex items-center gap-2">
             <CheckCircle size={16} className="text-positive" />
             <span className="font-mono text-sm font-semibold text-positive">Upload Complete</span>
@@ -280,7 +280,7 @@ export default function IngestPage() {
               <div className="font-display text-xl font-bold text-negative">{csvResult.rejected}</div>
             </div>
           </div>
-        </GlowCard>
+        </GlowPanel>
       )}
 
       {error && (
@@ -301,7 +301,7 @@ export default function IngestPage() {
             <p className="mt-2 font-mono text-xs text-text-muted">No uploads yet</p>
           </div>
         ) : (
-          <GlowCard className="mt-3 overflow-hidden rounded-xl glass">
+          <GlowPanel className="mt-3 overflow-hidden">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border-dim glass-raised">
@@ -326,7 +326,7 @@ export default function IngestPage() {
                 ))}
               </tbody>
             </table>
-          </GlowCard>
+          </GlowPanel>
         )}
       </div>
     </div>

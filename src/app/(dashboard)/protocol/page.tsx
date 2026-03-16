@@ -7,7 +7,7 @@ import {
   Loader2, CheckCircle2, AlertCircle, HelpCircle,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { GlowCard } from '@/components/ui/glow-card';
+import { GlowPanel } from '@/components/ui/glow-panel';
 import {
   canonicalizeProtocol,
   type ProtocolData,
@@ -269,7 +269,7 @@ export default function ProtocolPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg liquid-glass text-stable hover:text-text-secondary transition-all text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] text-stable hover:text-text-secondary transition-all text-sm font-medium"
             >
               {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
               Save Protocol
@@ -329,7 +329,7 @@ export default function ProtocolPage() {
 
       {/* ── Protocol Header ─────────────────────────────────── */}
       {protocol && (
-        <GlowCard className="rounded-2xl liquid-glass p-5">
+        <GlowPanel className="p-5">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stable/10">
@@ -370,7 +370,7 @@ export default function ProtocolPage() {
               />
             </div>
           </div>
-        </GlowCard>
+        </GlowPanel>
       )}
 
       {/* ── Rule Categories ─────────────────────────────────── */}
@@ -380,7 +380,7 @@ export default function ProtocolPage() {
         const isExpanded = expandedCategories.has(category);
 
         return (
-          <GlowCard key={category} className="rounded-2xl liquid-glass overflow-hidden">
+          <GlowPanel key={category} className="overflow-hidden">
             {/* Category header */}
             <button
               onClick={() => toggleCategory(category)}
@@ -476,7 +476,7 @@ export default function ProtocolPage() {
                 })}
               </div>
             )}
-          </GlowCard>
+          </GlowPanel>
         );
       })}
     </div>

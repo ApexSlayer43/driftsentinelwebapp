@@ -15,7 +15,7 @@ export function SessionPulseStrip({ sessions, selectedId, onSelect }: SessionPul
 
   if (sessions.length === 0) {
     return (
-      <div className="flex items-center justify-center h-16 rounded-xl liquid-glass px-6">
+      <div className="flex items-center justify-center h-16 rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] px-6">
         <p className="font-mono text-[10px] text-text-muted tracking-wider">
           No sessions recorded yet. Upload a CSV to begin.
         </p>
@@ -28,7 +28,7 @@ export function SessionPulseStrip({ sessions, selectedId, onSelect }: SessionPul
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-1 overflow-x-auto py-3 px-4 rounded-xl liquid-glass scrollbar-thin">
+      <div className="flex items-center gap-1 overflow-x-auto py-3 px-4 rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] scrollbar-thin">
         {ordered.map((session) => {
           const style = getSessionQualityStyle(session.session_quality);
           const isSelected = session.session_id === selectedId;
@@ -71,7 +71,7 @@ export function SessionPulseStrip({ sessions, selectedId, onSelect }: SessionPul
 
               {/* Tooltip */}
               {isHovered && (
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 whitespace-nowrap rounded-lg liquid-glass px-3 py-1.5 pointer-events-none">
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 whitespace-nowrap rounded-lg bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] px-3 py-1.5 pointer-events-none">
                   <p className="font-mono text-[9px] text-text-primary font-semibold">
                     {session.trading_date}
                   </p>

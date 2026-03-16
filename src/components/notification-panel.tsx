@@ -186,7 +186,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -320, opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed left-24 top-4 bottom-4 z-50 w-[340px] overflow-hidden rounded-2xl liquid-glass"
+            className="fixed left-24 top-4 bottom-4 z-50 w-[340px] overflow-hidden rounded-2xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04]"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-white/[0.04] px-5 py-4">
@@ -200,7 +200,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
               </div>
               <button
                 onClick={onClose}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-text-dim transition-colors hover:text-text-secondary liquid-glass-tab"
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-text-dim transition-colors hover:text-text-secondary hover:bg-white/[0.04] transition-colors"
               >
                 <X size={14} />
               </button>
@@ -230,7 +230,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.03 }}
-                        className="group rounded-xl px-3.5 py-3 transition-colors hover:bg-white/[0.02] liquid-glass-tab"
+                        className="group rounded-xl px-3.5 py-3 transition-colors hover:bg-white/[0.04] transition-colors"
                       >
                         <div className="flex gap-3">
                           {/* Icon */}

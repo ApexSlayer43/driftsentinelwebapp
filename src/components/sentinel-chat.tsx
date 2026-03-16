@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { TextStreamChatTransport, type UIMessage } from 'ai';
 import { Send, Bot, X, Loader2, ChevronDown, Paperclip, FileText, CheckCircle } from 'lucide-react';
-import { GlowCard } from '@/components/ui/glow-card';
+import { GlowPanel } from '@/components/ui/glow-panel';
 
 type SentiMode = 'morningBriefing' | 'sessionCompanion' | 'postSessionAAR' | 'onboarding';
 
@@ -386,7 +386,7 @@ export function SentinelChat() {
       )}
 
       {/* Floating Senti FAB */}
-      <GlowCard variant="teal" className="rounded-full">
+      <GlowPanel variant="teal" className="rounded-full">
         <button
           className="sentinel-fab relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 hover:scale-110"
           onClick={() => setOpen(!open)}
@@ -409,7 +409,7 @@ export function SentinelChat() {
             />
           )}
         </button>
-      </GlowCard>
+      </GlowPanel>
 
       <style jsx>{`
         @keyframes sentinel-pop {
