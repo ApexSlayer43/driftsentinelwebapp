@@ -5,7 +5,7 @@ import { Clock, Layers, Search } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getModeLabel, getModeIcon, getModeWeight } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
-import type { ViolationDetail, FillCanonical } from '@/lib/types';
+import type { ViolationDetail, FillCanonical, DailyScore } from '@/lib/types';
 
 /**
  * Forensics — Pattern analysis deep-dive
@@ -18,6 +18,7 @@ import type { ViolationDetail, FillCanonical } from '@/lib/types';
 export default function ForensicsPage() {
   const [violations, setViolations] = useState<ViolationDetail[]>([]);
   const [fills, setFills] = useState<FillCanonical[]>([]);
+  const [dailyScores, setDailyScores] = useState<DailyScore[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [detailFills, setDetailFills] = useState<FillCanonical[]>([]);
@@ -40,7 +41,7 @@ export default function ForensicsPage() {
       if (!accounts || accounts.length === 0) { setLoading(false); return; }
       const ref = accounts[0].account_ref;
 
-      const [violationsRes, fillsRes] = await Promise.all([
+      const [violationsRes, fillsRes, scoresRes] = await Promise.all([
         supabase
           .from('violations')
           .select('*')
@@ -53,6 +54,12 @@ export default function ForensicsPage() {
           .eq('account_ref', ref)
           .order('timestamp_utc', { ascending: false })
           .limit(500),
+        supabase
+          .from('daily_scores')
+          .select('*')
+          .eq('account_ref', ref)
+          .order('trading_date', { ascending: false })
+          .limit(60),
       ]);
 
       if (violationsRes.data) {
@@ -61,6 +68,7 @@ export default function ForensicsPage() {
         if (v.length > 0) setSelectedId(v[0].violation_id);
       }
       if (fillsRes.data) setFills(fillsRes.data as FillCanonical[]);
+      if (scoresRes.data) setDailyScores(scoresRes.data as DailyScore[]);
       setLoading(false);
     }
     load();
@@ -200,11 +208,11 @@ export default function ForensicsPage() {
                   <span
                     className="shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold"
                     style={{
-                      color: '#FB923C',
-                      backgroundColor: 'rgba(251, 146, 60, 0.12)',
+                      color: v.severity === 'CRITICAL' ? '#EF4444' : v.severity === 'HIGH' ? '#FB923C' : '#F59E0B',
+                      backgroundColor: v.severity === 'CRITICAL' ? 'rgba(239,68,68,0.12)' : v.severity === 'HIGH' ? 'rgba(251,146,60,0.12)' : 'rgba(245,158,11,0.12)',
                     }}
                   >
-                    -{v.points} pts
+                    {v.severity}
                   </span>
                 </div>
                 <div className="mt-1.5 font-mono text-[11px] text-text-muted">
@@ -227,6 +235,7 @@ export default function ForensicsPage() {
             fills={detailFills}
             fillsLoading={detailLoading}
             recurrence={recurrence}
+            dailyScores={dailyScores}
           />
         ) : (
           <div className="flex h-full items-center justify-center font-mono text-[13px] text-text-muted">
@@ -247,13 +256,21 @@ interface ForensicDetailProps {
   fills: FillCanonical[];
   fillsLoading: boolean;
   recurrence: { id: string; date: Date; points: number; isCurrent: boolean }[];
+  dailyScores: DailyScore[];
 }
 
-function ForensicDetail({ violation, fills, fillsLoading, recurrence }: ForensicDetailProps) {
+function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScores }: ForensicDetailProps) {
   const modeLabel = getModeLabel(violation.mode);
   const modeIcon = getModeIcon(violation.mode);
   const modeWeight = getModeWeight(violation.mode);
-  const weightedPoints = Math.round(violation.points * modeWeight);
+
+  // Find the daily score for this violation's date to show real BSS impact
+  const violationDate = new Date(violation.first_seen_utc).toISOString().split('T')[0];
+  const dayScore = dailyScores.find((ds) => ds.trading_date === violationDate);
+  const bssBefore = dayScore ? dayScore.bss_previous : null;
+  const bssAfter = dayScore ? dayScore.bss_score : null;
+  const actualBssDelta = bssBefore !== null && bssAfter !== null ? bssAfter - bssBefore : null;
+  const dsiScore = dayScore?.dsi_score ?? null;
 
   const dateStr = new Date(violation.first_seen_utc).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
@@ -371,8 +388,19 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence }: Forensic
                 Impact
               </div>
               <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
-                BSS dropped {violation.points} points ({violation.points} raw × {modeWeight}x weight = {weightedPoints} weighted).
-                Severity: {violation.severity}.
+                {actualBssDelta !== null ? (
+                  <>
+                    This pattern contributed to a <span className="font-bold text-[#FB923C]">{actualBssDelta}</span> BSS change for the session
+                    {bssBefore !== null && bssAfter !== null && ` (${bssBefore} → ${bssAfter})`}.
+                    {dsiScore !== null && ` Daily Stability Index scored ${dsiScore}/100.`}
+                    {' '}Severity: {violation.severity}.
+                  </>
+                ) : (
+                  <>
+                    {violation.points} DSI penalty points (×{modeWeight} mode weight) fed into EWMA scoring.
+                    Severity: {violation.severity}. The BSS delta on the dashboard reflects the smoothed result.
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -385,29 +413,50 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence }: Forensic
           Impact Metrics
         </div>
         <div className="grid grid-cols-3 gap-3">
+          {/* BSS Delta — the actual score change users see on the dashboard */}
           <div className="glass-card rounded-xl p-4 text-center">
-            <div className="font-mono text-[22px] font-bold text-[#22D3EE]" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              -{violation.points}
+            <div className="font-mono text-[22px] font-bold text-[#FB923C]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {actualBssDelta !== null ? actualBssDelta : '—'}
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
-              BSS Impact
+              BSS Delta
             </div>
           </div>
+          {/* DSI Score — the daily stability index that feeds EWMA */}
           <div className="glass-card rounded-xl p-4 text-center">
             <div className="font-mono text-[22px] font-bold text-text-secondary" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              -{weightedPoints}
+              {dsiScore !== null ? `${dsiScore}` : '—'}
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
-              Points Deducted
+              DSI Score
             </div>
           </div>
+          {/* Severity */}
           <div className="glass-card rounded-xl p-4 text-center">
-            <div className="font-mono text-[22px] font-bold text-[#EF4444]" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              —
+            <div className={`font-mono text-[22px] font-bold ${
+              violation.severity === 'CRITICAL' ? 'text-[#EF4444]' :
+              violation.severity === 'HIGH' ? 'text-[#FB923C]' :
+              violation.severity === 'MED' ? 'text-[#F59E0B]' :
+              'text-text-secondary'
+            }`}>
+              {violation.severity}
             </div>
             <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
-              Session P&L
+              Severity
             </div>
+          </div>
+        </div>
+
+        {/* Scoring explainer — how DSI penalty flows into BSS */}
+        <div className="mt-3 glass-inset rounded-xl px-4 py-3">
+          <div className="font-mono text-[11px] text-text-dim leading-relaxed">
+            <span className="text-text-muted font-semibold">How scoring works:</span>{' '}
+            This pattern applied a {violation.points}-pt DSI penalty (×{modeWeight} mode weight).
+            {dsiScore !== null && ` That session\u2019s DSI scored ${dsiScore}/100.`}
+            {' '}BSS uses exponential weighted moving average (EWMA) to smooth daily scores,
+            {actualBssDelta !== null
+              ? ` resulting in a net ${actualBssDelta} BSS change for this day.`
+              : ' so the BSS delta on the dashboard is the smoothed result, not the raw penalty.'}
           </div>
         </div>
       </div>
