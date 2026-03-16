@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
-  Search,
   Upload,
   Settings,
   LogOut,
@@ -14,11 +13,13 @@ import {
   Crosshair,
   Bot,
   Radar,
+  Menu as MenuIcon,
+  X,
   type LucideIcon,
 } from 'lucide-react';
 import { Particles } from '@/components/ui/particles';
 import { GlassFilter } from '@/components/ui/liquid-glass-button';
-import { cn } from '@/lib/utils';
+import { MenuContainer, MenuItem } from '@/components/ui/fluid-menu';
 import LiveEye from '@/components/live-eye';
 import { createClient } from '@/lib/supabase/client';
 import type { BehavioralState } from '@/lib/tokens';
@@ -111,8 +112,20 @@ export default function DashboardLayout({
     };
   }, []);
 
+  // Navigate and auto-close menu helper
+  function navTo(href: string) {
+    router.push(href);
+  }
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
+  }
+
   return (
-    <div className="flex h-screen overflow-hidden relative">
+    <div className="relative h-screen overflow-hidden">
       <Particles
         className="absolute inset-0 z-0"
         quantity={120}
@@ -123,45 +136,47 @@ export default function DashboardLayout({
       />
       <GlassFilter />
 
-      {/* Vertical sidebar nav */}
-      <nav className="relative z-10 flex w-16 shrink-0 flex-col items-center gap-1 self-start mt-6 ml-4 rounded-2xl py-3 liquid-glass">
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-          return (
-            <button
-              key={item.href}
-              onClick={() => router.push(item.href)}
-              title={item.title}
-              className={cn(
-                'group relative flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200',
-                isActive
-                  ? 'text-accent-primary liquid-glass-tab-active'
-                  : 'text-text-muted hover:text-text-secondary liquid-glass-tab'
-              )}
-            >
-              <Icon size={18} />
-            </button>
-          );
-        })}
-        {/* Separator + Sign out */}
-        <div className="my-1 h-px w-6 bg-border-subtle" />
-        <button
-          onClick={async () => {
-            const supabase = createClient();
-            await supabase.auth.signOut();
-            router.push('/login');
-            router.refresh();
-          }}
-          title="Sign out"
-          className="group relative flex h-10 w-10 items-center justify-center rounded-xl text-text-muted transition-all duration-200 hover:text-negative liquid-glass-tab"
-        >
-          <LogOut size={18} />
-        </button>
-      </nav>
+      {/* Fluid nav — fixed top-right */}
+      <div className="fixed top-5 right-5 z-50">
+        <MenuContainer>
+          {/* Toggle button — hamburger / X */}
+          <MenuItem
+            icon={
+              <div className="relative w-5 h-5">
+                <div className="absolute inset-0 transition-all duration-300 ease-in-out origin-center opacity-100 scale-100 rotate-0 [div[data-expanded=true]_&]:opacity-0 [div[data-expanded=true]_&]:scale-0 [div[data-expanded=true]_&]:rotate-180">
+                  <MenuIcon size={20} strokeWidth={1.5} />
+                </div>
+                <div className="absolute inset-0 transition-all duration-300 ease-in-out origin-center opacity-0 scale-0 -rotate-180 [div[data-expanded=true]_&]:opacity-100 [div[data-expanded=true]_&]:scale-100 [div[data-expanded=true]_&]:rotate-0">
+                  <X size={20} strokeWidth={1.5} />
+                </div>
+              </div>
+            }
+          />
+          {/* Nav items */}
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+            return (
+              <MenuItem
+                key={item.href}
+                icon={<Icon size={20} strokeWidth={1.5} />}
+                onClick={() => navTo(item.href)}
+                isActive={isActive}
+                title={item.title}
+              />
+            );
+          })}
+          {/* Sign out */}
+          <MenuItem
+            icon={<LogOut size={20} strokeWidth={1.5} />}
+            onClick={handleSignOut}
+            title="Sign out"
+          />
+        </MenuContainer>
+      </div>
 
-      {/* Main content area */}
-      <div className="flex flex-1 flex-col overflow-hidden relative z-10">
+      {/* Main content area — full width now */}
+      <div className="flex flex-col h-full overflow-hidden relative z-10">
         {/* Top brand bar with live eye */}
         <div className="flex items-center justify-center py-2">
           <LiveEye size={40} />
@@ -171,7 +186,6 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
-
     </div>
   );
 }
