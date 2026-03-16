@@ -250,24 +250,36 @@ export async function POST(req: Request) {
   const fillsToInsert = [];
   let dupCount = 0;
   let rejectCount = 0;
+  const seenEventIds = new Set<string>();
 
-  for (const fill of pdfResult.fills) {
-    const key = `${fill.timestamp_utc}|${fill.contract}|${fill.side}|${fill.price}`;
-    if (existingFills.has(key)) {
-      dupCount++;
-      continue;
-    }
+  for (let idx = 0; idx < pdfResult.fills.length; idx++) {
+    const fill = pdfResult.fills[idx];
 
     // Validate required fields
-    if (!fill.timestamp_utc || !fill.contract || !fill.side || !fill.qty || !fill.price) {
+    if (!fill.timestamp_utc || !fill.contract || !fill.side || fill.qty == null || fill.price == null) {
       rejectCount++;
       continue;
     }
 
+    const dedupKey = `${fill.timestamp_utc}|${fill.contract}|${fill.side}|${fill.price}`;
+    if (existingFills.has(dedupKey)) {
+      dupCount++;
+      continue;
+    }
+
+    // Include index to guarantee unique event_id even for identical fills
+    const eventId = createHash('sha256')
+      .update(`${accountRef}:${ingestRunId}:${idx}:${fill.timestamp_utc}:${fill.contract}:${fill.side}:${fill.price}:${fill.qty}`)
+      .digest('hex');
+
+    if (seenEventIds.has(eventId)) {
+      dupCount++;
+      continue;
+    }
+    seenEventIds.add(eventId);
+
     fillsToInsert.push({
-      event_id: createHash('sha256')
-        .update(`${accountRef}:${fill.timestamp_utc}:${fill.contract}:${fill.side}:${fill.price}:${fill.qty}`)
-        .digest('hex'),
+      event_id: eventId,
       account_ref: accountRef,
       ingest_run_id: ingestRunId,
       timestamp_utc: fill.timestamp_utc,
@@ -284,23 +296,21 @@ export async function POST(req: Request) {
   let acceptedCount = 0;
 
   if (fillsToInsert.length > 0) {
-    // Insert in batches of 100
-    for (let i = 0; i < fillsToInsert.length; i += 100) {
-      const batch = fillsToInsert.slice(i, i + 100);
+    // Insert one at a time to avoid entire batch failing on a single conflict
+    for (const fill of fillsToInsert) {
       const { error: insertErr } = await admin
         .from('fills_canonical')
-        .insert(batch);
+        .insert(fill);
 
       if (insertErr) {
-        console.error('fills insert error (batch):', insertErr);
-        // Check for unique constraint violations (duplicates that slipped through)
         if (insertErr.code === '23505') {
-          dupCount += batch.length;
+          dupCount++;
         } else {
-          rejectCount += batch.length;
+          console.error('fill insert error:', insertErr.message, fill.event_id);
+          rejectCount++;
         }
       } else {
-        acceptedCount += batch.length;
+        acceptedCount++;
       }
     }
   }
