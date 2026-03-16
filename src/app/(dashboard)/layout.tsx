@@ -10,6 +10,8 @@ import {
   LogOut,
   Shield,
   UserCircle,
+  Clock,
+  Crosshair,
   type LucideIcon,
 } from 'lucide-react';
 import { Particles } from '@/components/ui/particles';
@@ -22,7 +24,8 @@ import type { BehavioralState } from '@/lib/tokens';
 const NAV_ITEMS: { title: string; icon: LucideIcon; href: string }[] = [
   { title: 'Dashboard', icon: LayoutDashboard, href: '/' },
   { title: 'Upload', icon: Upload, href: '/ingest' },
-  { title: 'Forensics', icon: Search, href: '/violations' },
+  { title: 'Historical', icon: Clock, href: '/violations' },
+  { title: 'Forensics', icon: Crosshair, href: '/forensics' },
   { title: 'Signal Config', icon: Shield, href: '/protocol' },
   { title: 'DS Trader ID', icon: UserCircle, href: '/trader-id' },
   { title: 'Settings', icon: Settings, href: '/settings' },
