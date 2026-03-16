@@ -13,6 +13,7 @@ import {
   Clock,
   Crosshair,
   Bot,
+  Radar,
   type LucideIcon,
 } from 'lucide-react';
 import { Particles } from '@/components/ui/particles';
@@ -26,6 +27,7 @@ const NAV_ITEMS: { title: string; icon: LucideIcon; href: string }[] = [
   { title: 'Dashboard', icon: LayoutDashboard, href: '/' },
   { title: 'Upload', icon: Upload, href: '/ingest' },
   { title: 'Historical', icon: Clock, href: '/violations' },
+  { title: 'Sessions', icon: Radar, href: '/sessions' },
   { title: 'Forensics', icon: Crosshair, href: '/forensics' },
   { title: 'Signal Config', icon: Shield, href: '/protocol' },
   { title: 'DS Trader ID', icon: UserCircle, href: '/trader-id' },

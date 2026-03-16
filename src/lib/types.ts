@@ -127,6 +127,60 @@ export interface DailyScore {
   computed_at: string;
 }
 
+// Session from sessions table (migration 003)
+export interface Session {
+  session_id: string;
+  account_ref: string;
+  user_id: string;
+  trading_date: string;
+  session_start_utc: string;
+  session_end_utc: string;
+  fills_count: number;
+  violation_count: number;
+  dsi_score: number | null;
+  bss_at_session: number | null;
+  bss_delta: number | null;
+  first_violation_sequence: number | null;
+  max_consecutive_losses: number;
+  recovery_attempted: boolean;
+  session_extended: boolean;
+  session_quality: 'CLEAN' | 'MINOR' | 'DEGRADED' | 'COMPROMISED' | 'BREAKDOWN';
+  ingest_run_id: string;
+  created_at: string;
+}
+
+// Session event from session_events table
+export interface SessionEvent {
+  session_event_id: string;
+  session_id: string;
+  account_ref: string;
+  user_id: string;
+  sequence_number: number;
+  elapsed_seconds: number;
+  event_type: string;
+  metadata: Record<string, any>;
+  fill_event_id: string | null;
+  violation_id: string | null;
+  preceding_event_id: string | null;
+  created_at: string;
+}
+
+// Upload event from upload_events table
+export interface UploadEvent {
+  upload_event_id: string;
+  user_id: string;
+  account_ref: string;
+  ingest_run_id: string;
+  uploaded_at: string;
+  gap_hours: number | null;
+  cadence_status: 'SAME_DAY' | 'NEXT_DAY' | 'SHORT_GAP' | 'MEDIUM_GAP' | 'LONG_GAP' | 'DARK_PERIOD' | 'FIRST_UPLOAD';
+  detected_platform: string;
+  session_count: number;
+  trade_count: number;
+  date_range_start: string | null;
+  date_range_end: string | null;
+}
+
 // Ingest run from ingest_runs
 export interface IngestRun {
   ingest_run_id: string;

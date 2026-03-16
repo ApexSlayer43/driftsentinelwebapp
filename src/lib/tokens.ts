@@ -72,6 +72,60 @@ export const MODE_ICONS: Record<string, string> = {
   SIZE_ESCALATION: 'ArrowUpRight',
 };
 
+// Session quality styles — maps session_quality enum to visual tokens
+// Uses colorblind-safe palette aligned with SIGNALS
+export const SESSION_QUALITY_STYLES = {
+  CLEAN:       { color: '#22D3EE', bg: 'rgba(34,211,238,0.12)', border: 'rgba(34,211,238,0.25)', label: 'Clean' },
+  MINOR:       { color: '#60A5FA', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.25)', label: 'Minor' },
+  DEGRADED:    { color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.25)', label: 'Degraded' },
+  COMPROMISED: { color: '#FB923C', bg: 'rgba(251,146,60,0.12)', border: 'rgba(251,146,60,0.25)', label: 'Compromised' },
+  BREAKDOWN:   { color: '#FB923C', bg: 'rgba(251,146,60,0.15)', border: 'rgba(251,146,60,0.30)', label: 'Breakdown' },
+} as const;
+
+// Upload cadence styles — colorblind-safe
+export const CADENCE_STYLES = {
+  SAME_DAY:     { color: '#22D3EE', label: 'Same Day' },
+  NEXT_DAY:     { color: '#60A5FA', label: 'Next Day' },
+  SHORT_GAP:    { color: '#94A3B8', label: '1-3 Days' },
+  MEDIUM_GAP:   { color: '#F59E0B', label: '3-7 Days' },
+  LONG_GAP:     { color: '#FB923C', label: '7-14 Days' },
+  DARK_PERIOD:  { color: '#FB923C', label: 'Dark Period' },
+  FIRST_UPLOAD: { color: '#6B7280', label: 'First Upload' },
+} as const;
+
+// Session event type labels
+export const EVENT_TYPE_LABELS: Record<string, string> = {
+  SESSION_START: 'Session Start',
+  SESSION_END: 'Session End',
+  TRADE_OPEN: 'Trade Open',
+  TRADE_CLOSE: 'Trade Close',
+  VIOLATION_TRIGGERED: 'Violation Triggered',
+  VIOLATION_CLEARED: 'Violation Cleared',
+  PROTOCOL_BREACH: 'Protocol Breach',
+  SIZE_ESCALATION: 'Size Escalation',
+  RECOVERY_ATTEMPT: 'Recovery Attempt',
+};
+
+export const EVENT_TYPE_ICONS: Record<string, string> = {
+  SESSION_START: 'Play',
+  SESSION_END: 'Square',
+  TRADE_OPEN: 'ArrowUpRight',
+  TRADE_CLOSE: 'ArrowDownRight',
+  VIOLATION_TRIGGERED: 'AlertTriangle',
+  VIOLATION_CLEARED: 'CheckCircle',
+  PROTOCOL_BREACH: 'ShieldAlert',
+  SIZE_ESCALATION: 'TrendingUp',
+  RECOVERY_ATTEMPT: 'RotateCcw',
+};
+
+export function getSessionQualityStyle(quality: string) {
+  return SESSION_QUALITY_STYLES[quality as keyof typeof SESSION_QUALITY_STYLES] ?? SESSION_QUALITY_STYLES.CLEAN;
+}
+
+export function getCadenceStyle(status: string) {
+  return CADENCE_STYLES[status as keyof typeof CADENCE_STYLES] ?? CADENCE_STYLES.FIRST_UPLOAD;
+}
+
 export type BehavioralState = keyof typeof STATE_STYLES;
 export type BssTier = keyof typeof TIER_STYLES;
 export type Severity = keyof typeof SEVERITY_COLORS;
