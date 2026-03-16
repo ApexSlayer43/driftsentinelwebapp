@@ -181,48 +181,41 @@ export default function ForensicsPage() {
               .find(Boolean);
             const instrument = evidenceFill?.instrument_root ?? evidenceFill?.contract ?? '—';
 
-            // Severity border color
-            const borderColor =
-              v.severity === 'CRITICAL' ? '#EF4444' :
-              v.severity === 'HIGH' ? '#FB923C' :
-              v.severity === 'MED' ? '#F59E0B' :
-              '#6366F1';
-
             return (
-              <button
-                key={v.violation_id}
-                onClick={() => setSelectedId(v.violation_id)}
-                className={`w-full text-left rounded-xl px-4 py-3 transition-all border-l-4 ${
-                  isActive
-                    ? 'bg-raised/80 border-accent-primary'
-                    : 'bg-surface hover:bg-raised/40 border-transparent'
-                }`}
-                style={isActive ? { borderLeftColor: borderColor } : {}}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <DynamicIcon name={modeIcon} size={14} className="text-text-muted shrink-0 mt-0.5" />
-                    <span className="font-mono text-[13px] font-semibold text-text-primary">
-                      {modeLabel}
+              <GlowCard key={v.violation_id} className="rounded-xl">
+                <button
+                  onClick={() => setSelectedId(v.violation_id)}
+                  className={`w-full text-left rounded-xl px-4 py-3 transition-all liquid-glass ${
+                    isActive
+                      ? 'ring-1 ring-[#FFD700]/40 bg-raised/60'
+                      : 'hover:bg-raised/30'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <DynamicIcon name={modeIcon} size={14} className="text-text-muted shrink-0 mt-0.5" />
+                      <span className="font-mono text-[13px] font-semibold text-text-primary">
+                        {modeLabel}
+                      </span>
+                    </div>
+                    <span
+                      className="shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold"
+                      style={{
+                        color: v.severity === 'CRITICAL' ? '#EF4444' : v.severity === 'HIGH' ? '#FB923C' : '#F59E0B',
+                        backgroundColor: v.severity === 'CRITICAL' ? 'rgba(239,68,68,0.12)' : v.severity === 'HIGH' ? 'rgba(251,146,60,0.12)' : 'rgba(245,158,11,0.12)',
+                      }}
+                    >
+                      {v.severity}
                     </span>
                   </div>
-                  <span
-                    className="shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold"
-                    style={{
-                      color: v.severity === 'CRITICAL' ? '#EF4444' : v.severity === 'HIGH' ? '#FB923C' : '#F59E0B',
-                      backgroundColor: v.severity === 'CRITICAL' ? 'rgba(239,68,68,0.12)' : v.severity === 'HIGH' ? 'rgba(251,146,60,0.12)' : 'rgba(245,158,11,0.12)',
-                    }}
-                  >
-                    {v.severity}
-                  </span>
-                </div>
-                <div className="mt-1.5 font-mono text-[11px] text-text-muted">
-                  {instrument} · {dateStr} · {timeStr} EST
-                </div>
-                <div className="mt-1 font-mono text-[11px] text-text-dim leading-relaxed line-clamp-2">
-                  {v.evidence_event_ids.length} fills flagged under rule {v.rule_id}. Severity: {v.severity}.
-                </div>
-              </button>
+                  <div className="mt-1.5 font-mono text-[11px] text-text-muted">
+                    {instrument} · {dateStr} · {timeStr} EST
+                  </div>
+                  <div className="mt-1 font-mono text-[11px] text-text-dim leading-relaxed line-clamp-2">
+                    {v.evidence_event_ids.length} fills flagged under rule {v.rule_id}. Severity: {v.severity}.
+                  </div>
+                </button>
+              </GlowCard>
             );
           })}
         </div>

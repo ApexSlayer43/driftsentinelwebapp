@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { getTierStyle } from '@/lib/tokens';
+import { GlowCard } from '@/components/ui/glow-card';
 import type { DailyScore } from '@/lib/types';
 
 interface EvidenceSessionsProps {
@@ -81,16 +82,6 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
   return (
     <div className="space-y-2">
       {scores.map((day) => {
-        const isClean = day.violation_count === 0;
-        const isSevere = day.violation_count >= 3;
-
-        // 4px left border accent: clean/violation/severe
-        const borderClass = isSevere
-          ? 'border-accent-severe'
-          : !isClean
-          ? 'border-accent-violation'
-          : 'border-accent-clean';
-
         // Derive tier from BSS score for color
         const tier = day.bss_score >= 90 ? 'SOVEREIGN'
           : day.bss_score >= 80 ? 'DISCIPLINED'
@@ -104,9 +95,9 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
         const delta = day.bss_score - day.bss_previous;
 
         return (
-          <div
+          <GlowCard
             key={day.daily_score_id}
-            className={`glass-card rounded-2xl p-3.5 ${borderClass}`}
+            className="glass-card rounded-2xl p-3.5"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -147,7 +138,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
                 {day.violation_count} pattern{day.violation_count > 1 ? 's' : ''} detected
               </div>
             )}
-          </div>
+          </GlowCard>
         );
       })}
     </div>
