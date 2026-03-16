@@ -27,10 +27,18 @@ export default function ForensicsPage() {
   useEffect(() => {
     async function load() {
       const supabase = createClient();
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
 
-      const ref = userData.user.user_metadata?.account_ref ?? userData.user.id;
+      // Get account_ref from accounts table — same pattern as Historical page
+      const { data: accounts } = await supabase
+        .from('accounts')
+        .select('account_ref')
+        .eq('user_id', user.id)
+        .limit(1);
+
+      if (!accounts || accounts.length === 0) { setLoading(false); return; }
+      const ref = accounts[0].account_ref;
 
       const [violationsRes, fillsRes] = await Promise.all([
         supabase

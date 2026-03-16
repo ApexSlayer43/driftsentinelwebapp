@@ -82,7 +82,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
     <div className="space-y-2">
       {/* Link to full forensics */}
       <Link
-        href="/violations"
+        href="/forensics"
         className="block text-center font-mono text-[12px] uppercase tracking-[0.12em] text-accent-primary transition-colors hover:text-accent-hover"
       >
         View full forensics →
