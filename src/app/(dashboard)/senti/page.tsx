@@ -3,8 +3,9 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { TextStreamChatTransport, type UIMessage } from 'ai';
-import { Send, Bot, Loader2, RotateCcw, MessageSquare, Clock } from 'lucide-react';
+import { Bot, Loader2, RotateCcw, MessageSquare, Clock } from 'lucide-react';
 import { GlowCard } from '@/components/ui/glow-card';
+import { GradientAIChatInput } from '@/components/ui/gradient-ai-chat-input';
 
 type SentiMode = 'morningBriefing' | 'sessionCompanion' | 'postSessionAAR' | 'onboarding';
 
@@ -63,12 +64,12 @@ function formatRelativeDate(dateStr: string): string {
 export default function SentiPage() {
   const [mode, setMode] = useState<SentiMode>('sessionCompanion');
   const [input, setInput] = useState('');
+  const [uploadingFile, setUploadingFile] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const transport = useMemo(
     () =>
@@ -99,10 +100,7 @@ export default function SentiPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
 
-  // Auto-focus input
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+  // (input auto-focus handled by GradientAIChatInput)
 
   // Fetch conversation history
   const fetchHistory = useCallback(async () => {
@@ -195,6 +193,87 @@ export default function SentiPage() {
       handleSend();
     }
   }
+
+  // File upload handler — sends PDF/CSV to Senti ingest endpoint and streams analysis
+  async function handleFileUpload(file: File) {
+    const isPdf = file.name.toLowerCase().endsWith('.pdf');
+    const isCsv = file.name.toLowerCase().endsWith('.csv');
+    if (!isPdf && !isCsv) return;
+
+    setUploadingFile(true);
+
+    // Add user message showing the upload
+    const uploadMsg: UIMessage = {
+      id: 'upload-' + Date.now(),
+      role: 'user',
+      parts: [{ type: 'text', text: `Uploaded: ${file.name}` }],
+    };
+    setMessages((prev: UIMessage[]) => [...prev, uploadMsg]);
+
+    // Add placeholder for Senti's streaming response
+    const sentiMsgId = 'senti-analysis-' + Date.now();
+    const placeholderMsg: UIMessage = {
+      id: sentiMsgId,
+      role: 'assistant',
+      parts: [{ type: 'text', text: '' }],
+    };
+    setMessages((prev: UIMessage[]) => [...prev, placeholderMsg]);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/chat/ingest', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        throw new Error(errBody?.error || `Upload failed: ${res.status}`);
+      }
+
+      // Stream the response
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          fullText += decoder.decode(value, { stream: true });
+          setMessages((prev: UIMessage[]) =>
+            prev.map((m: UIMessage) =>
+              m.id === sentiMsgId
+                ? { ...m, parts: [{ type: 'text' as const, text: fullText }] }
+                : m
+            )
+          );
+        }
+      }
+    } catch (err) {
+      const errorText = err instanceof Error ? err.message : 'Failed to analyze file';
+      setMessages((prev: UIMessage[]) =>
+        prev.map((m: UIMessage) =>
+          m.id === sentiMsgId
+            ? { ...m, parts: [{ type: 'text' as const, text: `Error: ${errorText}` }] }
+            : m
+        )
+      );
+    } finally {
+      setUploadingFile(false);
+    }
+  }
+
+  // Map modes to dropdown options for the gradient input
+  const modeDropdownOptions = MODE_OPTIONS.map((opt) => ({
+    id: opt.value,
+    label: opt.label,
+    value: opt.value,
+  }));
+
+  const selectedModeOption = modeDropdownOptions.find((o) => o.value === mode) ?? null;
 
   return (
     <div className="flex h-full max-h-[calc(100vh-60px)]">
@@ -387,47 +466,22 @@ export default function SentiPage() {
           </div>
         </div>
 
-        {/* Input area */}
+        {/* Input area — Gradient AI Chat Input */}
         <div className="px-6 pb-4 pt-2">
           <div className="max-w-2xl mx-auto">
-            <GlowCard variant="teal" className="rounded-xl">
-              <div
-                className="flex items-end gap-3 rounded-xl px-4 py-3"
-                style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.04)',
-                }}
-              >
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask about your behavioral data..."
-                  disabled={isBusy}
-                  rows={1}
-                  className="flex-1 resize-none bg-transparent font-mono text-[13px] text-text-primary placeholder-text-dim outline-none disabled:opacity-50"
-                  style={{ minHeight: '24px', maxHeight: '120px' }}
-                  onInput={(e) => {
-                    const target = e.target as HTMLTextAreaElement;
-                    target.style.height = '24px';
-                    target.style.height = target.scrollHeight + 'px';
-                  }}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={isBusy || !input.trim()}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all text-text-muted hover:text-positive disabled:opacity-30 disabled:pointer-events-none"
-                  style={{ background: 'rgba(34, 211, 238, 0.08)' }}
-                >
-                  {isBusy ? (
-                    <Loader2 size={14} className="animate-spin text-positive" />
-                  ) : (
-                    <Send size={14} />
-                  )}
-                </button>
-              </div>
-            </GlowCard>
+            <GradientAIChatInput
+              placeholder="Ask about your behavioral data..."
+              disabled={isBusy}
+              uploading={uploadingFile}
+              onSend={(msg) => {
+                setInput('');
+                sendMessage({ text: msg });
+              }}
+              onFileAttach={handleFileUpload}
+              dropdownOptions={modeDropdownOptions}
+              selectedOption={selectedModeOption}
+              onOptionSelect={(opt) => switchMode(opt.value as SentiMode)}
+            />
             <div className="text-center mt-2">
               <span className="font-mono text-[9px] text-text-dim">
                 Senti speaks from your data. No trading advice. No predictions.
