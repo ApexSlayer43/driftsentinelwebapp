@@ -92,7 +92,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
         <div className="mx-5 h-px bg-border-subtle" />
 
         {/* Tab content */}
-        <div className="overflow-y-auto px-5 py-4" style={{ maxHeight: 'calc(65vh - 100px)' }}>
+        <div className="overflow-y-auto px-4 py-3" style={{ maxHeight: 'calc(65vh - 90px)' }}>
           {activeTab === 'sessions' && <EvidenceSessions accountRef={accountRef} />}
           {activeTab === 'violations' && <EvidenceViolations accountRef={accountRef} />}
           {activeTab === 'trends' && <EvidenceTrends accountRef={accountRef} />}

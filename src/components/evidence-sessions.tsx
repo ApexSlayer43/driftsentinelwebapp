@@ -97,47 +97,44 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
         return (
           <GlowPanel
             key={day.daily_score_id}
-            className="p-3.5"
+            className="p-2.5"
+            outerClassName="p-1"
           >
             <div className="flex items-center justify-between">
-              <div>
-                {/* Date — 12px Inter weight 500 */}
-                <div className="font-mono text-[12px] font-medium text-text-primary">
-                  {day.trading_date}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[11px] font-medium text-text-primary">
+                    {day.trading_date}
+                  </span>
+                  {day.violation_count > 0 && (
+                    <span className="flex items-center gap-1 font-mono text-[9px] text-warning">
+                      <span className="inline-block h-1 w-1 rounded-full bg-warning" />
+                      {day.violation_count}v
+                    </span>
+                  )}
                 </div>
-                {/* Metadata row — trade count, DSI, streak */}
-                <div className="mt-1 flex items-center gap-3 font-mono text-[12px] text-text-muted">
-                  <span>{day.fills_count} fills</span>
+                <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-text-muted">
+                  <span>{day.fills_count}f</span>
                   <span>DSI {day.dsi_score}</span>
                   {day.streak_count > 0 && (
-                    <span className="text-positive">{day.streak_count}d streak</span>
+                    <span className="text-positive">{day.streak_count}d</span>
                   )}
                 </div>
               </div>
-              <div className="text-right">
-                {/* BSS score — tier colored */}
-                <div
-                  className="font-mono text-lg font-bold"
+              <div className="flex items-center gap-2">
+                <span
+                  className="font-mono text-base font-bold"
                   style={{ color: tierStyle.color, fontVariantNumeric: 'tabular-nums' }}
                 >
                   {day.bss_score}
-                </div>
-                {/* Delta — cyan positive, orange negative */}
-                <div className={`font-mono text-[12px] font-medium ${
+                </span>
+                <span className={`font-mono text-[10px] font-medium ${
                   delta > 0 ? 'text-positive' : delta < 0 ? 'text-negative' : 'text-text-muted'
                 }`} style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {delta > 0 ? '+' : ''}{delta !== 0 ? delta : '—'}
-                </div>
+                </span>
               </div>
             </div>
-
-            {/* Violation badge — amber, only when violations present */}
-            {day.violation_count > 0 && (
-              <div className="mt-2 flex items-center gap-1.5 font-mono text-[11px] text-warning">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-warning" />
-                {day.violation_count} pattern{day.violation_count > 1 ? 's' : ''} detected
-              </div>
-            )}
           </GlowPanel>
         );
       })}

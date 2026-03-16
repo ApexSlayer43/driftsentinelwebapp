@@ -171,7 +171,7 @@ export default function SessionsPage() {
         </div>
       )}
 
-      {/* Pulse Strip — inline, not a full-width bar */}
+      {/* Pulse Strip */}
       <div className="px-8 py-2 shrink-0">
         <h2 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-1.5">
           Session Pulse
