@@ -8,7 +8,7 @@ import { ViolationDetailPanel } from '@/components/violation-detail';
 import type { FillCanonical, ViolationDetail } from '@/lib/types';
 
 /**
- * Forensics — Layer 3 (spec Section 2)
+ * Historical — Layer 3 (spec Section 2)
  *
  * Trade-level data table with sortable columns:
  * Time | Instrument | Side | Qty | Entry | Exit | P&L | BSS Impact | Violation Flags
@@ -23,7 +23,7 @@ type SortDir = 'asc' | 'desc';
 
 const PAGE_SIZE = 25;
 
-export default function ForensicsPage() {
+export default function HistoricalPage() {
   const [fills, setFills] = useState<FillCanonical[]>([]);
   const [violations, setViolations] = useState<ViolationDetail[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,7 +156,7 @@ export default function ForensicsPage() {
         <div className="px-5 pt-6 pb-4 border-b border-border-subtle flex items-end justify-between">
           <div>
             <h1 className="font-mono text-[13px] font-semibold uppercase tracking-[0.15em] text-text-secondary">
-              Forensics
+              Historical
             </h1>
             <p className="mt-1 font-mono text-[12px] text-text-muted">
               {fills.length} fills · {violations.length} patterns detected
@@ -202,7 +202,7 @@ export default function ForensicsPage() {
             <div className="flex flex-col items-center justify-center py-20">
               <Search size={24} className="text-text-dim" />
               <p className="mt-3 font-mono text-[12px] text-text-muted">
-                No trade data yet. Upload your Tradovate CSV to populate forensics.
+                No trade data yet. Upload your Tradovate CSV to populate historical data.
               </p>
             </div>
           ) : (
