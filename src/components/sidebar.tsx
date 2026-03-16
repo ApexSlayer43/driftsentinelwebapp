@@ -9,12 +9,14 @@ import {
   Upload,
   Settings,
   Shield,
+  Search,
 } from 'lucide-react';
 import { getTierStyle } from '@/lib/tokens';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
   { label: 'Historical', href: '/violations', icon: AlertTriangle },
+  { label: 'Forensics', href: '/forensics', icon: Search },
   { label: 'History', href: '/history', icon: BarChart3 },
   { label: 'Ingest', href: '/ingest', icon: Upload },
 ];
