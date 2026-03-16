@@ -96,12 +96,13 @@ export function SessionDrillDown({ session, onClose }: SessionDrillDownProps) {
 
   return (
     <GlowPanel className="p-0 relative overflow-hidden">
-      {/* Close button */}
+      {/* Close button — prominent, top-right */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.06] hover:bg-white/[0.10] transition-all text-text-muted hover:text-text-primary"
+        className="absolute top-3 right-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.10] hover:border-white/[0.20] transition-all text-white/60 hover:text-white shadow-lg"
+        title="Close session"
       >
-        <X size={14} />
+        <X size={16} strokeWidth={2} />
       </button>
 
       {/* Two-column layout: Left = session overview, Right = timeline */}
