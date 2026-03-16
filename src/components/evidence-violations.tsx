@@ -107,10 +107,10 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
           <GlowPanel key={v.violation_id} className="p-0" outerClassName="p-1">
             <button
               onClick={() => setExpandedId(isExpanded ? null : v.violation_id)}
-              className="flex w-full items-center gap-2.5 p-2.5 transition-transform hover:scale-[1.005]"
+              className="flex items-center gap-2.5 p-2.5 transition-transform hover:scale-[1.005]"
             >
               <DynamicIcon name={modeIcon} size={12} className="shrink-0 text-text-muted" />
-              <div className="flex-1 text-left min-w-0">
+              <div className="text-left min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-[11px] font-medium text-text-primary truncate">
                     {modeLabel}

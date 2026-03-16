@@ -100,7 +100,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
             className="p-2.5"
             outerClassName="p-1"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-[11px] font-medium text-text-primary">
