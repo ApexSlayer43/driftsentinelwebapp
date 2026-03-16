@@ -1,11 +1,11 @@
 // ── Invisible Interface Design Token System ──
 // Aligned exactly to the design intelligence briefing (Sections 5-7)
 
-// Accent: Indigo (#6366F1) — trust, reliability, technology
+// Accent: White/Silver — monochrome brand
 export const ACCENT = {
-  primary: '#6366F1',
-  hover: '#818CF8',
-  muted: '#312E81',
+  primary: '#E2E8F0',
+  hover: '#FFFFFF',
+  muted: 'rgba(255,255,255,0.06)',
 } as const;
 
 // Behavioral Signals — colorblind-safe (cyan/orange, NOT red/green)
@@ -43,13 +43,13 @@ export const SEVERITY_COLORS = {
   CRITICAL: '#FB923C',
 } as const;
 
-// Compliance grid colors (spec Section 7 — indigo at varying opacities)
+// Compliance grid colors — monochrome (white at varying opacities)
 export const COMPLIANCE_COLORS = {
   empty: '#1A1D27',
-  partial: '#1E2A4A',
-  moderate: '#2346A0',
-  high: '#3B6CF6',
-  full: '#6366F1',
+  partial: 'rgba(255,255,255,0.06)',
+  moderate: 'rgba(255,255,255,0.15)',
+  high: 'rgba(255,255,255,0.28)',
+  full: 'rgba(255,255,255,0.45)',
 } as const;
 
 export const MODE_LABELS: Record<string, string> = {

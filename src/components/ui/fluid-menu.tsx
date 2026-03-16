@@ -15,7 +15,7 @@ export function MenuItem({ children, onClick, disabled = false, icon, isActive =
     <button
       className={`relative block w-full h-12 text-center group
         ${disabled ? "text-text-dim cursor-not-allowed" : "text-text-muted"}
-        ${isActive ? "text-positive" : ""}
+        ${isActive ? "text-white" : ""}
       `}
       role="menuitem"
       onClick={onClick}
@@ -24,7 +24,7 @@ export function MenuItem({ children, onClick, disabled = false, icon, isActive =
     >
       <span className="flex items-center justify-center h-full">
         {icon && (
-          <span className="h-5 w-5 transition-all duration-200 group-hover:[&_svg]:stroke-[2.5] group-hover:text-positive">
+          <span className="h-5 w-5 transition-all duration-200 group-hover:[&_svg]:stroke-[2.5] group-hover:text-white">
             {icon}
           </span>
         )}

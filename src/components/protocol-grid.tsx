@@ -231,7 +231,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
             <div
               key={i}
               className="h-[10px] w-[10px] rounded-[2px]"
-              style={{ backgroundColor: '#6366F1', opacity: op }}
+              style={{ backgroundColor: '#FFFFFF', opacity: op }}
             />
           ))}
           <span className="text-text-dim">More</span>

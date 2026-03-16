@@ -45,38 +45,38 @@ export function SentinelWordmark({ className = '', height = 100 }: SentinelWordm
       {/* Eye mark centered at 50,50 */}
       <g transform="translate(50,50)">
         {/* Outer orbit ring dashed */}
-        <circle cx="0" cy="0" r="38" fill="none" stroke="#6366F1" strokeWidth="0.4" opacity="0.18" strokeDasharray="3 7" />
+        <circle cx="0" cy="0" r="38" fill="none" stroke="#C0C8D8" strokeWidth="0.4" opacity="0.18" strokeDasharray="3 7" />
         {/* Eye almond shape */}
         <path
           d="M-32,0 C-19,-17 19,-17 32,0 C19,17 -19,17 -32,0 Z"
           fill="none"
-          stroke="#6366F1"
+          stroke="#C0C8D8"
           strokeWidth="2"
           filter="url(#wm-glow)"
         />
         {/* Iris ring */}
-        <circle cx="0" cy="0" r="11" fill="none" stroke="#6366F1" strokeWidth="1.2" opacity="0.55" filter="url(#wm-glow)" />
+        <circle cx="0" cy="0" r="11" fill="none" stroke="#C0C8D8" strokeWidth="1.2" opacity="0.55" filter="url(#wm-glow)" />
         {/* Pupil outer — gold */}
         <circle cx="0" cy="0" r="6.5" fill="#FFD700" opacity="0.12" />
         <circle cx="0" cy="0" r="6.5" fill="none" stroke="#FFD700" strokeWidth="1.6" filter="url(#wm-glow)" />
         {/* Center dot — gold */}
         <circle cx="0" cy="0" r="2.8" fill="#FFD700" filter="url(#wm-glow-strong)" />
         {/* Horizontal axis ticks */}
-        <line x1="-32" y1="0" x2="-25" y2="0" stroke="#6366F1" strokeWidth="2.2" filter="url(#wm-glow)" />
-        <line x1="25" y1="0" x2="32" y2="0" stroke="#6366F1" strokeWidth="2.2" filter="url(#wm-glow)" />
+        <line x1="-32" y1="0" x2="-25" y2="0" stroke="#C0C8D8" strokeWidth="2.2" filter="url(#wm-glow)" />
+        <line x1="25" y1="0" x2="32" y2="0" stroke="#C0C8D8" strokeWidth="2.2" filter="url(#wm-glow)" />
         {/* Vertical axis ticks — inside eye, clipped to almond */}
         <g clipPath="url(#wm-eye-clip)">
-          <line x1="0" y1="-25" x2="0" y2="-12" stroke="#6366F1" strokeWidth="2.2" filter="url(#wm-glow)" />
-          <line x1="0" y1="12" x2="0" y2="25" stroke="#6366F1" strokeWidth="2.2" filter="url(#wm-glow)" />
+          <line x1="0" y1="-25" x2="0" y2="-12" stroke="#C0C8D8" strokeWidth="2.2" filter="url(#wm-glow)" />
+          <line x1="0" y1="12" x2="0" y2="25" stroke="#C0C8D8" strokeWidth="2.2" filter="url(#wm-glow)" />
         </g>
         {/* Vertical minor ticks — outside */}
-        <line x1="0" y1="-17" x2="0" y2="-12" stroke="#6366F1" strokeWidth="1" opacity="0.45" />
-        <line x1="0" y1="12" x2="0" y2="17" stroke="#6366F1" strokeWidth="1" opacity="0.45" />
+        <line x1="0" y1="-17" x2="0" y2="-12" stroke="#C0C8D8" strokeWidth="1" opacity="0.45" />
+        <line x1="0" y1="12" x2="0" y2="17" stroke="#C0C8D8" strokeWidth="1" opacity="0.45" />
         {/* Corner reticle marks */}
-        <line x1="22" y1="-11" x2="25" y2="-14" stroke="#6366F1" strokeWidth="0.9" opacity="0.5" />
-        <line x1="-22" y1="-11" x2="-25" y2="-14" stroke="#6366F1" strokeWidth="0.9" opacity="0.5" />
-        <line x1="22" y1="11" x2="25" y2="14" stroke="#6366F1" strokeWidth="0.9" opacity="0.5" />
-        <line x1="-22" y1="11" x2="-25" y2="14" stroke="#6366F1" strokeWidth="0.9" opacity="0.5" />
+        <line x1="22" y1="-11" x2="25" y2="-14" stroke="#C0C8D8" strokeWidth="0.9" opacity="0.5" />
+        <line x1="-22" y1="-11" x2="-25" y2="-14" stroke="#C0C8D8" strokeWidth="0.9" opacity="0.5" />
+        <line x1="22" y1="11" x2="25" y2="14" stroke="#C0C8D8" strokeWidth="0.9" opacity="0.5" />
+        <line x1="-22" y1="11" x2="-25" y2="14" stroke="#C0C8D8" strokeWidth="0.9" opacity="0.5" />
       </g>
 
       {/* DRIFT - small, muted, wide tracking */}
@@ -100,7 +100,7 @@ export function SentinelWordmark({ className = '', height = 100 }: SentinelWordm
         fontFamily="'Syne', 'Courier New', Courier, monospace"
         fontSize="36"
         fontWeight="900"
-        fill="#6366F1"
+        fill="#C0C8D8"
         letterSpacing="2.5"
         filter="url(#wm-glow-text)"
       >
@@ -113,7 +113,7 @@ export function SentinelWordmark({ className = '', height = 100 }: SentinelWordm
         fontFamily="'JetBrains Mono', 'Courier New', Courier, monospace"
         fontSize="7.5"
         fontWeight="400"
-        fill="#6366F1"
+        fill="#C0C8D8"
         letterSpacing="5.5"
         opacity="0.4"
       >

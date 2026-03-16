@@ -32,10 +32,10 @@
   --color-breakdown: #FB923C;
   --color-building: #6B7280;
 
-  /* Accent — indigo (spec Section 5: trust, reliability, technology) */
-  --color-accent-primary: #6366F1;
-  --color-accent-hover: #818CF8;
-  --color-accent-muted: #312E81;
+  /* Accent — monochrome white/silver */
+  --color-accent-primary: #E2E8F0;
+  --color-accent-hover: #FFFFFF;
+  --color-accent-muted: rgba(255,255,255,0.06);
 
   /* Severity — mapped to behavioral signals */
   --color-sev-low: #94A3B8;
@@ -114,8 +114,8 @@
   --card-foreground: #E2E8F0;
   --popover: #1A1D27;
   --popover-foreground: #E2E8F0;
-  --primary: #6366F1;
-  --primary-foreground: #E2E8F0;
+  --primary: #E2E8F0;
+  --primary-foreground: #0F1117;
   --secondary: #242836;
   --secondary-foreground: #E2E8F0;
   --muted: #242836;
@@ -125,21 +125,21 @@
   --destructive: #FB923C;
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.08);
-  --ring: #6366F1;
-  --chart-1: #6366F1;
+  --ring: #E2E8F0;
+  --chart-1: #E2E8F0;
   --chart-2: #F59E0B;
   --chart-3: #FB923C;
-  --chart-4: #A78BFA;
+  --chart-4: #94A3B8;
   --chart-5: #6B7280;
   --radius: 0.625rem;
   --sidebar: #1A1D27;
   --sidebar-foreground: #E2E8F0;
-  --sidebar-primary: #6366F1;
+  --sidebar-primary: #E2E8F0;
   --sidebar-primary-foreground: #E2E8F0;
   --sidebar-accent: #242836;
   --sidebar-accent-foreground: #E2E8F0;
   --sidebar-border: rgba(255, 255, 255, 0.04);
-  --sidebar-ring: #6366F1;
+  --sidebar-ring: #E2E8F0;
 }
 
 @layer base {
@@ -301,7 +301,7 @@
     0 0 6px rgba(0, 0, 0, 0.06);
 }
 .liquid-glass-tab-active {
-  background: rgba(99, 102, 241, 0.04);
+  background: rgba(255, 255, 255, 0.04);
   box-shadow:
     0 0 6px rgba(0, 0, 0, 0.02),
     0 2px 4px rgba(0, 0, 0, 0.06),
@@ -310,7 +310,7 @@
     inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.25),
     inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.25),
     inset 0 0 6px 6px rgba(255, 255, 255, 0.03),
-    0 0 10px rgba(99, 102, 241, 0.05);
+    0 0 10px rgba(255, 255, 255, 0.05);
 }
 
 /* ── 4px Left Border Accents (spec Section 7 — session quality) ── */
@@ -330,7 +330,7 @@ body {
 }
 
 button, a, [role="button"], .interactive, [data-clickable] {
-  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14" stroke="%2364748B" stroke-width="1"/><line x1="2" y1="8" x2="14" y2="8" stroke="%2364748B" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="%236366F1"/></svg>') 8 8, pointer;
+  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><line x1="8" y1="2" x2="8" y2="14" stroke="%2364748B" stroke-width="1"/><line x1="2" y1="8" x2="14" y2="8" stroke="%2364748B" stroke-width="1"/><circle cx="8" cy="8" r="1.5" fill="%23E2E8F0"/></svg>') 8 8, pointer;
 }
 
 .bss-orb {

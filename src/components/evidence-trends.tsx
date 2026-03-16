@@ -26,7 +26,7 @@ interface TrendPoint {
 
 /**
  * Trends tab — 7-day BSS + DSI dual-line chart.
- * BSS in brand teal (#6366F1), DSI in soft purple (#A78BFA).
+ * BSS in brand teal (#E2E8F0), DSI in soft purple (#94A3B8).
  * Dark theme matching the existing design system.
  */
 export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
@@ -102,7 +102,7 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
           <span className="text-text-muted">BSS</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#A78BFA' }} />
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#94A3B8' }} />
           <span className="text-text-muted">DSI</span>
         </div>
       </div>
@@ -140,19 +140,19 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
           <Line
             type="monotone"
             dataKey="bss"
-            stroke="#6366F1"
+            stroke="#E2E8F0"
             strokeWidth={2}
-            dot={{ fill: '#6366F1', r: 3, strokeWidth: 0 }}
-            activeDot={{ r: 5, stroke: '#6366F1', strokeWidth: 2, fill: '#1A1D27' }}
+            dot={{ fill: '#E2E8F0', r: 3, strokeWidth: 0 }}
+            activeDot={{ r: 5, stroke: '#E2E8F0', strokeWidth: 2, fill: '#1A1D27' }}
             name="BSS"
           />
           <Line
             type="monotone"
             dataKey="dsi"
-            stroke="#A78BFA"
+            stroke="#94A3B8"
             strokeWidth={2}
-            dot={{ fill: '#A78BFA', r: 3, strokeWidth: 0 }}
-            activeDot={{ r: 5, stroke: '#A78BFA', strokeWidth: 2, fill: '#1A1D27' }}
+            dot={{ fill: '#94A3B8', r: 3, strokeWidth: 0 }}
+            activeDot={{ r: 5, stroke: '#94A3B8', strokeWidth: 2, fill: '#1A1D27' }}
             name="DSI"
           />
         </LineChart>
