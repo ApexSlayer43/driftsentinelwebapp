@@ -1,26 +1,41 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Search, Clock, Layers } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Search, ArrowUpDown, Zap } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { getModeLabel, getModeIcon, getModeWeight } from '@/lib/tokens';
-import { DynamicIcon } from '@/components/dynamic-icon';
+import { getModeLabel, getModeWeight } from '@/lib/tokens';
 import { ViolationDetailPanel } from '@/components/violation-detail';
-import { GlowingEffect } from '@/components/ui/glowing-effect';
-import type { ViolationDetail } from '@/lib/types';
+import type { FillCanonical, ViolationDetail } from '@/lib/types';
 
 /**
- * Forensics — master-detail behavioral pattern analysis.
- * Left: scrollable pattern list with point deductions + snippets.
- * Right: full SBI analysis, impact metrics, session context, recurrence.
+ * Forensics — Layer 3 (spec Section 2)
+ *
+ * Trade-level data table with sortable columns:
+ * Time | Instrument | Side | Qty | Entry | Exit | P&L | BSS Impact | Violation Flags
+ *
+ * Master-detail: table on left, selected item's full detail on right.
+ * This is the Bloomberg-density zone — filterable, sortable, professional.
+ * Font: JetBrains Mono 13px with tabular-nums.
  */
-export default function ViolationsPage() {
+
+type SortKey = 'timestamp_utc' | 'contract' | 'side' | 'qty' | 'price';
+type SortDir = 'asc' | 'desc';
+
+const PAGE_SIZE = 25;
+
+export default function ForensicsPage() {
+  const [fills, setFills] = useState<FillCanonical[]>([]);
   const [violations, setViolations] = useState<ViolationDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortKey, setSortKey] = useState<SortKey>('timestamp_utc');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [page, setPage] = useState(0);
+  const [filterSide, setFilterSide] = useState<string | null>(null);
+  const [filterViolations, setFilterViolations] = useState(false);
   const [selectedViolation, setSelectedViolation] = useState<ViolationDetail | null>(null);
 
   useEffect(() => {
-    async function loadViolations() {
+    async function load() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
@@ -32,133 +47,279 @@ export default function ViolationsPage() {
         .limit(1);
 
       if (!accounts || accounts.length === 0) { setLoading(false); return; }
+      const ref = accounts[0].account_ref;
 
-      const { data, error } = await supabase
-        .from('violations')
-        .select('*')
-        .eq('account_ref', accounts[0].account_ref)
-        .order('created_at', { ascending: false })
-        .limit(100);
+      // Fetch fills and violations in parallel
+      const [fillsRes, violationsRes] = await Promise.all([
+        supabase
+          .from('fills_canonical')
+          .select('*')
+          .eq('account_ref', ref)
+          .order('timestamp_utc', { ascending: false })
+          .limit(500),
+        supabase
+          .from('violations')
+          .select('*')
+          .eq('account_ref', ref)
+          .order('created_at', { ascending: false })
+          .limit(200),
+      ]);
 
-      if (!error && data) {
-        const viols = data as ViolationDetail[];
-        setViolations(viols);
-        // Auto-select first
-        if (viols.length > 0) setSelectedViolation(viols[0]);
-      }
+      if (fillsRes.data) setFills(fillsRes.data as FillCanonical[]);
+      if (violationsRes.data) setViolations(violationsRes.data as ViolationDetail[]);
       setLoading(false);
     }
 
-    loadViolations();
+    load();
   }, []);
 
-  const totalDeductions = violations.reduce((sum, v) => sum + v.points, 0);
+  // Build a map of event_id → violation(s) for flag lookup
+  const violationMap = useMemo(() => {
+    const map = new Map<string, ViolationDetail>();
+    for (const v of violations) {
+      for (const eid of v.evidence_event_ids) {
+        map.set(eid, v);
+      }
+    }
+    return map;
+  }, [violations]);
+
+  // Filtered fills
+  const filtered = useMemo(() => {
+    let result = [...fills];
+    if (filterSide) result = result.filter(f => f.side === filterSide);
+    if (filterViolations) result = result.filter(f => violationMap.has(f.event_id));
+    return result;
+  }, [fills, filterSide, filterViolations, violationMap]);
+
+  // Sorted fills
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    arr.sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case 'timestamp_utc':
+          cmp = new Date(a.timestamp_utc).getTime() - new Date(b.timestamp_utc).getTime();
+          break;
+        case 'contract':
+          cmp = (a.contract ?? '').localeCompare(b.contract ?? '');
+          break;
+        case 'side':
+          cmp = a.side.localeCompare(b.side);
+          break;
+        case 'qty':
+          cmp = a.qty - b.qty;
+          break;
+        case 'price':
+          cmp = a.price - b.price;
+          break;
+      }
+      return sortDir === 'desc' ? -cmp : cmp;
+    });
+    return arr;
+  }, [filtered, sortKey, sortDir]);
+
+  // Paginated
+  const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+  const paginated = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('desc');
+    }
+    setPage(0);
+  }
+
+  function SortHeader({ label, sortKeyName, className = '' }: { label: string; sortKeyName: SortKey; className?: string }) {
+    const isActive = sortKey === sortKeyName;
+    return (
+      <button
+        onClick={() => toggleSort(sortKeyName)}
+        className={`flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-[0.15em] transition-colors ${
+          isActive ? 'text-accent-primary' : 'text-text-muted hover:text-text-secondary'
+        } ${className}`}
+      >
+        {label}
+        <ArrowUpDown size={10} className={isActive ? 'opacity-100' : 'opacity-30'} />
+      </button>
+    );
+  }
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* ═══ MASTER LIST (left) ═══ */}
-      <div className="w-[380px] shrink-0 border-r border-border-subtle flex flex-col overflow-hidden">
+      {/* ═══ DATA TABLE (left) ═══ */}
+      <div className={`flex flex-col overflow-hidden ${selectedViolation ? 'w-[60%]' : 'w-full'} transition-all`}>
         {/* Header */}
-        <div className="px-5 pt-6 pb-4 border-b border-border-subtle">
-          <h1 className="font-mono text-[13px] font-semibold uppercase tracking-[0.15em] text-text-secondary">
-            Forensics
-          </h1>
-          <p className="mt-1 font-mono text-[12px] text-text-muted">
-            {violations.length} patterns detected · 30 days
-          </p>
+        <div className="px-5 pt-6 pb-4 border-b border-border-subtle flex items-end justify-between">
+          <div>
+            <h1 className="font-mono text-[13px] font-semibold uppercase tracking-[0.15em] text-text-secondary">
+              Forensics
+            </h1>
+            <p className="mt-1 font-mono text-[12px] text-text-muted">
+              {fills.length} fills · {violations.length} patterns detected
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {/* Side filter */}
+            <button
+              onClick={() => setFilterSide(filterSide === 'BUY' ? null : 'BUY')}
+              className={`rounded-lg px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors ${
+                filterSide === 'BUY' ? 'bg-positive/10 text-positive' : 'glass-inset text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              Buy
+            </button>
+            <button
+              onClick={() => setFilterSide(filterSide === 'SELL' ? null : 'SELL')}
+              className={`rounded-lg px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors ${
+                filterSide === 'SELL' ? 'bg-negative/10 text-negative' : 'glass-inset text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              Sell
+            </button>
+            <button
+              onClick={() => { setFilterViolations(!filterViolations); setPage(0); }}
+              className={`flex items-center gap-1 rounded-lg px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors ${
+                filterViolations ? 'bg-warning/10 text-warning' : 'glass-inset text-text-muted hover:text-text-secondary'
+              }`}
+            >
+              <Zap size={10} />
+              Flagged
+            </button>
+          </div>
         </div>
 
-        {/* Scrollable list */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+        {/* Table */}
+        <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="py-12 text-center">
-              <div className="mx-auto h-5 w-5 animate-spin rounded-full border-2 border-accent-primary border-t-transparent" />
+            <div className="flex justify-center py-12">
+              <div className="h-5 w-5 animate-pulse rounded-full bg-raised" />
             </div>
-          ) : violations.length === 0 ? (
-            <div className="rounded-xl glass-card py-12 text-center">
-              <Search size={24} className="mx-auto text-text-dim" />
+          ) : fills.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Search size={24} className="text-text-dim" />
               <p className="mt-3 font-mono text-[12px] text-text-muted">
-                No patterns detected
+                No trade data yet. Upload your Tradovate CSV to populate forensics.
               </p>
             </div>
           ) : (
-            violations.map((v) => {
-              const modeLabel = getModeLabel(v.mode);
-              const weighted = Math.round(v.points * getModeWeight(v.mode));
-              const isSelected = selectedViolation?.violation_id === v.violation_id;
-              const time = new Date(v.first_seen_utc).toLocaleString('en-US', {
-                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false,
-              });
+            <table className="w-full">
+              <thead className="sticky top-0 bg-surface z-10 border-b border-border-subtle">
+                <tr>
+                  <th className="px-3 py-2.5 text-left"><SortHeader label="Time" sortKeyName="timestamp_utc" /></th>
+                  <th className="px-3 py-2.5 text-left"><SortHeader label="Instrument" sortKeyName="contract" /></th>
+                  <th className="px-3 py-2.5 text-left"><SortHeader label="Side" sortKeyName="side" /></th>
+                  <th className="px-3 py-2.5 text-right"><SortHeader label="Qty" sortKeyName="qty" className="justify-end" /></th>
+                  <th className="px-3 py-2.5 text-right"><SortHeader label="Price" sortKeyName="price" className="justify-end" /></th>
+                  <th className="px-3 py-2.5 text-center">
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted">Flags</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginated.map((fill) => {
+                  const violation = violationMap.get(fill.event_id);
+                  const time = new Date(fill.timestamp_utc).toLocaleTimeString('en-US', {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+                  });
+                  const date = new Date(fill.timestamp_utc).toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric',
+                  });
+                  const sideColor = fill.side === 'BUY' ? '#22D3EE' : '#FB923C';
+                  const isSelected = violation && selectedViolation?.violation_id === violation.violation_id;
 
-              // Build a snippet from rule_id + window info
-              const windowStart = new Date(v.window_start_utc).toLocaleTimeString('en-US', {
-                hour: '2-digit', minute: '2-digit', hour12: false,
-              });
-              const windowEnd = new Date(v.window_end_utc).toLocaleTimeString('en-US', {
-                hour: '2-digit', minute: '2-digit', hour12: false,
-              });
+                  return (
+                    <tr
+                      key={fill.event_id}
+                      className={`border-b border-border-dim transition-colors hover:bg-raised/50 ${
+                        violation ? 'cursor-pointer' : ''
+                      } ${isSelected ? 'bg-accent-muted/20' : ''}`}
+                      onClick={() => violation && setSelectedViolation(violation)}
+                    >
+                      {/* Time */}
+                      <td className="px-3 py-2">
+                        <div className="font-mono text-[13px] text-text-primary" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                          {time}
+                        </div>
+                        <div className="font-mono text-[10px] text-text-dim">{date}</div>
+                      </td>
+                      {/* Instrument */}
+                      <td className="px-3 py-2 font-mono text-[13px] text-text-secondary">
+                        {fill.contract}
+                      </td>
+                      {/* Side */}
+                      <td className="px-3 py-2">
+                        <span
+                          className="rounded px-1.5 py-0.5 font-mono text-[11px] font-bold"
+                          style={{ color: sideColor, backgroundColor: `${sideColor}12` }}
+                        >
+                          {fill.side}
+                        </span>
+                      </td>
+                      {/* Qty */}
+                      <td className="px-3 py-2 text-right font-mono text-[13px] text-text-primary" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {fill.qty}
+                      </td>
+                      {/* Price */}
+                      <td className="px-3 py-2 text-right font-mono text-[13px] text-text-secondary" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {fill.price.toFixed(2)}
+                      </td>
+                      {/* Violation Flags */}
+                      <td className="px-3 py-2 text-center">
+                        {violation ? (
+                          <span className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 bg-warning/10 font-mono text-[10px] font-bold text-warning">
+                            <Zap size={10} />
+                            {getModeLabel(violation.mode).split(' ')[0]}
+                          </span>
+                        ) : fill.off_session ? (
+                          <span className="rounded px-1.5 py-0.5 bg-warning/10 font-mono text-[10px] font-bold text-warning">
+                            OFF
+                          </span>
+                        ) : null}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
 
-              return (
-                <div key={v.violation_id} className="relative">
-                  {isSelected && (
-                    <GlowingEffect
-                      spread={40}
-                      glow={true}
-                      disabled={false}
-                      proximity={64}
-                      inactiveZone={0.01}
-                      borderWidth={2}
-                      variant="teal"
-                      blur={3}
-                    />
-                  )}
-                  <button
-                    onClick={() => setSelectedViolation(v)}
-                    className={`relative w-full text-left rounded-xl p-3.5 transition-all ${
-                      isSelected
-                        ? 'glass-card border-accent-primary bg-accent-muted shadow-[0_0_20px_rgba(0,212,170,0.05)]'
-                        : 'glass-card hover:border-border-active'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-mono text-[13px] font-semibold text-text-primary">
-                        {modeLabel}
-                      </span>
-                      <span className="font-mono text-[12px] font-bold text-warning bg-warning/10 px-2 py-0.5 rounded">
-                        -{weighted} pts
-                      </span>
-                    </div>
-                    <div className="font-mono text-[12px] text-text-muted">
-                      {time}
-                    </div>
-                    <div className="mt-1.5 font-mono text-[12px] text-text-secondary leading-relaxed line-clamp-2">
-                      Window {windowStart} – {windowEnd} · {v.evidence_event_ids.length} evidence fills · Rule {v.rule_id}
-                    </div>
-                  </button>
-                </div>
-              );
-            })
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t border-border-subtle px-5 py-3">
+              <span className="font-mono text-[11px] text-text-muted">
+                Page {page + 1} of {totalPages} · {sorted.length} fills
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage(p => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="rounded-lg glass-inset px-3 py-1 font-mono text-[11px] text-text-secondary disabled:opacity-30"
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                  className="rounded-lg glass-inset px-3 py-1 font-mono text-[11px] text-text-secondary disabled:opacity-30"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
 
-      {/* ═══ DETAIL PANEL (right) ═══ */}
-      <div className="flex-1 overflow-y-auto p-8">
-        {selectedViolation ? (
+      {/* ═══ DETAIL PANEL (right) — shows when a flagged fill is selected ═══ */}
+      {selectedViolation && (
+        <div className="w-[40%] border-l border-border-subtle overflow-y-auto p-6">
           <ViolationDetailPanel violation={selectedViolation} onBack={() => setSelectedViolation(null)} />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center">
-              <Search size={32} className="mx-auto text-text-dim" />
-              <p className="mt-4 font-mono text-[13px] text-text-muted">
-                {violations.length > 0
-                  ? 'Select a pattern to view forensic detail'
-                  : 'No patterns detected yet'}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

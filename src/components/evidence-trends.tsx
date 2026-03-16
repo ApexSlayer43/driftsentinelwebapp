@@ -25,7 +25,7 @@ interface TrendPoint {
 
 /**
  * Trends tab — 7-day BSS + DSI dual-line chart.
- * BSS in brand teal (#00D4AA), DSI in soft purple (#A78BFA).
+ * BSS in brand teal (#6366F1), DSI in soft purple (#A78BFA).
  * Dark theme matching the existing design system.
  */
 export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
@@ -139,10 +139,10 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
           <Line
             type="monotone"
             dataKey="bss"
-            stroke="#00D4AA"
+            stroke="#6366F1"
             strokeWidth={2}
-            dot={{ fill: '#00D4AA', r: 3, strokeWidth: 0 }}
-            activeDot={{ r: 5, stroke: '#00D4AA', strokeWidth: 2, fill: '#1A1D27' }}
+            dot={{ fill: '#6366F1', r: 3, strokeWidth: 0 }}
+            activeDot={{ r: 5, stroke: '#6366F1', strokeWidth: 2, fill: '#1A1D27' }}
             name="BSS"
           />
           <Line

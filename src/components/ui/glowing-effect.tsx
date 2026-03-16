@@ -123,9 +123,9 @@ const GlowingEffect = memo(
             "pointer-events-none absolute -inset-px hidden rounded-[inherit] border opacity-0 transition-opacity",
             glow && "opacity-100",
             variant === "white" && "border-white",
-            variant === "teal" && "border-[#00D4AA]/20",
-            variant === "gold" && "border-[#FFD700]/20",
-            variant === "teal-gold" && "border-[#00D4AA]/15",
+            variant === "teal" && "border-[#00D4AA]/40",
+            variant === "gold" && "border-[#FFD700]/40",
+            variant === "teal-gold" && "border-[#00D4AA]/30",
             disabled && "!block"
           )}
         />
@@ -146,17 +146,17 @@ const GlowingEffect = memo(
                     var(--black),
                     var(--black) calc(25% / var(--repeating-conic-gradient-times))
                   )`,
-                  teal: `radial-gradient(circle, #00D4AA 10%, #00D4AA00 20%),
-                    radial-gradient(circle at 40% 40%, #00B894 5%, #00B89400 15%),
-                    radial-gradient(circle at 60% 60%, #33DDBB 10%, #33DDBB00 20%),
-                    radial-gradient(circle at 40% 60%, #00C9A0 10%, #00C9A000 20%),
+                  teal: `radial-gradient(circle, #00D4AA 15%, #00D4AA00 25%),
+                    radial-gradient(circle at 40% 40%, #00FFD0 8%, #00FFD000 18%),
+                    radial-gradient(circle at 60% 60%, #33DDBB 12%, #33DDBB00 22%),
+                    radial-gradient(circle at 40% 60%, #00E8BB 12%, #00E8BB00 22%),
                     repeating-conic-gradient(
                       from 236.84deg at 50% 50%,
-                      #00D4AA 0%,
-                      #00B894 calc(25% / var(--repeating-conic-gradient-times)),
-                      #33DDBB calc(50% / var(--repeating-conic-gradient-times)),
-                      #00C9A0 calc(75% / var(--repeating-conic-gradient-times)),
-                      #00D4AA calc(100% / var(--repeating-conic-gradient-times))
+                      #00FFD0 0%,
+                      #00D4AA calc(25% / var(--repeating-conic-gradient-times)),
+                      #33FFCC calc(50% / var(--repeating-conic-gradient-times)),
+                      #00E8BB calc(75% / var(--repeating-conic-gradient-times)),
+                      #00FFD0 calc(100% / var(--repeating-conic-gradient-times))
                     )`,
                   gold: `radial-gradient(circle, #FFD700 10%, #FFD70000 20%),
                     radial-gradient(circle at 40% 40%, #F59E0B 5%, #F59E0B00 15%),
@@ -214,7 +214,7 @@ const GlowingEffect = memo(
               'after:content-[""] after:rounded-[inherit] after:absolute after:inset-[calc(-1*var(--glowingeffect-border-width))]',
               "after:[border:var(--glowingeffect-border-width)_solid_transparent]",
               "after:[background:var(--gradient)] after:[background-attachment:fixed]",
-              "after:opacity-[var(--active)] after:transition-opacity after:duration-300",
+              "after:opacity-[var(--active)] after:transition-opacity after:duration-200",
               "after:[mask-clip:padding-box,border-box]",
               "after:[mask-composite:intersect]",
               "after:[mask-image:linear-gradient(#0000,#0000),conic-gradient(from_calc((var(--start)-var(--spread))*1deg),#00000000_0deg,#fff,#00000000_calc(var(--spread)*2deg))]"

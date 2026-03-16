@@ -75,7 +75,7 @@ export function BssOrb({
 
   // Trajectory
   const diff = yesterdayScore !== undefined ? score - yesterdayScore : 0;
-  const trajectoryColor = diff > 0 ? '#00D4AA' : diff < 0 ? '#FF3B5C' : '#4A5568';
+  const trajectoryColor = diff > 0 ? '#22D3EE' : diff < 0 ? '#FB923C' : '#4A5568';
   const trajectorySymbol = diff > 0 ? '\u2191' : diff < 0 ? '\u2193' : '\u2014';
   const trajectoryText = diff !== 0 ? `${Math.abs(diff)}` : '';
 

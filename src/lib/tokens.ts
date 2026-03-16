@@ -1,14 +1,31 @@
+// ── Invisible Interface Design Token System ──
+// Aligned exactly to the design intelligence briefing (Sections 5-7)
+
+// Accent: Indigo (#6366F1) — trust, reliability, technology
+export const ACCENT = {
+  primary: '#6366F1',
+  hover: '#818CF8',
+  muted: '#312E81',
+} as const;
+
+// Behavioral Signals — colorblind-safe (cyan/orange, NOT red/green)
+export const SIGNALS = {
+  positive: '#22D3EE',   // cyan — not green
+  negative: '#FB923C',   // orange — not red
+  warning: '#F59E0B',    // amber — caution
+  neutral: '#94A3B8',    // blue-gray — unchanged
+} as const;
+
 // State styles — used by BSS orb, badges, cards
-// Aligned to Invisible Interface spec Section 5
 export const STATE_STYLES = {
-  STABLE:        { solid: '#00D4AA', bg: 'rgba(0,212,170,0.07)', border: 'rgba(0,212,170,0.18)' },
+  STABLE:        { solid: '#22D3EE', bg: 'rgba(34,211,238,0.07)', border: 'rgba(34,211,238,0.18)' },
   DRIFT_FORMING: { solid: '#F59E0B', bg: 'rgba(245,158,11,0.07)', border: 'rgba(245,158,11,0.18)' },
   COMPROMISED:   { solid: '#FB923C', bg: 'rgba(251,146,60,0.07)', border: 'rgba(251,146,60,0.18)' },
   BREAKDOWN:     { solid: '#FB923C', bg: 'rgba(251,146,60,0.09)', border: 'rgba(251,146,60,0.22)' },
   BUILDING:      { solid: '#6B7280', bg: 'rgba(107,114,128,0.07)', border: 'rgba(107,114,128,0.18)' },
 } as const;
 
-// Tier colors — gaming loot rarity (spec Section 5)
+// Tier colors — gaming loot rarity progression (spec Section 5)
 // DORMANT → FORMING → DEVELOPING → CONSISTENT → DISCIPLINED → SOVEREIGN
 export const TIER_STYLES = {
   DORMANT:     { color: '#6B7280', glow: 'rgba(107,114,128,0.10)' },
@@ -24,6 +41,15 @@ export const SEVERITY_COLORS = {
   MED: '#F59E0B',
   HIGH: '#FB923C',
   CRITICAL: '#FB923C',
+} as const;
+
+// Compliance grid colors (spec Section 7 — indigo at varying opacities)
+export const COMPLIANCE_COLORS = {
+  empty: '#1A1D27',
+  partial: '#1E2A4A',
+  moderate: '#2346A0',
+  high: '#3B6CF6',
+  full: '#6366F1',
 } as const;
 
 export const MODE_LABELS: Record<string, string> = {
@@ -63,7 +89,6 @@ export function getSeverityColor(severity: string) {
 }
 
 // DSI mode weights — mirrors backend/src/engine/dsi.ts
-// These are the multipliers applied to raw violation points before DSI calculation
 export const MODE_WEIGHTS: Record<string, number> = {
   OFF_SESSION: 1.5,
   OVERSIZE: 1.3,

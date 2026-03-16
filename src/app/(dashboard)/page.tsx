@@ -8,7 +8,6 @@ import { VerdictLine } from '@/components/verdict-line';
 import { Sparkline } from '@/components/sparkline';
 import { Upload } from 'lucide-react';
 import { EvidenceSheet } from '@/components/evidence-sheet';
-import { GlowingEffect } from '@/components/ui/glowing-effect';
 import type { StatePayload } from '@/lib/types';
 
 /**
@@ -145,7 +144,7 @@ export default function DashboardPage() {
 
         <Link
           href="/ingest"
-          className="mt-4 flex items-center gap-2 rounded-2xl bg-accent-primary px-5 py-2.5 font-mono text-[14px] font-bold text-text-primary transition-opacity hover:opacity-90"
+          className="mt-4 flex items-center gap-2 rounded-2xl bg-accent-primary px-5 py-2.5 font-mono text-[14px] font-bold text-white transition-opacity hover:opacity-90"
         >
           <Upload size={14} />
           Upload CSV
@@ -178,17 +177,6 @@ export default function DashboardPage() {
           onKeyDown={(e) => e.key === 'Enter' && setSheetOpen(true)}
           aria-label={`BSS Score ${data.bss_score}. Tap to view evidence.`}
         >
-          <GlowingEffect
-            spread={60}
-            glow={true}
-            disabled={false}
-            proximity={100}
-            inactiveZone={0.3}
-            borderWidth={2}
-            variant="teal-gold"
-            blur={4}
-            movementDuration={1.5}
-          />
           <BssGauge
             score={data.bss_score}
             tier={data.bss_tier}
@@ -203,7 +191,7 @@ export default function DashboardPage() {
 
         {/* 2-3. Delta + Sparkline row — adjacent per spec */}
         <div className="mt-4 flex items-center gap-4">
-          {/* Delta indicator */}
+          {/* Delta indicator — cyan positive, orange negative */}
           <span className={`font-mono text-[14px] font-medium ${
             (data.bss_delta ?? 0) > 0 ? 'text-positive' : (data.bss_delta ?? 0) < 0 ? 'text-negative' : 'text-text-muted'
           }`}>

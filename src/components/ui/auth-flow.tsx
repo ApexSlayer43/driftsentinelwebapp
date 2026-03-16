@@ -84,7 +84,7 @@ export function AuthFlow() {
       useWorker: true,
     });
     // Teal and white themed bursts
-    const colors = ['#00D4AA', '#33DDBB', '#E2E8F0', '#94A3B8'];
+    const colors = ['#6366F1', '#818CF8', '#E2E8F0', '#94A3B8'];
     myConfetti({
       particleCount: 80,
       spread: 80,

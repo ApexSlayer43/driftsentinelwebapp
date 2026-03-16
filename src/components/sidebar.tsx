@@ -67,7 +67,7 @@ export function Sidebar({ bssScore, bssTier, className = '' }: SidebarProps) {
               href={item.href}
               className={`relative flex h-9 items-center gap-2.5 rounded-md px-2.5 font-mono text-[11.5px] transition-colors ${
                 isActive
-                  ? 'border-l-2 border-stable bg-stable/[0.06] text-text-primary'
+                  ? 'border-l-2 border-accent-primary bg-accent-primary/[0.06] text-text-primary'
                   : 'border-l-2 border-transparent text-text-secondary hover:bg-raised hover:text-text-primary'
               }`}
             >
@@ -90,7 +90,7 @@ export function Sidebar({ bssScore, bssTier, className = '' }: SidebarProps) {
               href={item.href}
               className={`relative flex h-9 items-center gap-2.5 rounded-md px-2.5 font-mono text-[11.5px] transition-colors ${
                 isActive
-                  ? 'border-l-2 border-stable bg-stable/[0.06] text-text-primary'
+                  ? 'border-l-2 border-accent-primary bg-accent-primary/[0.06] text-text-primary'
                   : 'border-l-2 border-transparent text-text-secondary hover:bg-raised hover:text-text-primary'
               }`}
             >

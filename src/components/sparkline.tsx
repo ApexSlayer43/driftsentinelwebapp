@@ -74,9 +74,9 @@ export function Sparkline({
         const fill = isLast
           ? tierStyle.color
           : isUp
-            ? '#00D4AA'
+            ? '#22D3EE'
             : isDown
-              ? '#FF3B5C'
+              ? '#FB923C'
               : '#4A5568';
 
         return (

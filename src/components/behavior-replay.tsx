@@ -87,7 +87,7 @@ export function BehaviorReplay({ accountRef, tradingDate }: BehaviorReplayProps)
 
       {fills.map((fill, i) => {
         const hasViolation = fill.violations.length > 0;
-        const sideColor = fill.side === 'BUY' ? '#00D4AA' : '#FF3B5C';
+        const sideColor = fill.side === 'BUY' ? '#22D3EE' : '#FB923C';
         const dotColor = hasViolation ? '#FF6B35' : sideColor;
         const time = new Date(fill.timestamp_utc).toLocaleTimeString('en-US', {
           hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,

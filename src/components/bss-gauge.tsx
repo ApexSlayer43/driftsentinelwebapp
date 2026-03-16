@@ -14,6 +14,17 @@ interface BssGaugeProps {
   buildProgress?: { collected: number; required: number };
 }
 
+/**
+ * BSS Score Gauge — spec Section 7
+ *
+ * 240° arc (150°→390°), 14px stroke, stroke-linecap: round
+ * Track color: #242836
+ * Score: 48px JetBrains Mono 700, #E2E8F0 (neutral — tier info is in badge)
+ * Delta: 12px, cyan positive (#22D3EE), orange negative (#FB923C)
+ * Tier badge: below score, color-coded capsule
+ * Tick marks at tier boundaries (6 segments)
+ * 1.2s transition with cubic-bezier(0.4, 0, 0.2, 1)
+ */
 export function BssGauge({
   score,
   tier,
@@ -26,21 +37,19 @@ export function BssGauge({
 }: BssGaugeProps) {
   const [animatedScore, setAnimatedScore] = useState(0);
   const tierStyle = getTierStyle(tier);
-  const stateStyle = getStateStyle(state);
 
-  const dimension = size === 'lg' ? 380 : 180;
+  const dimension = size === 'lg' ? 280 : 180;
   const cx = dimension / 2;
   const cy = dimension / 2;
   const radius = (dimension / 2) - 24;
-  const strokeWidth = size === 'lg' ? 10 : 5;
+  const strokeWidth = size === 'lg' ? 14 : 5;
 
-  // Arc calculation: 240° sweep from -210° to +30° (bottom gap)
-  const startAngle = 150; // degrees from 3-o'clock, clockwise
+  // Arc calculation: 240° sweep
+  const startAngle = 150;
   const sweepAngle = 240;
   const circumference = 2 * Math.PI * radius;
   const arcLength = (sweepAngle / 360) * circumference;
 
-  // Build progress or score progress
   const progressValue = isBuilding && buildProgress
     ? buildProgress.collected / buildProgress.required
     : score / 100;
@@ -73,15 +82,15 @@ export function BssGauge({
     return () => cancelAnimationFrame(raf);
   }, [score]);
 
-  // Delta display
-  const deltaColor = delta > 0 ? '#00D4AA' : delta < 0 ? '#FF3B5C' : '#4A5568';
+  // Delta display — cyan positive, orange negative (colorblind-safe)
+  const deltaColor = delta > 0 ? '#22D3EE' : delta < 0 ? '#FB923C' : '#4A5568';
   const deltaSymbol = delta > 0 ? '\u25B2' : delta < 0 ? '\u25BC' : '\u2014';
   const deltaText = delta !== 0 ? `${Math.abs(delta)}` : '';
 
   // Pulse animation for drift states
   const shouldPulse = ['DRIFT_FORMING', 'COMPROMISED', 'BREAKDOWN'].includes(state);
 
-  // Tick marks — thinner, more refined
+  // Tick marks at tier boundaries (6 segments)
   const tickCount = 48;
 
   return (
@@ -98,8 +107,8 @@ export function BssGauge({
             <stop offset="100%" stopColor={tierStyle.color} stopOpacity="1" />
           </linearGradient>
           <filter id="gauge-glow">
-            <feGaussianBlur stdDeviation="5" result="blur" />
-            <feFlood floodColor={tierStyle.color} floodOpacity="0.35" result="flood" />
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feFlood floodColor={tierStyle.color} floodOpacity="0.3" result="flood" />
             <feComposite in="flood" in2="blur" operator="in" result="colorBlur" />
             <feMerge>
               <feMergeNode in="colorBlur" />
@@ -133,13 +142,13 @@ export function BssGauge({
           );
         })}
 
-        {/* Background arc */}
+        {/* Background arc — #242836 track */}
         <circle
           cx={cx}
           cy={cy}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.04)"
+          stroke="#242836"
           strokeWidth={strokeWidth}
           strokeDasharray={`${arcLength} ${circumference - arcLength}`}
           strokeDashoffset={0}
@@ -161,38 +170,38 @@ export function BssGauge({
           transform={`rotate(${startAngle + 90} ${cx} ${cy})`}
           filter="url(#gauge-glow)"
           style={{
-            transition: 'stroke-dashoffset 1.2s ease-out',
+            transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
             ...(isBuilding ? { strokeDasharray: `${strokeWidth * 2} ${strokeWidth * 3}` } : {}),
           }}
           className={shouldPulse ? 'animate-pulse' : ''}
         />
 
-        {/* Score number — JetBrains Mono */}
+        {/* Score number — 48px JetBrains Mono 700 in #E2E8F0 (neutral) */}
         <text
           x={cx}
-          y={cy - (size === 'lg' ? 10 : 2)}
+          y={cy - (size === 'lg' ? 6 : 2)}
           textAnchor="middle"
           dominantBaseline="central"
-          fill="#E8EDF5"
+          fill="#E2E8F0"
           fontFamily="var(--font-mono)"
           fontWeight="700"
-          fontSize={size === 'lg' ? 72 : 32}
+          fontSize={size === 'lg' ? 48 : 32}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
           {isBuilding ? `${Math.round(progressValue * 100)}%` : animatedScore}
         </text>
 
-        {/* Delta indicator below score */}
+        {/* Delta indicator — 12px, cyan/orange */}
         {!isBuilding && (
           <text
             x={cx}
-            y={cy + (size === 'lg' ? 38 : 18)}
+            y={cy + (size === 'lg' ? 28 : 18)}
             textAnchor="middle"
             dominantBaseline="central"
             fill={deltaColor}
             fontFamily="var(--font-mono)"
             fontWeight="500"
-            fontSize={size === 'lg' ? 16 : 10}
+            fontSize={size === 'lg' ? 12 : 10}
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
             {deltaSymbol} {deltaText}
@@ -200,11 +209,19 @@ export function BssGauge({
         )}
       </svg>
 
-      {/* Tier label */}
+      {/* Tier badge — color-coded capsule below score */}
       <span
-        className="font-display text-xs font-bold uppercase tracking-[0.14em]"
-        style={{ color: tierStyle.color }}
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[14px] font-medium"
+        style={{
+          color: tierStyle.color,
+          backgroundColor: `${tierStyle.color}15`,
+          border: `1px solid ${tierStyle.color}25`,
+        }}
       >
+        <span
+          className="h-1.5 w-1.5 rounded-full"
+          style={{ backgroundColor: tierStyle.color }}
+        />
         {isBuilding ? 'BUILDING' : tier}
       </span>
     </div>

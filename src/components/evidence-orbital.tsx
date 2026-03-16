@@ -26,7 +26,7 @@ export function EvidenceOrbital({ violation, fills }: EvidenceOrbitalProps) {
       const y = cy + radius * Math.sin(angle);
       // Size by qty (clamped 4-14)
       const nodeRadius = Math.min(14, Math.max(4, fill.qty * 3));
-      const fillColor = fill.side === 'BUY' ? '#00D4AA' : '#FF3B5C';
+      const fillColor = fill.side === 'BUY' ? '#22D3EE' : '#FB923C';
 
       return { x, y, nodeRadius, fillColor, fill };
     });

@@ -10,9 +10,12 @@ interface EvidenceSessionsProps {
 }
 
 /**
- * Sessions tab — 7-day daily scores timeline.
- * Each row shows trading_date, BSS score, DSI, fills, violations, streak.
- * Color-coded: clean days (green border) vs violation days (orange border).
+ * Sessions tab — 7-day session timeline (spec Section 7).
+ *
+ * Each card: date/time (12px), duration (12px JetBrains Mono),
+ * trade count, net P&L, BSS impact (positive/negative delta).
+ * 4px left border accent: green (clean), amber (violations), orange (severe).
+ * Vertically stacked with 8px spacing, each 64-72dp height.
  */
 export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
   const [scores, setScores] = useState<DailyScore[]>([]);
@@ -21,7 +24,6 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
   useEffect(() => {
     async function load() {
       if (!accountRef) {
-        // Resolve account_ref from auth
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) { setLoading(false); return; }
@@ -63,7 +65,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
   if (loading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-positive border-t-transparent" />
+        <div className="h-4 w-4 animate-pulse rounded-full bg-raised" />
       </div>
     );
   }
@@ -77,11 +79,17 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
   }
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {scores.map((day) => {
         const isClean = day.violation_count === 0;
+        const isSevere = day.violation_count >= 3;
 
-        // Clean glass — consistent styling
+        // 4px left border accent: clean/violation/severe
+        const borderClass = isSevere
+          ? 'border-accent-severe'
+          : !isClean
+          ? 'border-accent-violation'
+          : 'border-accent-clean';
 
         // Derive tier from BSS score for color
         const tier = day.bss_score >= 90 ? 'SOVEREIGN'
@@ -92,19 +100,21 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
           : 'DORMANT';
         const tierStyle = getTierStyle(tier);
 
-        // BSS delta from previous
+        // BSS delta
         const delta = day.bss_score - day.bss_previous;
 
         return (
           <div
             key={day.daily_score_id}
-            className="glass-card rounded-2xl p-3.5 transition-transform hover:scale-[1.01]"
+            className={`glass-card rounded-2xl p-3.5 ${borderClass}`}
           >
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-mono text-[12px] font-semibold text-text-primary">
+                {/* Date — 12px Inter weight 500 */}
+                <div className="font-mono text-[12px] font-medium text-text-primary">
                   {day.trading_date}
                 </div>
+                {/* Metadata row — trade count, DSI, streak */}
                 <div className="mt-1 flex items-center gap-3 font-mono text-[12px] text-text-muted">
                   <span>{day.fills_count} fills</span>
                   <span>DSI {day.dsi_score}</span>
@@ -114,23 +124,27 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
                 </div>
               </div>
               <div className="text-right">
+                {/* BSS score — tier colored */}
                 <div
                   className="font-mono text-lg font-bold"
-                  style={{ color: tierStyle.color }}
+                  style={{ color: tierStyle.color, fontVariantNumeric: 'tabular-nums' }}
                 >
                   {day.bss_score}
                 </div>
+                {/* Delta — cyan positive, orange negative */}
                 <div className={`font-mono text-[12px] font-medium ${
                   delta > 0 ? 'text-positive' : delta < 0 ? 'text-negative' : 'text-text-muted'
-                }`}>
+                }`} style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {delta > 0 ? '+' : ''}{delta !== 0 ? delta : '—'}
                 </div>
               </div>
             </div>
 
+            {/* Violation badge — amber, only when violations present */}
             {day.violation_count > 0 && (
-              <div className="mt-2.5 glass-inset rounded-xl px-3 py-2 font-mono text-[12px] text-warning">
-                {day.violation_count} pattern{day.violation_count > 1 ? 's' : ''} detected · −{day.violation_count * 10} points
+              <div className="mt-2 flex items-center gap-1.5 font-mono text-[11px] text-warning">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-warning" />
+                {day.violation_count} pattern{day.violation_count > 1 ? 's' : ''} detected
               </div>
             )}
           </div>
