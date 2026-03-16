@@ -124,7 +124,7 @@ export async function POST(req: Request) {
     });
   }
 
-  /* 7. Parse CSV */
+  /* 7. Parse CSV in webapp (Express backend can't parse Performance CSV format) */
   const body = await req.json();
   const csvText: string = body.csv_text;
   const fileName: string = body.source_file ?? 'performance.csv';
@@ -151,18 +151,66 @@ export async function POST(req: Request) {
     );
   }
 
-  /* 8. Insert fills into Supabase */
-  const fileHash = createHash('sha256').update(csvText).digest('hex');
+  /* 8. Format fills as JSON and send to Express backend.
+   *    The backend handles insertion + compute pipeline (violations, DSI/BSS, sessions).
+   *    We parse CSV here because the backend doesn't understand Performance CSV format. */
+  const jsonFills = csvResult.fills
+    .filter((f) => f.timestamp_utc && f.contract && f.side && f.qty > 0 && f.price > 0)
+    .map((fill) => {
+      // Stable event_id from Tradovate's native IDs
+      const eventId = createHash('sha256')
+        .update(`${accountRef}:csv:${fill.buy_fill_id}:${fill.sell_fill_id}:${fill.side}`)
+        .digest('hex');
 
-  // Check for duplicate file upload
-  const { data: existingRun } = await admin
-    .from('ingest_runs')
-    .select('ingest_run_id')
-    .eq('file_hash', fileHash)
-    .eq('account_ref', accountRef)
-    .single();
+      return {
+        event_id: eventId,
+        timestamp_utc: fill.timestamp_utc,
+        instrument_root: extractRoot(fill.contract),
+        contract: fill.contract,
+        side: fill.side,
+        qty: fill.qty,
+        price: String(fill.price),  // Express backend expects numeric string
+        commission: '0',
+        off_session: false,
+      };
+    });
 
-  if (existingRun) {
+  const apiUrl = process.env.API_URL || 'https://api.driftsentinel.io';
+
+  try {
+    const upstream = await fetch(`${apiUrl}/v1/ingest/fills`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${rawToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        source_file: fileName,
+        fills: jsonFills,
+      }),
+    });
+
+    const rawText = await upstream.text();
+    let backendResult;
+    try {
+      backendResult = JSON.parse(rawText);
+    } catch {
+      console.error('CSV ingest: backend returned non-JSON:', upstream.status, rawText.slice(0, 500));
+      return Response.json(
+        { error: 'Backend returned invalid response', status: upstream.status },
+        { status: 502 },
+      );
+    }
+
+    if (!upstream.ok) {
+      console.error('CSV ingest: backend error:', upstream.status, backendResult);
+      return Response.json(
+        { error: backendResult?.error || 'Backend ingest failed', status: upstream.status },
+        { status: upstream.status },
+      );
+    }
+
+    // Merge backend ingest result with our CSV parse summary
     return Response.json({
       ok: true,
       source: 'performance_csv',
@@ -171,131 +219,19 @@ export async function POST(req: Request) {
       date_range: csvResult.dateRange,
       summary: csvResult.summary,
       fills_generated: csvResult.fills.length,
-      fills_new: 0,
-      fills_duplicate: csvResult.fills.length,
-      fills_rejected: 0,
+      fills_new: backendResult.fills_new ?? 0,
+      fills_duplicate: backendResult.fills_duplicate ?? 0,
+      fills_rejected: backendResult.fills_rejected ?? 0,
+      compute_triggered: backendResult.compute_triggered ?? false,
+      backfill: backendResult.backfill ?? null,
+      sessions: backendResult.sessions ?? null,
     });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('CSV ingest: backend fetch failed:', msg);
+    return Response.json(
+      { error: 'Backend unreachable', detail: msg },
+      { status: 502 },
+    );
   }
-
-  // Create ingest run record
-  const { data: runData, error: runErr } = await admin
-    .from('ingest_runs')
-    .insert({
-      user_id: user.id,
-      account_ref: accountRef,
-      device_id: deviceId,
-      file_name: fileName,
-      file_hash: fileHash,
-      accepted_count: 0,
-      dup_count: 0,
-      reject_count: 0,
-    })
-    .select('ingest_run_id')
-    .single();
-
-  if (runErr || !runData) {
-    console.error('ingest_runs insert:', runErr);
-    return Response.json({ error: 'Failed to create ingest run' }, { status: 500 });
-  }
-
-  const ingestRunId = runData.ingest_run_id;
-
-  // Build fill records — each fill uses buyFillId+sellFillId+side as a
-  // natural composite key. This is guaranteed unique per CSV row per side,
-  // even for partial fills that share the same buyFillId or sellFillId.
-  const fillsToInsert = [];
-  let dupCount = 0;
-  let rejectCount = 0;
-
-  for (const fill of csvResult.fills) {
-    // Validate
-    if (!fill.timestamp_utc || !fill.contract || !fill.side || fill.qty <= 0 || fill.price <= 0) {
-      rejectCount++;
-      continue;
-    }
-
-    // Stable event_id from Tradovate's native IDs:
-    // buyFillId + sellFillId + side = unique per row per side
-    const eventId = createHash('sha256')
-      .update(`${accountRef}:csv:${fill.buy_fill_id}:${fill.sell_fill_id}:${fill.side}`)
-      .digest('hex');
-
-    fillsToInsert.push({
-      event_id: eventId,
-      account_ref: accountRef,
-      ingest_run_id: ingestRunId,
-      timestamp_utc: fill.timestamp_utc,
-      instrument_root: extractRoot(fill.contract),
-      contract: fill.contract,
-      side: fill.side,
-      qty: fill.qty,
-      price: fill.price,
-      commission: 0,
-      off_session: false,
-    });
-  }
-
-  let acceptedCount = 0;
-
-  if (fillsToInsert.length > 0) {
-    // Insert one at a time to avoid entire batch failing on a single conflict
-    for (const fill of fillsToInsert) {
-      const { error: insertErr } = await admin
-        .from('fills_canonical')
-        .insert(fill);
-
-      if (insertErr) {
-        if (insertErr.code === '23505') {
-          dupCount++;
-        } else {
-          console.error('fill insert error:', insertErr.message, fill.event_id);
-          rejectCount++;
-        }
-      } else {
-        acceptedCount++;
-      }
-    }
-  }
-
-  // Update ingest run with final counts
-  await admin
-    .from('ingest_runs')
-    .update({
-      accepted_count: acceptedCount,
-      dup_count: dupCount,
-      reject_count: rejectCount,
-      compute_triggered: acceptedCount > 0,
-    })
-    .eq('ingest_run_id', ingestRunId);
-
-  // If fills were accepted, trigger compute pipeline (best-effort)
-  if (acceptedCount > 0) {
-    const apiUrl = process.env.API_URL || 'https://api.driftsentinel.io';
-    try {
-      await fetch(`${apiUrl}/v1/compute/trigger`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${rawToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ account_ref: accountRef }),
-      });
-    } catch {
-      // Best-effort — compute will pick up on next cycle
-    }
-  }
-
-  /* 9. Return response */
-  return Response.json({
-    ok: true,
-    source: 'performance_csv',
-    file_name: fileName,
-    trades_parsed: csvResult.tradeCount,
-    date_range: csvResult.dateRange,
-    summary: csvResult.summary,
-    fills_generated: csvResult.fills.length,
-    fills_new: acceptedCount,
-    fills_duplicate: dupCount,
-    fills_rejected: rejectCount,
-  });
 }
