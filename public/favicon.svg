@@ -3,10 +3,11 @@
   <path d="M16 1.5L28.5 7V17C28.5 23.5 22.5 28.5 16 30.5C9.5 28.5 3.5 23.5 3.5 17V7L16 1.5Z" fill="#080A0E" stroke="#1A2332" stroke-width="1"/>
   <!-- Inner shield bevel -->
   <path d="M16 4L25.5 8.5V17C25.5 22 20.8 26 16 27.8C11.2 26 6.5 22 6.5 17V8.5L16 4Z" fill="#0D1117" stroke="#1E2D3D" stroke-width="0.5"/>
-  <!-- Scanning eye — the sentinel -->
-  <ellipse cx="16" cy="14.5" rx="6" ry="4" fill="none" stroke="#00D4AA" stroke-width="1.2" opacity="0.7"/>
-  <circle cx="16" cy="14.5" r="2.2" fill="#00D4AA"/>
+  <!-- Scanning eye — indigo reticle -->
+  <ellipse cx="16" cy="14.5" rx="6" ry="4" fill="none" stroke="#6366F1" stroke-width="1.2" opacity="0.7"/>
+  <!-- Pupil — gold -->
+  <circle cx="16" cy="14.5" r="2.2" fill="#FFD700"/>
   <circle cx="16" cy="14.5" r="0.8" fill="#080A0E"/>
   <!-- Pulse lines below eye -->
-  <path d="M10 21L13 21L14.5 18.5L16 23L17.5 19.5L19 21L22 21" stroke="#00D4AA" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <path d="M10 21L13 21L14.5 18.5L16 23L17.5 19.5L19 21L22 21" stroke="#6366F1" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
 </svg>

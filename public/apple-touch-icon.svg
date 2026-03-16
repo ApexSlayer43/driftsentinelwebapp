@@ -5,10 +5,11 @@
   <path d="M90 20L155 45V100C155 130 125 155 90 167C55 155 25 130 25 100V45L90 20Z" fill="#0D1117" stroke="#1A2332" stroke-width="2"/>
   <!-- Inner shield bevel -->
   <path d="M90 32L145 53V100C145 125 119 147 90 157C61 147 35 125 35 100V53L90 32Z" fill="#111720" stroke="#1E2D3D" stroke-width="1"/>
-  <!-- Scanning eye — the sentinel -->
-  <ellipse cx="90" cy="82" rx="33" ry="22" fill="none" stroke="#00D4AA" stroke-width="2.5" opacity="0.7"/>
-  <circle cx="90" cy="82" r="12" fill="#00D4AA"/>
+  <!-- Scanning eye — indigo reticle -->
+  <ellipse cx="90" cy="82" rx="33" ry="22" fill="none" stroke="#6366F1" stroke-width="2.5" opacity="0.7"/>
+  <!-- Pupil — gold -->
+  <circle cx="90" cy="82" r="12" fill="#FFD700"/>
   <circle cx="90" cy="82" r="4.5" fill="#080A0E"/>
   <!-- Pulse lines below eye -->
-  <path d="M55 120L72 120L80 108L90 132L100 114L108 120L125 120" stroke="#00D4AA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <path d="M55 120L72 120L80 108L90 132L100 114L108 120L125 120" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
 </svg>

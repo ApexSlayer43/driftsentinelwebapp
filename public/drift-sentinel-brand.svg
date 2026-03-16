@@ -3,8 +3,8 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&amp;display=swap');
     </style>
-    <!-- Teal glow filter -->
-    <filter id="tealGlow" x="-20%" y="-20%" width="140%" height="140%">
+    <!-- Indigo glow filter -->
+    <filter id="indigoGlow" x="-20%" y="-20%" width="140%" height="140%">
       <feGaussianBlur stdDeviation="2" result="blur"/>
       <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
@@ -12,39 +12,38 @@
       <feGaussianBlur stdDeviation="3" result="blur"/>
       <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
-    <!-- Scanline pattern for eye -->
-    <pattern id="scanlines" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
-      <rect width="2" height="1" fill="#00D4AA" opacity="0.08"/>
-    </pattern>
+    <filter id="goldGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
   </defs>
   <!-- Background -->
   <rect width="400" height="120" fill="#080A0E"/>
   <!-- ═══ EYE MARK ═══ -->
-  <!-- Outer eye shape - almond/surveillance eye -->
   <g transform="translate(52, 60)">
-    <!-- Outer glow ring segments - subtle arc marks like targeting reticle -->
-    <circle cx="0" cy="0" r="36" fill="none" stroke="#00D4AA" stroke-width="0.5" opacity="0.2" stroke-dasharray="4 8"/>
-    <!-- Eye outline - two curves forming almond shape -->
+    <!-- Outer glow ring segments -->
+    <circle cx="0" cy="0" r="36" fill="none" stroke="#6366F1" stroke-width="0.5" opacity="0.2" stroke-dasharray="4 8"/>
+    <!-- Eye outline - almond shape -->
     <path d="M-32,0 C-20,-18 20,-18 32,0 C20,18 -20,18 -32,0 Z"
-          fill="none" stroke="#00D4AA" stroke-width="1.5" filter="url(#tealGlow)"/>
+          fill="none" stroke="#6366F1" stroke-width="1.5" filter="url(#indigoGlow)"/>
     <!-- Inner iris ring -->
-    <circle cx="0" cy="0" r="13" fill="none" stroke="#00D4AA" stroke-width="1" opacity="0.6"/>
-    <!-- Pupil - solid teal -->
-    <circle cx="0" cy="0" r="7" fill="#00D4AA" filter="url(#softGlow)"/>
+    <circle cx="0" cy="0" r="13" fill="none" stroke="#6366F1" stroke-width="1" opacity="0.6"/>
+    <!-- Pupil — gold -->
+    <circle cx="0" cy="0" r="7" fill="#FFD700" filter="url(#goldGlow)"/>
     <!-- Pupil core - dark center -->
     <circle cx="0" cy="0" r="4" fill="#080A0E"/>
-    <!-- Center dot -->
-    <circle cx="0" cy="0" r="1.5" fill="#00D4AA"/>
-    <!-- Corner tick marks - targeting feel -->
-    <line x1="-32" y1="0" x2="-28" y2="0" stroke="#00D4AA" stroke-width="1.5" opacity="0.8"/>
-    <line x1="28" y1="0" x2="32" y2="0" stroke="#00D4AA" stroke-width="1.5" opacity="0.8"/>
-    <line x1="0" y1="-18" x2="0" y2="-14" stroke="#00D4AA" stroke-width="1" opacity="0.5"/>
-    <line x1="0" y1="14" x2="0" y2="18" stroke="#00D4AA" stroke-width="1" opacity="0.5"/>
+    <!-- Center dot — gold -->
+    <circle cx="0" cy="0" r="1.5" fill="#FFD700"/>
+    <!-- Corner tick marks -->
+    <line x1="-32" y1="0" x2="-28" y2="0" stroke="#6366F1" stroke-width="1.5" opacity="0.8"/>
+    <line x1="28" y1="0" x2="32" y2="0" stroke="#6366F1" stroke-width="1.5" opacity="0.8"/>
+    <line x1="0" y1="-18" x2="0" y2="-14" stroke="#6366F1" stroke-width="1" opacity="0.5"/>
+    <line x1="0" y1="14" x2="0" y2="18" stroke="#6366F1" stroke-width="1" opacity="0.5"/>
     <!-- Small reticle marks at 45deg -->
-    <line x1="22" y1="-10" x2="24" y2="-12" stroke="#00D4AA" stroke-width="0.8" opacity="0.4"/>
-    <line x1="-22" y1="-10" x2="-24" y2="-12" stroke="#00D4AA" stroke-width="0.8" opacity="0.4"/>
-    <line x1="22" y1="10" x2="24" y2="12" stroke="#00D4AA" stroke-width="0.8" opacity="0.4"/>
-    <line x1="-22" y1="10" x2="-24" y2="12" stroke="#00D4AA" stroke-width="0.8" opacity="0.4"/>
+    <line x1="22" y1="-10" x2="24" y2="-12" stroke="#6366F1" stroke-width="0.8" opacity="0.4"/>
+    <line x1="-22" y1="-10" x2="-24" y2="-12" stroke="#6366F1" stroke-width="0.8" opacity="0.4"/>
+    <line x1="22" y1="10" x2="24" y2="12" stroke="#6366F1" stroke-width="0.8" opacity="0.4"/>
+    <line x1="-22" y1="10" x2="-24" y2="12" stroke="#6366F1" stroke-width="0.8" opacity="0.4"/>
   </g>
   <!-- ═══ WORDMARK ═══ -->
   <!-- DRIFT — smaller, muted, tracking wide -->
@@ -57,16 +56,16 @@
     fill="#6B7280"
     letter-spacing="6"
   >DRIFT</text>
-  <!-- SENTINEL — dominant, teal, heavy weight -->
+  <!-- SENTINEL — dominant, indigo, heavy weight -->
   <text
     x="106"
     y="82"
     font-family="'JetBrains Mono', monospace"
     font-size="30"
     font-weight="800"
-    fill="#00D4AA"
+    fill="#6366F1"
     letter-spacing="3"
-    filter="url(#tealGlow)"
+    filter="url(#indigoGlow)"
   >SENTINEL</text>
   <!-- Thin separator line between DRIFT and SENTINEL -->
   <line x1="108" y1="57" x2="370" y2="57" stroke="#1A1D23" stroke-width="1"/>
