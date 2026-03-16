@@ -176,38 +176,161 @@ export async function POST(req: Request) {
     );
   }
 
-  /* 8. Convert fills to CSV-like format and proxy to backend ingest */
-  // Build a CSV string that the existing backend parser can handle
-  // The backend expects Tradovate Position History CSV format, so we need to
-  // convert our parsed trades into that format
-  const csvHeader = 'Buy Time,Sell Time,Buy Price,Sell Price,Qty,P&L,Symbol,Duration';
-  const csvRows = pdfResult.trades.map((t) =>
-    `${t.buyTime},${t.sellTime},${t.buyPrice},${t.sellPrice},${t.qty},${t.pnl},${t.symbol},${t.duration}`
-  );
-  const csvText = [csvHeader, ...csvRows].join('\n');
+  /* 8. Insert fills directly into Supabase (bypasses Express backend) */
+  const fileHash = createHash('sha256').update(pdfBuffer).digest('hex');
 
-  // Also try to send fills directly to the backend
-  const apiUrl = process.env.API_URL || 'https://api.driftsentinel.io';
+  // Check for duplicate file upload
+  const { data: existingRun } = await admin
+    .from('ingest_runs')
+    .select('ingest_run_id')
+    .eq('file_hash', fileHash)
+    .eq('account_ref', accountRef)
+    .single();
 
-  let ingestResult = null;
-  try {
-    const upstream = await fetch(`${apiUrl}/v1/ingest/fills/csv`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${rawToken}`,
-        'Content-Type': 'application/json',
+  if (existingRun) {
+    return Response.json({
+      ok: true,
+      source: 'performance_pdf',
+      file_name: fileName,
+      summary: pdfResult.summary,
+      trades_parsed: pdfResult.tradeCount,
+      date_range: pdfResult.dateRange,
+      fills_generated: pdfResult.fills.length,
+      ingest: {
+        fills_new: 0,
+        fills_duplicate: pdfResult.fills.length,
+        fills_rejected: 0,
       },
-      body: JSON.stringify({ csv_text: csvText, source_file: fileName }),
     });
+  }
 
-    const rawText = await upstream.text();
-    try {
-      ingestResult = JSON.parse(rawText);
-    } catch {
-      console.error('PDF ingest: upstream non-JSON:', upstream.status, rawText.slice(0, 500));
+  // Create ingest run record
+  const { data: runData, error: runErr } = await admin
+    .from('ingest_runs')
+    .insert({
+      user_id: user.id,
+      account_ref: accountRef,
+      device_id: deviceId,
+      file_name: fileName,
+      file_hash: fileHash,
+      accepted_count: 0,
+      dup_count: 0,
+      reject_count: 0,
+    })
+    .select('ingest_run_id')
+    .single();
+
+  if (runErr || !runData) {
+    console.error('ingest_runs insert:', runErr);
+    return Response.json({ error: 'Failed to create ingest run' }, { status: 500 });
+  }
+
+  const ingestRunId = runData.ingest_run_id;
+
+  // Extract instrument root from contract (e.g., "MESH6" → "MES")
+  function extractRoot(contract: string): string {
+    const match = contract.match(/^([A-Z]{2,4})[FGHJKMNQUVXZ]\d{1,2}$/);
+    return match ? match[1] : contract;
+  }
+
+  // Deduplicate against existing fills
+  const existingFills = new Set<string>();
+  const { data: existing } = await admin
+    .from('fills_canonical')
+    .select('timestamp_utc, contract, side, price')
+    .eq('account_ref', accountRef);
+
+  if (existing) {
+    for (const f of existing) {
+      existingFills.add(`${f.timestamp_utc}|${f.contract}|${f.side}|${f.price}`);
     }
-  } catch (err) {
-    console.error('PDF ingest: upstream fetch failed:', err instanceof Error ? err.message : err);
+  }
+
+  // Build fill records, skipping duplicates
+  const fillsToInsert = [];
+  let dupCount = 0;
+  let rejectCount = 0;
+
+  for (const fill of pdfResult.fills) {
+    const key = `${fill.timestamp_utc}|${fill.contract}|${fill.side}|${fill.price}`;
+    if (existingFills.has(key)) {
+      dupCount++;
+      continue;
+    }
+
+    // Validate required fields
+    if (!fill.timestamp_utc || !fill.contract || !fill.side || !fill.qty || !fill.price) {
+      rejectCount++;
+      continue;
+    }
+
+    fillsToInsert.push({
+      event_id: createHash('sha256')
+        .update(`${accountRef}:${fill.timestamp_utc}:${fill.contract}:${fill.side}:${fill.price}:${fill.qty}`)
+        .digest('hex'),
+      account_ref: accountRef,
+      ingest_run_id: ingestRunId,
+      timestamp_utc: fill.timestamp_utc,
+      instrument_root: extractRoot(fill.contract),
+      contract: fill.contract,
+      side: fill.side,
+      qty: fill.qty,
+      price: fill.price,
+      commission: 0,
+      off_session: false,
+    });
+  }
+
+  let acceptedCount = 0;
+
+  if (fillsToInsert.length > 0) {
+    // Insert in batches of 100
+    for (let i = 0; i < fillsToInsert.length; i += 100) {
+      const batch = fillsToInsert.slice(i, i + 100);
+      const { error: insertErr } = await admin
+        .from('fills_canonical')
+        .insert(batch);
+
+      if (insertErr) {
+        console.error('fills insert error (batch):', insertErr);
+        // Check for unique constraint violations (duplicates that slipped through)
+        if (insertErr.code === '23505') {
+          dupCount += batch.length;
+        } else {
+          rejectCount += batch.length;
+        }
+      } else {
+        acceptedCount += batch.length;
+      }
+    }
+  }
+
+  // Update ingest run with final counts
+  await admin
+    .from('ingest_runs')
+    .update({
+      accepted_count: acceptedCount,
+      dup_count: dupCount,
+      reject_count: rejectCount,
+      compute_triggered: acceptedCount > 0,
+    })
+    .eq('ingest_run_id', ingestRunId);
+
+  // If fills were accepted, trigger compute pipeline via Express backend (best-effort)
+  if (acceptedCount > 0) {
+    const apiUrl = process.env.API_URL || 'https://api.driftsentinel.io';
+    try {
+      await fetch(`${apiUrl}/v1/compute/trigger`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${rawToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ account_ref: accountRef }),
+      });
+    } catch {
+      // Best-effort — compute will pick up on next cycle
+    }
   }
 
   /* 9. Return rich response with both parsed data + ingest result */
@@ -223,8 +346,12 @@ export async function POST(req: Request) {
     trades_parsed: pdfResult.tradeCount,
     date_range: pdfResult.dateRange,
 
-    // Ingest pipeline result (if backend accepted)
-    ingest: ingestResult,
+    // Ingest pipeline result
+    ingest: {
+      fills_new: acceptedCount,
+      fills_duplicate: dupCount,
+      fills_rejected: rejectCount,
+    },
 
     // Fills generated (count)
     fills_generated: pdfResult.fills.length,
