@@ -118,8 +118,12 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
                 </div>
                 <div className="font-mono text-[12px] text-text-muted">{time}</div>
               </div>
-              <span className="font-mono text-[14px] font-bold text-text-primary">
-                −{v.points}
+              <span className={`font-mono text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                v.severity === 'CRITICAL' ? 'text-[#EF4444] bg-[#EF4444]/10' :
+                v.severity === 'HIGH' ? 'text-[#FB923C] bg-[#FB923C]/10' :
+                'text-[#F59E0B] bg-[#F59E0B]/10'
+              }`}>
+                {v.severity}
               </span>
             </button>
 
@@ -137,7 +141,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
                 </div>
                 <div className="font-mono text-[12px]">
                   <span className="text-text-muted">Impact: </span>
-                  <span className="text-text-secondary">−{v.points} BSS points · Rule {v.rule_id}</span>
+                  <span className="text-text-secondary">−{v.points} DSI penalty · Rule {v.rule_id}</span>
                 </div>
               </div>
             )}

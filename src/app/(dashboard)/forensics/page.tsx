@@ -264,13 +264,20 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
   const modeIcon = getModeIcon(violation.mode);
   const modeWeight = getModeWeight(violation.mode);
 
-  // Find the daily score for this violation's date to show real BSS impact
+  // Find the daily score — try violation date first, then +1 day (scoring may run next day)
   const violationDate = new Date(violation.first_seen_utc).toISOString().split('T')[0];
-  const dayScore = dailyScores.find((ds) => ds.trading_date === violationDate);
-  const bssBefore = dayScore ? dayScore.bss_previous : null;
-  const bssAfter = dayScore ? dayScore.bss_score : null;
-  const actualBssDelta = bssBefore !== null && bssAfter !== null ? bssAfter - bssBefore : null;
+  const nextDate = new Date(new Date(violation.first_seen_utc).getTime() + 86400000).toISOString().split('T')[0];
+  const dayScore = dailyScores.find((ds) => ds.trading_date === violationDate)
+    ?? dailyScores.find((ds) => ds.trading_date === nextDate);
+
+  // Real numbers from the scoring engine
+  const bssBefore = dayScore?.bss_previous ?? null;
+  const bssAfter = dayScore?.bss_score ?? null;
+  const actualBssDelta = bssBefore !== null && bssAfter !== null
+    ? Number(bssAfter) - Number(bssBefore)
+    : null;
   const dsiScore = dayScore?.dsi_score ?? null;
+  const alpha = dayScore?.alpha_effective ? Number(dayScore.alpha_effective) : null;
 
   const dateStr = new Date(violation.first_seen_utc).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
@@ -390,15 +397,17 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
               <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
                 {actualBssDelta !== null ? (
                   <>
-                    This pattern contributed to a <span className="font-bold text-[#FB923C]">{actualBssDelta}</span> BSS change for the session
-                    {bssBefore !== null && bssAfter !== null && ` (${bssBefore} → ${bssAfter})`}.
-                    {dsiScore !== null && ` Daily Stability Index scored ${dsiScore}/100.`}
-                    {' '}Severity: {violation.severity}.
+                    This pattern caused a {violation.points}-pt DSI penalty, driving the Daily Stability Index to{' '}
+                    <span className="font-bold text-text-primary">{dsiScore}/100</span>.
+                    BSS moved from {bssBefore} to {bssAfter}{' '}
+                    (<span className="font-bold text-[#FB923C]">{actualBssDelta}</span>)
+                    {alpha !== null && ` at ${alpha} EWMA alpha`}.
                   </>
                 ) : (
                   <>
-                    {violation.points} DSI penalty points (×{modeWeight} mode weight) fed into EWMA scoring.
-                    Severity: {violation.severity}. The BSS delta on the dashboard reflects the smoothed result.
+                    This pattern applied a {violation.points}-pt DSI penalty (not subtracted directly from BSS).
+                    The DSI score feeds into BSS via EWMA smoothing — the {'\u2013'}19 you see on the dashboard
+                    is the smoothed result, not the raw penalty.
                   </>
                 )}
               </div>
@@ -407,56 +416,70 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
         </div>
       </div>
 
-      {/* ═══ IMPACT METRICS ═══ */}
+      {/* ═══ SCORING FLOW — DSI Penalty → DSI Score → BSS Delta ═══ */}
       <div>
         <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-3">
-          Impact Metrics
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {/* BSS Delta — the actual score change users see on the dashboard */}
-          <div className="glass-card rounded-xl p-4 text-center">
-            <div className="font-mono text-[22px] font-bold text-[#FB923C]" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {actualBssDelta !== null ? actualBssDelta : '—'}
-            </div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
-              BSS Delta
-            </div>
-          </div>
-          {/* DSI Score — the daily stability index that feeds EWMA */}
-          <div className="glass-card rounded-xl p-4 text-center">
-            <div className="font-mono text-[22px] font-bold text-text-secondary" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {dsiScore !== null ? `${dsiScore}` : '—'}
-            </div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
-              DSI Score
-            </div>
-          </div>
-          {/* Severity */}
-          <div className="glass-card rounded-xl p-4 text-center">
-            <div className={`font-mono text-[22px] font-bold ${
-              violation.severity === 'CRITICAL' ? 'text-[#EF4444]' :
-              violation.severity === 'HIGH' ? 'text-[#FB923C]' :
-              violation.severity === 'MED' ? 'text-[#F59E0B]' :
-              'text-text-secondary'
-            }`}>
-              {violation.severity}
-            </div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-1">
-              Severity
-            </div>
-          </div>
+          Scoring Flow
         </div>
 
-        {/* Scoring explainer — how DSI penalty flows into BSS */}
-        <div className="mt-3 glass-inset rounded-xl px-4 py-3">
-          <div className="font-mono text-[11px] text-text-dim leading-relaxed">
-            <span className="text-text-muted font-semibold">How scoring works:</span>{' '}
-            This pattern applied a {violation.points}-pt DSI penalty (×{modeWeight} mode weight).
-            {dsiScore !== null && ` That session\u2019s DSI scored ${dsiScore}/100.`}
-            {' '}BSS uses exponential weighted moving average (EWMA) to smooth daily scores,
+        {/* Visual pipeline: penalty → DSI → BSS */}
+        <div className="glass-card rounded-xl p-5">
+          <div className="grid grid-cols-4 gap-3 items-center">
+            {/* Step 1: DSI Penalty */}
+            <div className="text-center">
+              <div className="font-mono text-[20px] font-bold text-[#FB923C]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                -{violation.points}
+              </div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
+                DSI Penalty
+              </div>
+              <div className="font-mono text-[9px] text-text-dim mt-0.5">
+                ×{modeWeight} weight
+              </div>
+            </div>
+
+            {/* Arrow */}
+            <div className="text-center font-mono text-[14px] text-text-dim">→</div>
+
+            {/* Step 2: DSI Score for the day */}
+            <div className="text-center">
+              <div className="font-mono text-[20px] font-bold text-text-primary" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {dsiScore !== null ? `${dsiScore}/100` : '—'}
+              </div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
+                DSI Score
+              </div>
+              <div className="font-mono text-[9px] text-text-dim mt-0.5">
+                Daily stability
+              </div>
+            </div>
+
+            {/* Arrow */}
+            <div className="text-center">
+              <div className="font-mono text-[11px] text-text-dim mb-1">EWMA →</div>
+              <div className="font-mono text-[20px] font-bold text-[#FB923C]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {actualBssDelta !== null ? actualBssDelta : '—'}
+              </div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
+                BSS Delta
+              </div>
+              {bssBefore !== null && bssAfter !== null && (
+                <div className="font-mono text-[9px] text-text-dim mt-0.5">
+                  {bssBefore} → {bssAfter}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Explainer */}
+          <div className="mt-4 pt-3 border-t border-border-dim font-mono text-[11px] text-text-dim leading-relaxed">
+            The {violation.points}-pt penalty is a <span className="text-text-muted">DSI deduction</span>, not a direct BSS subtraction.
+            Your daily DSI score{dsiScore !== null ? ` (${dsiScore}/100)` : ''} feeds into BSS via EWMA smoothing
+            {alpha !== null && ` (alpha: ${alpha})`}, which is why the dashboard shows{' '}
             {actualBssDelta !== null
-              ? ` resulting in a net ${actualBssDelta} BSS change for this day.`
-              : ' so the BSS delta on the dashboard is the smoothed result, not the raw penalty.'}
+              ? <span className="text-[#FB923C] font-semibold">{actualBssDelta}</span>
+              : 'a smaller delta'}{' '}
+            — not -{violation.points}.
           </div>
         </div>
       </div>

@@ -153,23 +153,26 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
       {/* ═══ IMPACT METRICS — 4-column grid ═══ */}
       <div className="grid grid-cols-4 gap-2.5">
         <div className="glass-inset rounded-xl p-3 text-center">
-          <div className="font-mono text-[17px] font-bold text-text-secondary" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <div className="font-mono text-[17px] font-bold text-[#FB923C]" style={{ fontVariantNumeric: 'tabular-nums' }}>
             -{violation.points}
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-0.5">
-            Raw Pts
+            DSI Penalty
           </div>
         </div>
         <div className="glass-inset rounded-xl p-3 text-center">
-          <div className="font-mono text-[17px] font-bold text-warning" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            -{weightedPoints}
+          <div className="font-mono text-[17px] font-bold text-text-secondary" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            ×{modeWeight}
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-0.5">
-            DSI Impact
+            Mode Weight
           </div>
         </div>
         <div className="glass-inset rounded-xl p-3 text-center">
-          <div className="font-mono text-[17px] font-bold text-warning">
+          <div className={`font-mono text-[17px] font-bold ${
+            violation.severity === 'CRITICAL' ? 'text-[#EF4444]' :
+            violation.severity === 'HIGH' ? 'text-[#FB923C]' : 'text-[#F59E0B]'
+          }`}>
             {violation.severity}
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted mt-0.5">
