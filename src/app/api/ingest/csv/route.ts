@@ -200,21 +200,9 @@ export async function POST(req: Request) {
 
   const ingestRunId = runData.ingest_run_id;
 
-  // Deduplicate against existing fills using Tradovate fill IDs
-  // We store fill_id in event_id for CSV imports, so check both
-  const existingFills = new Set<string>();
-  const { data: existing } = await admin
-    .from('fills_canonical')
-    .select('timestamp_utc, contract, side, price, qty')
-    .eq('account_ref', accountRef);
-
-  if (existing) {
-    for (const f of existing) {
-      existingFills.add(`${f.timestamp_utc}|${f.contract}|${f.side}|${f.price}|${f.qty}`);
-    }
-  }
-
-  // Build fill records
+  // Build fill records — each fill uses buyFillId+sellFillId+side as a
+  // natural composite key. This is guaranteed unique per CSV row per side,
+  // even for partial fills that share the same buyFillId or sellFillId.
   const fillsToInsert = [];
   let dupCount = 0;
   let rejectCount = 0;
@@ -226,17 +214,10 @@ export async function POST(req: Request) {
       continue;
     }
 
-    // Dedup by full composite key (timestamp + contract + side + price + qty)
-    const dedupKey = `${fill.timestamp_utc}|${fill.contract}|${fill.side}|${fill.price}|${fill.qty}`;
-    if (existingFills.has(dedupKey)) {
-      dupCount++;
-      continue;
-    }
-    existingFills.add(dedupKey);
-
-    // Use Tradovate's fill_id + side + qty for a stable unique event_id
+    // Stable event_id from Tradovate's native IDs:
+    // buyFillId + sellFillId + side = unique per row per side
     const eventId = createHash('sha256')
-      .update(`${accountRef}:csv:${fill.fill_id}:${fill.side}:${fill.qty}:${fill.price}`)
+      .update(`${accountRef}:csv:${fill.buy_fill_id}:${fill.sell_fill_id}:${fill.side}`)
       .digest('hex');
 
     fillsToInsert.push({

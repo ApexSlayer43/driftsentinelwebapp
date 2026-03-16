@@ -26,7 +26,8 @@ export interface PerformanceCsvRow {
 }
 
 export interface PerformanceCsvFill {
-  fill_id: string; // Tradovate's native fill ID (buyFillId or sellFillId)
+  buy_fill_id: string;  // Tradovate buyFillId (for composite key)
+  sell_fill_id: string;  // Tradovate sellFillId (for composite key)
   timestamp_utc: string;
   contract: string;
   side: 'BUY' | 'SELL';
@@ -101,14 +102,12 @@ export function parsePerformanceCsv(csvText: string): PerformanceCsvResult {
 
   const trades: PerformanceCsvRow[] = [];
   const fills: PerformanceCsvFill[] = [];
-  const seenFillIds = new Set<string>();
 
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
 
     // Handle commas inside money values like "$(1,234.50)"
-    // Replace commas inside $() with placeholder, split, restore
     const cols = splitCsvLine(line);
     if (cols.length < header.length) continue;
 
@@ -140,35 +139,33 @@ export function parsePerformanceCsv(csvText: string): PerformanceCsvResult {
       duration,
     });
 
-    // Emit BUY fill (dedup by buyFillId — same buyFillId can appear in multiple rows
-    // when a single buy is partially filled against multiple sells)
-    const buyKey = `BUY:${buyFillId}:${qty}:${buyPrice}`;
-    if (!seenFillIds.has(buyKey)) {
-      seenFillIds.add(buyKey);
-      fills.push({
-        fill_id: buyFillId,
-        timestamp_utc: tradovateToIso(boughtTimestamp),
-        contract: symbol,
-        side: 'BUY',
-        qty,
-        price: buyPrice,
-      });
-    }
+    // Each row = 1 trade pairing = exactly 2 fills (BUY + SELL).
+    // NO dedup here — partial fills share the same buyFillId or sellFillId
+    // across multiple rows, but each row is a unique trade pairing.
+    // The buyFillId+sellFillId combo is the natural unique key per row.
 
-    // Emit SELL fill
-    const sellKey = `SELL:${sellFillId}:${qty}:${sellPrice}`;
-    if (!seenFillIds.has(sellKey)) {
-      seenFillIds.add(sellKey);
-      fills.push({
-        fill_id: sellFillId,
-        timestamp_utc: tradovateToIso(soldTimestamp),
-        contract: symbol,
-        side: 'SELL',
-        qty,
-        price: sellPrice,
-        pnl,
-      });
-    }
+    // BUY fill
+    fills.push({
+      buy_fill_id: buyFillId,
+      sell_fill_id: sellFillId,
+      timestamp_utc: tradovateToIso(boughtTimestamp),
+      contract: symbol,
+      side: 'BUY',
+      qty,
+      price: buyPrice,
+    });
+
+    // SELL fill
+    fills.push({
+      buy_fill_id: buyFillId,
+      sell_fill_id: sellFillId,
+      timestamp_utc: tradovateToIso(soldTimestamp),
+      contract: symbol,
+      side: 'SELL',
+      qty,
+      price: sellPrice,
+      pnl,
+    });
   }
 
   // Sort fills by timestamp
