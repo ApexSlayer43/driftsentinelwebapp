@@ -102,39 +102,38 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
           >
             <div className="flex items-center justify-between">
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[11px] font-medium text-text-primary">
-                    {day.trading_date}
-                  </span>
-                  {day.violation_count > 0 && (
-                    <span className="flex items-center gap-1 font-mono text-[9px] text-warning">
-                      <span className="inline-block h-1 w-1 rounded-full bg-warning" />
-                      {day.violation_count}v
-                    </span>
-                  )}
+                <div className="font-mono text-[12px] font-medium text-text-primary">
+                  {day.trading_date}
                 </div>
-                <div className="mt-0.5 flex items-center gap-2 font-mono text-[10px] text-text-muted">
-                  <span>{day.fills_count}f</span>
+                <div className="mt-1 flex items-center gap-3 font-mono text-[11px] text-text-muted">
+                  <span>{day.fills_count} fills</span>
                   <span>DSI {day.dsi_score}</span>
                   {day.streak_count > 0 && (
-                    <span className="text-positive">{day.streak_count}d</span>
+                    <span className="text-positive">{day.streak_count}d streak</span>
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="font-mono text-base font-bold"
+              <div className="text-right">
+                <div
+                  className="font-mono text-lg font-bold"
                   style={{ color: tierStyle.color, fontVariantNumeric: 'tabular-nums' }}
                 >
                   {day.bss_score}
-                </span>
-                <span className={`font-mono text-[10px] font-medium ${
+                </div>
+                <div className={`font-mono text-[11px] font-medium ${
                   delta > 0 ? 'text-positive' : delta < 0 ? 'text-negative' : 'text-text-muted'
                 }`} style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {delta > 0 ? '+' : ''}{delta !== 0 ? delta : '—'}
-                </span>
+                </div>
               </div>
             </div>
+
+            {day.violation_count > 0 && (
+              <div className="mt-1.5 flex items-center gap-1.5 font-mono text-[11px] text-warning">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-warning" />
+                {day.violation_count} pattern{day.violation_count > 1 ? 's' : ''} detected
+              </div>
+            )}
           </GlowPanel>
         );
       })}
