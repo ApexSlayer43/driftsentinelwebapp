@@ -80,7 +80,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
   }
 
   return (
-    <div className="space-y-1.5 max-w-md">
+    <div className="space-y-1.5">
       {/* Link to full forensics */}
       <Link
         href="/forensics"

@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { EvidenceSessions } from './evidence-sessions';
 import { EvidenceViolations } from './evidence-violations';
 import { EvidenceTrends } from './evidence-trends';
-
-type EvidenceTab = 'sessions' | 'violations' | 'trends';
 
 interface EvidenceSheetProps {
   isOpen: boolean;
@@ -14,21 +12,12 @@ interface EvidenceSheetProps {
   accountRef?: string;
 }
 
-const TAB_LABELS: Record<EvidenceTab, string> = {
-  sessions: 'Sessions',
-  violations: 'Violations',
-  trends: 'Trends',
-};
-
 /**
- * Evidence Sheet — bottom sheet with 3 tabs.
+ * Evidence Sheet — bottom sheet showing all 3 sections at once.
  * Opens from gauge tap. Slides up with spring animation.
- * Uses the existing liquid-glass design language.
+ * 3-column grid: Sessions | Violations | Trends
  */
 export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProps) {
-  const [activeTab, setActiveTab] = useState<EvidenceTab>('sessions');
-
-  // Close on Escape
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') onClose();
   }, [onClose]);
@@ -42,27 +31,30 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
 
   if (!isOpen) return null;
 
-  const TABS: EvidenceTab[] = ['sessions', 'violations', 'trends'];
-
   return (
     <div className="fixed inset-0 z-50">
-      {/* Backdrop — click to close */}
+      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Sheet — liquid-glass-raised per spec Section 7 */}
+      {/* Sheet */}
       <div
-        className="absolute bottom-0 left-0 right-0 bg-[rgba(13,15,21,0.92)] backdrop-blur-xl border border-white/[0.06] rounded-t-3xl"
+        className="absolute bottom-0 left-0 right-0 bg-[rgba(13,15,21,0.95)] backdrop-blur-xl border border-white/[0.06] rounded-t-3xl flex flex-col"
         style={{
-          maxHeight: '65vh',
+          height: '70vh',
           animation: 'sheetSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >
-        {/* Drag handle + close */}
-        <div className="flex items-center justify-between px-5 pt-3 pb-1">
-          <div className="h-1 w-10 rounded-full bg-text-dim" />
+        {/* Header — drag handle + title + close */}
+        <div className="flex items-center justify-between px-6 pt-3 pb-2 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="h-1 w-10 rounded-full bg-text-dim" />
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+              Evidence Breakdown
+            </span>
+          </div>
           <button
             onClick={onClose}
             className="rounded-full p-1.5 transition-colors hover:bg-elevated"
@@ -71,31 +63,46 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
           </button>
         </div>
 
-        {/* Tab bar — liquid glass tabs */}
-        <div className="flex gap-1.5 px-5 pb-3">
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`rounded-full px-4 py-1.5 font-mono text-[12px] font-bold uppercase tracking-[0.12em] transition-all ${
-                activeTab === tab
-                  ? 'bg-white/[0.06] text-text-primary'
-                  : 'hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary'
-              }`}
-            >
-              {TAB_LABELS[tab]}
-            </button>
-          ))}
-        </div>
-
         {/* Separator */}
-        <div className="mx-5 h-px bg-border-subtle" />
+        <div className="mx-6 h-px bg-border-subtle shrink-0" />
 
-        {/* Tab content */}
-        <div className="overflow-y-auto px-4 py-3" style={{ maxHeight: 'calc(65vh - 90px)' }}>
-          {activeTab === 'sessions' && <EvidenceSessions accountRef={accountRef} />}
-          {activeTab === 'violations' && <EvidenceViolations accountRef={accountRef} />}
-          {activeTab === 'trends' && <EvidenceTrends accountRef={accountRef} />}
+        {/* 3-column grid filling the panel */}
+        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-0 overflow-hidden">
+          {/* Sessions column */}
+          <div className="flex flex-col min-h-0 border-r border-white/[0.04]">
+            <div className="px-4 py-2.5 shrink-0">
+              <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
+                Sessions
+              </h3>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
+              <EvidenceSessions accountRef={accountRef} />
+            </div>
+          </div>
+
+          {/* Violations column */}
+          <div className="flex flex-col min-h-0 border-r border-white/[0.04]">
+            <div className="px-4 py-2.5 shrink-0">
+              <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
+                Violations
+              </h3>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
+              <EvidenceViolations accountRef={accountRef} />
+            </div>
+          </div>
+
+          {/* Trends column */}
+          <div className="flex flex-col min-h-0">
+            <div className="px-4 py-2.5 shrink-0">
+              <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
+                Trends
+              </h3>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
+              <EvidenceTrends accountRef={accountRef} />
+            </div>
+          </div>
         </div>
       </div>
 
