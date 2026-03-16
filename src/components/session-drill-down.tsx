@@ -96,11 +96,11 @@ export function SessionDrillDown({ session, onClose }: SessionDrillDownProps) {
     : null;
 
   return (
-    <div className="animate-in slide-in-from-bottom-4 rounded-xl liquid-glass p-6 relative">
+    <div className="animate-in slide-in-from-bottom-4 rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] p-6 relative">
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 flex h-7 w-7 items-center justify-center rounded-lg liquid-glass-tab text-text-muted hover:text-text-secondary transition-colors"
+        className="absolute top-4 right-4 flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary transition-colors"
       >
         <X size={14} />
       </button>

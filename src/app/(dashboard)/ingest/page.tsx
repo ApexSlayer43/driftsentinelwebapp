@@ -141,8 +141,8 @@ export default function IngestPage() {
           onClick={() => setMode('pdf')}
           className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-colors ${
             mode === 'pdf'
-              ? 'liquid-glass-tab-active text-text-primary'
-              : 'liquid-glass-tab text-text-muted hover:text-text-secondary'
+              ? 'bg-white/[0.06] text-text-primary'
+              : 'hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary'
           }`}
         >
           <FileText size={12} />
@@ -152,8 +152,8 @@ export default function IngestPage() {
           onClick={() => setMode('csv')}
           className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-colors ${
             mode === 'csv'
-              ? 'liquid-glass-tab-active text-text-primary'
-              : 'liquid-glass-tab text-text-muted hover:text-text-secondary'
+              ? 'bg-white/[0.06] text-text-primary'
+              : 'hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary'
           }`}
         >
           <FileSpreadsheet size={12} />

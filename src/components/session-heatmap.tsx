@@ -82,12 +82,12 @@ export function SessionHeatmap({ sessions, selectedId, onSelect, month, onMonthC
   }
 
   return (
-    <div className="rounded-xl liquid-glass p-5">
+    <div className="rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] p-5">
       {/* Month navigation */}
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={prevMonth}
-          className="flex h-7 w-7 items-center justify-center rounded-lg liquid-glass-tab text-text-muted hover:text-text-secondary transition-colors"
+          className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary transition-colors"
         >
           <ChevronLeft size={14} />
         </button>
@@ -96,7 +96,7 @@ export function SessionHeatmap({ sessions, selectedId, onSelect, month, onMonthC
         </h3>
         <button
           onClick={nextMonth}
-          className="flex h-7 w-7 items-center justify-center rounded-lg liquid-glass-tab text-text-muted hover:text-text-secondary transition-colors"
+          className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary transition-colors"
         >
           <ChevronRight size={14} />
         </button>

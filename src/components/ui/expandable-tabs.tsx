@@ -83,8 +83,8 @@ export function ExpandableTabs({
             className={cn(
               "relative flex items-center rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300",
               selected === index
-                ? cn(activeColor, "liquid-glass-tab-active")
-                : "text-muted-foreground hover:text-foreground liquid-glass-tab"
+                ? cn(activeColor, "bg-white/[0.06]")
+                : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-colors"
             )}
           >
             <Icon size={20} />
