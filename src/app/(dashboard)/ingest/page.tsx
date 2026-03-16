@@ -227,14 +227,14 @@ export default function IngestPage() {
           )}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
-            <PdfStat label="Gross P/L" value={`$${pdfResult.summary.grossPnl.toFixed(2)}`} color={pdfResult.summary.grossPnl >= 0 ? '#22D3EE' : '#FB923C'} />
-            <PdfStat label="Net P/L" value={`$${pdfResult.summary.totalPnl.toFixed(2)}`} color={pdfResult.summary.totalPnl >= 0 ? '#22D3EE' : '#FB923C'} />
-            <PdfStat label="Win Rate" value={`${pdfResult.summary.winRate}%`} color={pdfResult.summary.winRate >= 50 ? '#22D3EE' : '#FB923C'} />
-            <PdfStat label="Expectancy" value={`$${pdfResult.summary.expectancy.toFixed(2)}`} color={pdfResult.summary.expectancy >= 0 ? '#22D3EE' : '#FB923C'} />
+            <PdfStat label="Gross P/L" value={`$${pdfResult.summary.grossPnl.toFixed(2)}`} color={pdfResult.summary.grossPnl >= 0 ? '#FFFFFF' : '#8891A0'} />
+            <PdfStat label="Net P/L" value={`$${pdfResult.summary.totalPnl.toFixed(2)}`} color={pdfResult.summary.totalPnl >= 0 ? '#FFFFFF' : '#8891A0'} />
+            <PdfStat label="Win Rate" value={`${pdfResult.summary.winRate}%`} color={pdfResult.summary.winRate >= 50 ? '#FFFFFF' : '#8891A0'} />
+            <PdfStat label="Expectancy" value={`$${pdfResult.summary.expectancy.toFixed(2)}`} color={pdfResult.summary.expectancy >= 0 ? '#FFFFFF' : '#8891A0'} />
             <PdfStat label="Trades" value={String(pdfResult.summary.tradeCount)} />
             <PdfStat label="Contracts" value={String(pdfResult.summary.contractCount)} />
-            <PdfStat label="Max Run-up" value={`$${pdfResult.summary.maxRunUp.toFixed(2)}`} color="#22D3EE" />
-            <PdfStat label="Max Drawdown" value={`$${Math.abs(pdfResult.summary.maxDrawdown).toFixed(2)}`} color="#FB923C" />
+            <PdfStat label="Max Run-up" value={`$${pdfResult.summary.maxRunUp.toFixed(2)}`} color="#FFFFFF" />
+            <PdfStat label="Max Drawdown" value={`$${Math.abs(pdfResult.summary.maxDrawdown).toFixed(2)}`} color="#8891A0" />
           </div>
 
           {pdfResult.ingest && (

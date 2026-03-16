@@ -82,8 +82,8 @@ export function BssGauge({
     return () => cancelAnimationFrame(raf);
   }, [score]);
 
-  // Delta display — cyan positive, orange negative (colorblind-safe)
-  const deltaColor = delta > 0 ? '#22D3EE' : delta < 0 ? '#FB923C' : '#4A5568';
+  // Delta display — monochrome: brighter white for positive, dimmer for negative
+  const deltaColor = delta > 0 ? '#FFFFFF' : delta < 0 ? '#8891A0' : '#4A5568';
   const deltaSymbol = delta > 0 ? '\u25B2' : delta < 0 ? '\u25BC' : '\u2014';
   const deltaText = delta !== 0 ? `${Math.abs(delta)}` : '';
 

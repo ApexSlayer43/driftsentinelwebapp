@@ -7,10 +7,10 @@ export default function LoginPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
       {/* WebGL nebula background — gold hue, slow drift, dimmed */}
       <CelestialSphere
-        hue={42}
         speed={0.25}
         zoom={1.3}
-        particleSize={2.5}
+        starDensity={400}
+        nebulaIntensity={0.10}
         className="absolute inset-0 h-full w-full opacity-35"
       />
       {/* Vignette overlay to keep center content readable */}

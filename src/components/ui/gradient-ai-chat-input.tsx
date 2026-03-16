@@ -58,25 +58,25 @@ export function GradientAIChatInput({
   dropdownOptions = [],
   selectedOption = null,
   onOptionSelect,
-  // DS Cyan/Teal gradient defaults (dark mode only)
+  // Monochrome white/silver gradient defaults
   mainGradient = {
-    topLeft: "#0E7490",     // cyan-700
-    topRight: "#155E75",    // cyan-800
-    bottomRight: "#164E63", // cyan-900
-    bottomLeft: "#0D9488",  // teal-600
+    topLeft: "#3A3F4B",
+    topRight: "#2E3340",
+    bottomRight: "#252A35",
+    bottomLeft: "#3A3F4B",
   },
   outerGradient = {
-    topLeft: "#0C5E75",
-    topRight: "#0E4F63",
-    bottomRight: "#0C3E4F",
-    bottomLeft: "#0B7A70",
+    topLeft: "#2A2F3A",
+    topRight: "#222730",
+    bottomRight: "#1C2028",
+    bottomLeft: "#2A2F3A",
   },
-  innerGradientOpacity = 0.08,
-  buttonBorderColor = "rgba(255,255,255,0.06)",
+  innerGradientOpacity = 0.04,
+  buttonBorderColor = "rgba(255,255,255,0.08)",
   // Shadow defaults
   enableShadows = true,
-  shadowOpacity = 1,
-  shadowColor = "rgb(34, 211, 238)", // cyan glow
+  shadowOpacity = 0.8,
+  shadowColor = "rgb(255, 255, 255)", // white glow
 }: GradientAIChatInputProps) {
   const [message, setMessage] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

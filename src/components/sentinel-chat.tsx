@@ -386,16 +386,16 @@ export function SentinelChat() {
       )}
 
       {/* Floating Senti FAB */}
-      <GlowPanel variant="teal" className="rounded-full">
+      <GlowPanel className="rounded-full">
         <button
           className="sentinel-fab relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 hover:scale-110"
           onClick={() => setOpen(!open)}
           style={{
             background:
-              'radial-gradient(circle at 30% 30%, rgba(34, 211, 238, 0.9), rgba(6, 182, 212, 0.8))',
+              'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(200, 210, 225, 0.8))',
             boxShadow: open
-              ? '0 0 15px rgba(34, 211, 238, 0.4), 0 0 30px rgba(34, 211, 238, 0.2)'
-              : '0 0 20px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.3), 0 0 60px rgba(34, 211, 238, 0.15)',
+              ? '0 0 15px rgba(255, 255, 255, 0.3), 0 0 30px rgba(255, 255, 255, 0.15)'
+              : '0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 255, 255, 0.2), 0 0 60px rgba(255, 255, 255, 0.1)',
           }}
         >
           <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/25 to-transparent pointer-events-none" />
@@ -405,7 +405,7 @@ export function SentinelChat() {
           {!open && (
             <div
               className="absolute inset-0 rounded-full animate-ping pointer-events-none"
-              style={{ backgroundColor: 'rgba(34, 211, 238, 0.2)' }}
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
             />
           )}
         </button>

@@ -378,7 +378,7 @@ export default function SentiPage() {
                         className="flex h-7 w-7 items-center justify-center rounded-full"
                         style={{
                           background:
-                            'radial-gradient(circle at 30% 30%, rgba(34, 211, 238, 0.7), rgba(6, 182, 212, 0.5))',
+                            'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(200, 210, 225, 0.6))',
                         }}
                       >
                         <Bot size={14} className="text-void" />

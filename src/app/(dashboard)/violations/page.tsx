@@ -228,7 +228,7 @@ export default function HistoricalPage() {
                   const date = new Date(fill.timestamp_utc).toLocaleDateString('en-US', {
                     month: 'short', day: 'numeric',
                   });
-                  const sideColor = fill.side === 'BUY' ? '#22D3EE' : '#FB923C';
+                  const sideColor = fill.side === 'BUY' ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)';
                   const isSelected = violation && selectedViolation?.violation_id === violation.violation_id;
 
                   return (

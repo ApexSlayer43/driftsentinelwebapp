@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type { Session, SessionEvent } from '@/lib/types';
-import { getSessionQualityStyle, getTierStyle } from '@/lib/tokens';
+import { getSessionQualityStyle } from '@/lib/tokens';
 import { EVENT_TYPE_LABELS, EVENT_TYPE_ICONS } from '@/lib/tokens';
+import { GlowPanel } from '@/components/ui/glow-panel';
 import {
   X,
   Play,
@@ -16,6 +17,9 @@ import {
   ShieldAlert,
   TrendingUp,
   RotateCcw,
+  Activity,
+  Zap,
+  Shield,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -36,20 +40,6 @@ function getEventIcon(eventType: string): LucideIcon {
   return ICON_MAP[iconName] ?? AlertTriangle;
 }
 
-function getEventColor(eventType: string): string {
-  switch (eventType) {
-    case 'SESSION_START': return '#6366F1';
-    case 'SESSION_END': return '#94A3B8';
-    case 'TRADE_OPEN': return '#22D3EE';
-    case 'TRADE_CLOSE': return '#94A3B8';
-    case 'VIOLATION_TRIGGERED': return '#FB923C';
-    case 'VIOLATION_CLEARED': return '#22D3EE';
-    case 'PROTOCOL_BREACH': return '#FB923C';
-    case 'SIZE_ESCALATION': return '#F59E0B';
-    case 'RECOVERY_ATTEMPT': return '#60A5FA';
-    default: return '#6B7280';
-  }
-}
 
 function formatElapsed(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
@@ -91,133 +81,149 @@ export function SessionDrillDown({ session, onClose }: SessionDrillDownProps) {
   }, [session.session_id]);
 
   const qualityStyle = getSessionQualityStyle(session.session_quality);
-  const bssTierStyle = session.bss_at_session !== null
-    ? getTierStyle(session.bss_at_session >= 80 ? 'PROVEN' : session.bss_at_session >= 60 ? 'GROUNDED' : session.bss_at_session >= 40 ? 'DEFINED' : 'FORMING')
-    : null;
 
   return (
-    <div className="animate-in slide-in-from-bottom-4 rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] p-6 relative">
+    <GlowPanel className="p-6 relative">
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 flex h-7 w-7 items-center justify-center rounded-lg hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary transition-colors"
+        className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.04] hover:bg-white/[0.08] transition-all text-text-muted hover:text-text-primary"
       >
         <X size={14} />
       </button>
 
       {/* Session Summary Header */}
-      <div className="mb-5">
-        <div className="flex items-center gap-3 mb-3">
-          <h3 className="font-mono text-sm font-bold text-text-primary">
-            {session.trading_date}
-          </h3>
-          <span
-            className="rounded-full px-2.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-wider"
-            style={{ backgroundColor: qualityStyle.bg, color: qualityStyle.color, border: `1px solid ${qualityStyle.border}` }}
-          >
+      <div className="mb-6">
+        {/* Date + Quality badge row */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="h-2.5 w-2.5 rounded-full bg-white/60" style={{ boxShadow: '0 0 8px rgba(255,255,255,0.2)' }} />
+            <h3 className="font-mono text-base font-bold text-white tracking-tight">
+              {session.trading_date}
+            </h3>
+          </div>
+          <span className="rounded-full px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.12em] bg-white/[0.06] text-white/70 border border-white/[0.1]">
             {qualityStyle.label}
           </span>
         </div>
 
-        {/* Metrics row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-          <MetricPill label="Fills" value={String(session.fills_count)} />
-          <MetricPill label="Violations" value={String(session.violation_count)} color={session.violation_count > 0 ? '#FF6B35' : undefined} />
-          <MetricPill label="DSI" value={session.dsi_score !== null ? String(session.dsi_score) : '—'} />
-          <MetricPill label="BSS" value={session.bss_at_session !== null ? String(session.bss_at_session) : '—'} color={bssTierStyle?.color} />
-          <MetricPill
+        {/* Metrics grid — monochrome white/silver */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          <MetricTile label="Fills" value={String(session.fills_count)} icon={Activity} />
+          <MetricTile label="Violations" value={String(session.violation_count)} icon={AlertTriangle} />
+          <MetricTile label="DSI Score" value={session.dsi_score !== null ? String(session.dsi_score) : '—'} icon={Shield} />
+          <MetricTile label="BSS" value={session.bss_at_session !== null ? String(session.bss_at_session) : '—'} icon={Zap} />
+          <MetricTile
             label="BSS Delta"
             value={session.bss_delta !== null ? `${session.bss_delta >= 0 ? '+' : ''}${session.bss_delta.toFixed(1)}` : '—'}
-            color={session.bss_delta !== null ? (session.bss_delta >= 0 ? '#00D4AA' : '#FF3B5C') : undefined}
+            icon={TrendingUp}
           />
-          <MetricPill label="Max Consec. Loss" value={String(session.max_consecutive_losses)} color={session.max_consecutive_losses >= 3 ? '#FF6B35' : undefined} />
+          <MetricTile label="Max Consec Loss" value={String(session.max_consecutive_losses)} icon={RotateCcw} />
         </div>
 
-        {/* Behavioral flags */}
-        <div className="flex items-center gap-2 mt-3">
-          {session.recovery_attempted && (
-            <span className="rounded-full px-2 py-0.5 font-mono text-[7px] uppercase tracking-wider bg-[rgba(74,158,229,0.12)] text-[#4A9EE5] border border-[rgba(74,158,229,0.25)]">
-              Recovery Attempted
-            </span>
-          )}
-          {session.session_extended && (
-            <span className="rounded-full px-2 py-0.5 font-mono text-[7px] uppercase tracking-wider bg-[rgba(245,166,35,0.12)] text-[#F5A623] border border-[rgba(245,166,35,0.25)]">
-              Extended Session
-            </span>
-          )}
-          {session.first_violation_sequence !== null && (
-            <span className="rounded-full px-2 py-0.5 font-mono text-[7px] uppercase tracking-wider bg-[rgba(255,107,53,0.12)] text-[#FF6B35] border border-[rgba(255,107,53,0.25)]">
-              First Violation @ Trade #{session.first_violation_sequence}
-            </span>
-          )}
-        </div>
+        {/* Behavioral flags — improved pill design */}
+        {(session.recovery_attempted || session.session_extended || session.first_violation_sequence !== null) && (
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            {session.recovery_attempted && (
+              <BehaviorFlag label="Recovery Attempted" />
+            )}
+            {session.session_extended && (
+              <BehaviorFlag label="Extended Session" />
+            )}
+            {session.first_violation_sequence !== null && (
+              <BehaviorFlag label={`First Violation @ Trade #${session.first_violation_sequence}`} />
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Event Timeline */}
-      <div className="border-t border-border-dim pt-4">
-        <h4 className="font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-3">
-          Session Event Timeline
+      {/* Event Timeline — redesigned */}
+      <div className="border-t border-white/[0.04] pt-5">
+        <h4 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-4">
+          Event Timeline
         </h4>
 
         {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-stable border-t-transparent" />
+          <div className="flex items-center justify-center py-10">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-positive border-t-transparent" />
           </div>
         ) : events.length === 0 ? (
-          <p className="font-mono text-[10px] text-text-muted py-4">
-            No events recorded for this session.
-          </p>
+          <div className="flex items-center justify-center py-8 rounded-xl bg-white/[0.01] border border-white/[0.03]">
+            <p className="font-mono text-[11px] text-text-dim">
+              No events recorded for this session.
+            </p>
+          </div>
         ) : (
-          <div className="relative pl-6">
-            {/* Vertical timeline line */}
-            <div className="absolute left-[7px] top-0 bottom-0 w-px bg-border-subtle" />
+          <div className="relative pl-8">
+            {/* Vertical timeline line — gradient fade */}
+            <div
+              className="absolute left-[9px] top-1 bottom-1 w-px"
+              style={{
+                background: 'linear-gradient(to bottom, rgba(255,255,255,0.25), rgba(255,255,255,0.08), rgba(255,255,255,0.02))',
+              }}
+            />
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               {events.map((event, i) => {
                 const Icon = getEventIcon(event.event_type);
-                const color = getEventColor(event.event_type);
                 const label = EVENT_TYPE_LABELS[event.event_type] ?? event.event_type;
                 const meta = event.metadata ?? {};
+                const isViolation = event.event_type === 'VIOLATION_TRIGGERED' || event.event_type === 'PROTOCOL_BREACH';
+                // Monochrome brightness: violations slightly brighter to stand out
+                const nodeBrightness = isViolation ? 'bg-white/90' : 'bg-white/60';
 
                 return (
-                  <div key={event.session_event_id ?? i} className="relative flex items-start gap-3">
-                    {/* Timeline dot */}
+                  <div
+                    key={event.session_event_id ?? i}
+                    className={`relative flex items-start gap-3 py-2 px-3 rounded-lg transition-colors ${
+                      isViolation ? 'bg-white/[0.02]' : 'hover:bg-white/[0.02]'
+                    }`}
+                  >
+                    {/* Timeline node */}
                     <div
-                      className="absolute left-[-20px] top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full"
-                      style={{ backgroundColor: color, opacity: 0.8 }}
+                      className={`absolute left-[-23px] top-3 flex h-[18px] w-[18px] items-center justify-center rounded-full ring-2 ring-[rgba(13,15,21,0.85)] ${nodeBrightness}`}
+                      style={{
+                        boxShadow: isViolation ? '0 0 8px rgba(255,255,255,0.3)' : '0 0 6px rgba(255,255,255,0.15)',
+                      }}
                     >
-                      <Icon size={8} className="text-void" />
+                      <Icon size={9} className="text-void" strokeWidth={2.5} />
                     </div>
 
                     {/* Event content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] font-semibold" style={{ color }}>
+                      <div className="flex items-center gap-2.5">
+                        <span className={`font-mono text-[11px] font-semibold ${isViolation ? 'text-white' : 'text-white/80'}`}>
                           {label}
                         </span>
-                        <span className="font-mono text-[8px] text-text-muted">
+                        <span className="font-mono text-[9px] text-text-dim bg-white/[0.03] rounded px-1.5 py-0.5">
                           +{formatElapsed(event.elapsed_seconds)}
                         </span>
-                        <span className="font-mono text-[7px] text-text-dim">
+                        <span className="font-mono text-[8px] text-text-dim">
                           #{event.sequence_number}
                         </span>
                       </div>
 
                       {/* Metadata display */}
                       {meta.instrument && (
-                        <p className="font-mono text-[8px] text-text-muted mt-0.5">
-                          {meta.side} {meta.qty}x {meta.contract ?? meta.instrument} @ {meta.price}
-                          {meta.off_session ? ' (off-session)' : ''}
+                        <p className="font-mono text-[10px] text-text-muted mt-1">
+                          <span className="text-text-secondary">{meta.side}</span>{' '}
+                          {meta.qty}x {meta.contract ?? meta.instrument}{' '}
+                          <span className="text-text-secondary">@ {meta.price}</span>
+                          {meta.off_session && (
+                            <span className="ml-1.5 text-[8px] text-warning">(off-session)</span>
+                          )}
                         </p>
                       )}
                       {meta.violation_type && (
-                        <p className="font-mono text-[8px] mt-0.5" style={{ color }}>
-                          {meta.violation_type} — {meta.severity} ({meta.points} pts)
+                        <p className="font-mono text-[10px] mt-1 text-white/70">
+                          {meta.violation_type}
+                          <span className="text-white/40"> — {meta.severity}</span>
+                          <span className="ml-1 text-white/30">({meta.points} pts)</span>
                         </p>
                       )}
                       {meta.session_quality && event.event_type === 'SESSION_END' && (
-                        <p className="font-mono text-[8px] text-text-muted mt-0.5">
-                          Quality: {meta.session_quality} — {meta.fills_count} fills, {meta.violation_count} violations
+                        <p className="font-mono text-[10px] text-text-muted mt-1">
+                          Quality: <span className="text-text-secondary">{meta.session_quality}</span> — {meta.fills_count} fills, {meta.violation_count} violations
                         </p>
                       )}
                     </div>
@@ -228,22 +234,41 @@ export function SessionDrillDown({ session, onClose }: SessionDrillDownProps) {
           </div>
         )}
       </div>
+    </GlowPanel>
+  );
+}
+
+/* ── Metric Tile ── */
+function MetricTile({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: LucideIcon;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5 rounded-xl px-3.5 py-3 bg-white/[0.03] border border-white/[0.04] transition-colors hover:border-white/[0.08]">
+      <div className="flex items-center gap-1.5">
+        <Icon size={10} className="text-white/40" />
+        <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.18em] text-white/30">
+          {label}
+        </span>
+      </div>
+      <span className="font-mono text-lg font-bold leading-none text-white">
+        {value}
+      </span>
     </div>
   );
 }
 
-function MetricPill({ label, value, color }: { label: string; value: string; color?: string }) {
+/* ── Behavior Flag ── */
+function BehaviorFlag({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center gap-0.5 rounded-lg border border-border-dim px-3 py-2">
-      <span className="font-mono text-[7px] uppercase tracking-wider text-text-muted">
-        {label}
-      </span>
-      <span
-        className="font-mono text-sm font-bold"
-        style={{ color: color ?? '#E8EDF5' }}
-      >
-        {value}
-      </span>
-    </div>
+    <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[8px] font-semibold uppercase tracking-[0.1em] bg-white/[0.06] text-white/60 border border-white/[0.08] transition-colors">
+      <span className="h-1 w-1 rounded-full bg-white/50" />
+      {label}
+    </span>
   );
 }

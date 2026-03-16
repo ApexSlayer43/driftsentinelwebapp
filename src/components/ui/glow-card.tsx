@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 interface GlowCardProps {
   children: React.ReactNode;
   className?: string;
-  variant?: "default" | "white" | "teal" | "gold" | "teal-gold";
   blur?: number;
   spread?: number;
   borderWidth?: number;
@@ -17,14 +16,11 @@ interface GlowCardProps {
 }
 
 /**
- * GlowCard — wraps any panel with the Aceternity-style GlowingEffect.
- * Default variant is "gold" to match the DS eye logo.
- * Just replace `<div className="glass-card ...">` with `<GlowCard className="glass-card ...">`.
+ * GlowCard — wraps any panel with the white/silver GlowingEffect.
  */
 export function GlowCard({
   children,
   className,
-  variant = "gold",
   blur = 0,
   spread = 20,
   borderWidth = 1,
@@ -36,7 +32,6 @@ export function GlowCard({
   return (
     <div className={cn("relative rounded-[inherit]", className)}>
       <GlowingEffect
-        variant={variant}
         blur={blur}
         spread={spread}
         borderWidth={borderWidth}

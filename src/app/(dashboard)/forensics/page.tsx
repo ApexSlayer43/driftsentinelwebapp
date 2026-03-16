@@ -187,7 +187,7 @@ export default function ForensicsPage() {
                   onClick={() => setSelectedId(v.violation_id)}
                   className={`w-full text-left rounded-xl px-4 py-3 transition-all ${
                     isActive
-                      ? 'ring-1 ring-[#FFD700]/40 bg-raised/60'
+                      ? 'ring-1 ring-white/30 bg-raised/60'
                       : 'hover:bg-raised/30'
                   }`}
                 >
@@ -201,8 +201,8 @@ export default function ForensicsPage() {
                     <span
                       className="shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold"
                       style={{
-                        color: v.severity === 'CRITICAL' ? '#EF4444' : v.severity === 'HIGH' ? '#FB923C' : '#F59E0B',
-                        backgroundColor: v.severity === 'CRITICAL' ? 'rgba(239,68,68,0.12)' : v.severity === 'HIGH' ? 'rgba(251,146,60,0.12)' : 'rgba(245,158,11,0.12)',
+                        color: v.severity === 'CRITICAL' ? '#FFFFFF' : v.severity === 'HIGH' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.6)',
+                        backgroundColor: v.severity === 'CRITICAL' ? 'rgba(255,255,255,0.12)' : v.severity === 'HIGH' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)',
                       }}
                     >
                       {v.severity}
@@ -350,7 +350,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
         <div className="space-y-4">
           {/* Situation */}
           <GlowPanel className="p-4 flex gap-3.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#6366F1]/15 font-mono text-[12px] font-bold text-[#6366F1]">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/15 font-mono text-[12px] font-bold text-white">
               S
             </div>
             <div>
@@ -365,7 +365,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
 
           {/* Behavior */}
           <GlowPanel className="p-4 flex gap-3.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F59E0B]/15 font-mono text-[12px] font-bold text-[#F59E0B]">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 font-mono text-[12px] font-bold text-white">
               B
             </div>
             <div>
@@ -381,7 +381,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
 
           {/* Impact */}
           <GlowPanel className="p-4 flex gap-3.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EF4444]/15 font-mono text-[12px] font-bold text-[#EF4444]">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/12 font-mono text-[12px] font-bold text-white">
               I
             </div>
             <div>
@@ -394,7 +394,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                     This pattern caused a {violation.points}-pt DSI penalty, driving the Daily Stability Index to{' '}
                     <span className="font-bold text-text-primary">{dsiScore}/100</span>.
                     BSS moved from {bssBefore} to {bssAfter}{' '}
-                    (<span className="font-bold text-[#FB923C]">{actualBssDelta}</span>)
+                    (<span className="font-bold text-white">{actualBssDelta}</span>)
                     {alpha !== null && ` at ${alpha} EWMA alpha`}.
                   </>
                 ) : (
@@ -421,7 +421,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
           <div className="grid grid-cols-4 gap-3 items-center">
             {/* Step 1: DSI Penalty */}
             <div className="text-center">
-              <div className="font-mono text-[20px] font-bold text-[#FB923C]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 -{violation.points}
               </div>
               <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
@@ -437,7 +437,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
 
             {/* Step 2: DSI Score for the day */}
             <div className="text-center">
-              <div className="font-mono text-[20px] font-bold text-text-primary" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {dsiScore !== null ? `${dsiScore}/100` : '—'}
               </div>
               <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
@@ -451,7 +451,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
             {/* Arrow */}
             <div className="text-center">
               <div className="font-mono text-[11px] text-text-dim mb-1">EWMA →</div>
-              <div className="font-mono text-[20px] font-bold text-[#FB923C]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {actualBssDelta !== null ? actualBssDelta : '—'}
               </div>
               <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
@@ -471,7 +471,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
             Your daily DSI score{dsiScore !== null ? ` (${dsiScore}/100)` : ''} feeds into BSS via EWMA smoothing
             {alpha !== null && ` (alpha: ${alpha})`}, which is why the dashboard shows{' '}
             {actualBssDelta !== null
-              ? <span className="text-[#FB923C] font-semibold">{actualBssDelta}</span>
+              ? <span className="text-white font-semibold">{actualBssDelta}</span>
               : 'a smaller delta'}{' '}
             — not -{violation.points}.
           </div>
@@ -486,11 +486,11 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
         <GlowPanel className="overflow-hidden">
           <div className="grid grid-cols-5 gap-px bg-border-dim">
             {[
-              { label: 'Duration', value: `${windowMinutes} min`, color: 'text-text-primary' },
-              { label: 'Entries', value: `${entries}`, color: 'text-text-primary' },
-              { label: 'Win Rate', value: `${winRate}%`, color: winRate < 50 ? 'text-[#FB923C]' : 'text-[#22D3EE]' },
-              { label: 'Max Lot', value: `${maxLot || '—'}`, color: 'text-[#22D3EE]' },
-              { label: 'Fills', value: `${violation.evidence_event_ids.length}`, color: 'text-text-primary' },
+              { label: 'Duration', value: `${windowMinutes} min`, color: 'text-white' },
+              { label: 'Entries', value: `${entries}`, color: 'text-white' },
+              { label: 'Win Rate', value: `${winRate}%`, color: winRate < 50 ? 'text-white/60' : 'text-white' },
+              { label: 'Max Lot', value: `${maxLot || '—'}`, color: 'text-white' },
+              { label: 'Fills', value: `${violation.evidence_event_ids.length}`, color: 'text-white' },
             ].map((item) => (
               <div key={item.label} className="bg-surface px-4 py-3">
                 <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mb-1">
@@ -520,14 +520,14 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                   className="w-3 rounded-sm"
                   style={{
                     height: `${Math.max(16, Math.min(32, r.points * 4))}px`,
-                    backgroundColor: r.isCurrent ? '#FB923C' : '#F59E0B',
-                    opacity: r.isCurrent ? 1 : 0.6,
+                    backgroundColor: '#FFFFFF',
+                    opacity: r.isCurrent ? 0.8 : 0.4,
                   }}
                 />
               ))}
             </div>
             <div className="flex items-center gap-2 font-mono text-[12px]">
-              <span className="font-bold text-[#F59E0B]">{recurrence.length} occurrences</span>
+              <span className="font-bold text-white">{recurrence.length} occurrences</span>
               <span className="text-text-muted">
                 Last: {lastOccurrence}
                 {avgInterval && ` · Avg interval: ${avgInterval} days`}
@@ -552,13 +552,16 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
               const fillTime = new Date(fill.timestamp_utc).toLocaleTimeString('en-US', {
                 hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
               });
-              const sideColor = fill.side === 'BUY' ? '#22D3EE' : '#FB923C';
+              const sideColor = fill.side === 'BUY' ? '#FFFFFF' : '#C0C8D8';
 
               return (
                 <div key={fill.event_id} className="flex items-center gap-3 glass-inset rounded-xl px-3 py-2">
                   <span
                     className="rounded px-1.5 py-0.5 font-mono text-[11px] font-bold"
-                    style={{ color: sideColor, backgroundColor: `${sideColor}12` }}
+                    style={{
+                      color: sideColor,
+                      backgroundColor: fill.side === 'BUY' ? 'rgba(255,255,255,0.1)' : 'rgba(192,200,216,0.1)'
+                    }}
                   >
                     {fill.side}
                   </span>
@@ -566,7 +569,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                     {fillTime}
                   </span>
                   <span className="font-mono text-[12px] text-text-secondary">{fill.contract}</span>
-                  <span className="ml-auto font-mono text-[12px] font-bold text-text-primary" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  <span className="ml-auto font-mono text-[12px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
                     {fill.qty} @ {fill.price}
                   </span>
                   {fill.off_session && (

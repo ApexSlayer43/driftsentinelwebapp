@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 interface GlowPanelProps {
   children: React.ReactNode;
   className?: string;
-  variant?: "default" | "teal" | "gold" | "teal-gold" | "white";
   /** Outer wrapper classes (border container) */
   outerClassName?: string;
   /** Disable the glow effect (static border only) */
@@ -20,12 +19,11 @@ interface GlowPanelProps {
 
 /**
  * GlowPanel — replacement for GlowCard/liquid-glass.
- * Wraps content in a card with a mouse-tracking glowing border effect.
+ * Wraps content in a card with a mouse-tracking white/silver glowing border effect.
  */
 export function GlowPanel({
   children,
   className,
-  variant = "default",
   outerClassName,
   disabled = false,
   spread = 40,
@@ -47,7 +45,6 @@ export function GlowPanel({
         proximity={proximity}
         inactiveZone={inactiveZone}
         borderWidth={borderWidth}
-        variant={variant}
       />
       <div
         className={cn(

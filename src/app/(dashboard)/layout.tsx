@@ -17,7 +17,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react';
-import { Particles } from '@/components/ui/particles';
+import { CelestialSphere } from '@/components/ui/celestial-sphere';
 import { MenuContainer, MenuItem } from '@/components/ui/fluid-menu';
 import LiveEye from '@/components/live-eye';
 import { createClient } from '@/lib/supabase/client';
@@ -125,13 +125,12 @@ export default function DashboardLayout({
 
   return (
     <div className="relative h-screen overflow-hidden">
-      <Particles
-        className="absolute inset-0 z-0"
-        quantity={120}
-        ease={80}
-        color="#ffffff"
-        size={0.4}
-        staticity={50}
+      <CelestialSphere
+        className="absolute inset-0 z-0 w-full h-full"
+        speed={0.4}
+        zoom={1.2}
+        starDensity={80}
+        nebulaIntensity={0.6}
       />
       {/* Fluid nav — fixed top-right */}
       <div className="fixed top-5 right-5 z-50">

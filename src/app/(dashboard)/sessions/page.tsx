@@ -7,7 +7,16 @@ import { SessionPulseStrip } from '@/components/session-pulse-strip';
 import { SessionHeatmap } from '@/components/session-heatmap';
 import { SessionDrillDown } from '@/components/session-drill-down';
 import { UploadCadenceBar } from '@/components/upload-cadence-bar';
+import { GlowPanel } from '@/components/ui/glow-panel';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
+import {
+  Calendar,
+  Target,
+  BarChart3,
+  AlertTriangle,
+  Shield,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 type TimeRange = '30D' | '60D' | '90D';
 
@@ -29,7 +38,6 @@ export default function SessionsPage() {
         return;
       }
 
-      // Get account_ref
       const { data: accounts } = await supabase
         .from('accounts')
         .select('account_ref')
@@ -47,7 +55,6 @@ export default function SessionsPage() {
       since.setDate(since.getDate() - days);
       const sinceStr = since.toISOString().slice(0, 10);
 
-      // Fetch sessions and uploads in parallel
       const [sessionsResult, uploadsResult] = await Promise.all([
         supabase
           .from('sessions')
@@ -76,7 +83,6 @@ export default function SessionsPage() {
     loadData();
   }, [range]);
 
-  // Compute summary stats
   const stats = useMemo(() => {
     if (sessions.length === 0) return null;
     const cleanCount = sessions.filter((s) => s.session_quality === 'CLEAN').length;
@@ -96,7 +102,7 @@ export default function SessionsPage() {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-stable border-t-transparent mx-auto" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-positive border-t-transparent mx-auto" />
           <p className="mt-3 font-mono text-xs text-text-muted">Loading sessions...</p>
         </div>
       </div>
@@ -115,15 +121,15 @@ export default function SessionsPage() {
             Your behavioral black box — every session, every event, every pattern
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1 rounded-full bg-white/[0.03] p-1 border border-white/[0.04]">
           {RANGES.map((r) => (
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`rounded-full px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.1em] transition-colors ${
+              className={`rounded-full px-3.5 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.1em] transition-all ${
                 range === r
-                  ? 'bg-white/[0.06] text-text-primary'
-                  : 'hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary'
+                  ? 'bg-white/[0.08] text-text-primary shadow-sm'
+                  : 'text-text-muted hover:text-text-secondary'
               }`}
             >
               {r}
@@ -132,22 +138,42 @@ export default function SessionsPage() {
         </div>
       </div>
 
-      {/* Summary stats */}
+      {/* Summary stats — GlowPanel cards */}
       {stats && (
         <div className="px-8 py-3 shrink-0">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            <StatCard label="Sessions" value={String(stats.total)} />
-            <StatCard label="Clean Rate" value={`${stats.cleanRate}%`} color={stats.cleanRate >= 70 ? '#22D3EE' : stats.cleanRate >= 40 ? '#F59E0B' : '#FB923C'} />
-            <StatCard label="Avg Fills" value={String(stats.avgFills)} />
-            <StatCard label="Total Violations" value={String(stats.totalViolations)} color={stats.totalViolations > 0 ? '#FB923C' : '#22D3EE'} />
-            <StatCard label="Avg DSI" value={stats.avgDsi !== null ? String(stats.avgDsi) : '—'} />
+            <StatCard
+              label="Sessions"
+              value={String(stats.total)}
+              icon={Calendar}
+            />
+            <StatCard
+              label="Clean Rate"
+              value={`${stats.cleanRate}%`}
+              icon={Target}
+            />
+            <StatCard
+              label="Avg Fills"
+              value={String(stats.avgFills)}
+              icon={BarChart3}
+            />
+            <StatCard
+              label="Violations"
+              value={String(stats.totalViolations)}
+              icon={AlertTriangle}
+            />
+            <StatCard
+              label="Avg DSI"
+              value={stats.avgDsi !== null ? String(stats.avgDsi) : '—'}
+              icon={Shield}
+            />
           </div>
         </div>
       )}
 
       {/* Pulse Strip */}
       <div className="px-8 py-2 shrink-0">
-        <h2 className="font-mono text-[8px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-2">
+        <h2 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-2">
           Session Pulse
         </h2>
         <SessionPulseStrip
@@ -215,18 +241,36 @@ export default function SessionsPage() {
   );
 }
 
-function StatCard({ label, value, color }: { label: string; value: string; color?: string }) {
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: LucideIcon;
+}) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] px-4 py-3">
-      <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.18em] text-text-muted">
-        {label}
-      </span>
-      <span
-        className="font-mono text-lg font-bold"
-        style={{ color: color ?? '#E8EDF5' }}
-      >
-        {value}
-      </span>
+    <div className="relative rounded-[1.25rem] border-[0.75px] border-white/[0.06] p-1.5">
+      <GlowingEffect
+        spread={30}
+        glow={true}
+        disabled={false}
+        proximity={48}
+        inactiveZone={0.01}
+        borderWidth={2}
+      />
+      <div className="relative flex flex-col items-center gap-1.5 rounded-xl border-[0.75px] border-white/[0.04] bg-[rgba(13,15,21,0.85)] px-4 py-3.5">
+        <div className="flex items-center gap-1.5">
+          <Icon size={10} className="text-white/40" />
+          <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.18em] text-text-muted">
+            {label}
+          </span>
+        </div>
+        <span className="font-mono text-xl font-bold leading-none text-white">
+          {value}
+        </span>
+      </div>
     </div>
   );
 }
