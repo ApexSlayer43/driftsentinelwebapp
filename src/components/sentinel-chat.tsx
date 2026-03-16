@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { TextStreamChatTransport, type UIMessage } from 'ai';
-import { Send, Bot, X, Loader2, ChevronDown } from 'lucide-react';
+import { Send, Bot, X, Loader2, ChevronDown, Paperclip, FileText, CheckCircle } from 'lucide-react';
 import { GlowCard } from '@/components/ui/glow-card';
 
 type SentiMode = 'morningBriefing' | 'sessionCompanion' | 'postSessionAAR' | 'onboarding';
@@ -35,9 +35,12 @@ export function SentinelChat() {
   const [mode, setMode] = useState<SentiMode>('sessionCompanion');
   const [showModeMenu, setShowModeMenu] = useState(false);
   const [input, setInput] = useState('');
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const transport = useMemo(
     () =>
@@ -118,6 +121,88 @@ export function SentinelChat() {
       e.preventDefault();
       handleSend();
     }
+  }
+
+  // File upload handler — sends PDF to Senti ingest endpoint and streams analysis
+  async function handleFileUpload(file: File) {
+    const isPdf = file.name.toLowerCase().endsWith('.pdf');
+    const isCsv = file.name.toLowerCase().endsWith('.csv');
+    if (!isPdf && !isCsv) return;
+
+    setUploadingFile(true);
+    setUploadedFileName(file.name);
+
+    // Add user message showing the upload
+    const uploadMsg: UIMessage = {
+      id: 'upload-' + Date.now(),
+      role: 'user',
+      parts: [{ type: 'text', text: `📎 Uploaded: ${file.name}` }],
+    };
+    setMessages((prev: UIMessage[]) => [...prev, uploadMsg]);
+
+    // Add placeholder for Senti's response
+    const sentiMsgId = 'senti-analysis-' + Date.now();
+    const placeholderMsg: UIMessage = {
+      id: sentiMsgId,
+      role: 'assistant',
+      parts: [{ type: 'text', text: '' }],
+    };
+    setMessages((prev: UIMessage[]) => [...prev, placeholderMsg]);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/chat/ingest', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        throw new Error(errBody?.error || `Upload failed: ${res.status}`);
+      }
+
+      // Stream the response text
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          fullText += decoder.decode(value, { stream: true });
+          // Update the placeholder message with streamed text
+          setMessages((prev: UIMessage[]) =>
+            prev.map((m: UIMessage) =>
+              m.id === sentiMsgId
+                ? { ...m, parts: [{ type: 'text' as const, text: fullText }] }
+                : m
+            )
+          );
+        }
+      }
+    } catch (err) {
+      const errorText = err instanceof Error ? err.message : 'Failed to analyze file';
+      setMessages((prev: UIMessage[]) =>
+        prev.map((m: UIMessage) =>
+          m.id === sentiMsgId
+            ? { ...m, parts: [{ type: 'text' as const, text: `⚠️ ${errorText}` }] }
+            : m
+        )
+      );
+    } finally {
+      setUploadingFile(false);
+      setUploadedFileName(null);
+    }
+  }
+
+  function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) handleFileUpload(file);
+    // Reset so same file can be re-uploaded
+    e.target.value = '';
   }
 
   const activeMode = MODE_OPTIONS.find((m) => m.value === mode);
@@ -244,24 +329,53 @@ export function SentinelChat() {
             })}
           </div>
 
+          {/* Upload status bar */}
+          {uploadingFile && uploadedFileName && (
+            <div className="flex items-center gap-2 border-t border-white/[0.04] px-3 py-1.5" style={{ background: 'rgba(34, 211, 238, 0.04)' }}>
+              <FileText size={10} className="text-positive" />
+              <span className="font-mono text-[9px] text-positive truncate flex-1">
+                Analyzing {uploadedFileName}...
+              </span>
+              <Loader2 size={10} className="text-positive animate-spin" />
+            </div>
+          )}
+
           {/* Input */}
           <div className="flex items-center gap-2 border-t border-white/[0.04] px-3 py-2.5">
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.csv"
+              onChange={handleFileInputChange}
+              className="hidden"
+            />
+            {/* Paperclip upload button */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isBusy || uploadingFile}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors text-text-dim hover:text-positive disabled:opacity-30 disabled:pointer-events-none"
+              style={{ background: 'rgba(255,255,255,0.04)' }}
+              title="Upload Performance PDF or CSV"
+            >
+              <Paperclip size={12} />
+            </button>
             <input
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask about your data..."
-              disabled={isBusy}
+              placeholder={uploadingFile ? 'Analyzing your report...' : 'Ask about your data...'}
+              disabled={isBusy || uploadingFile}
               className="flex-1 bg-transparent font-mono text-[12px] text-text-primary placeholder-text-dim outline-none disabled:opacity-50"
             />
             <button
               onClick={handleSend}
-              disabled={isBusy || !input.trim()}
+              disabled={isBusy || uploadingFile || !input.trim()}
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors text-text-muted hover:text-positive disabled:opacity-30 disabled:pointer-events-none"
               style={{ background: 'rgba(255,255,255,0.04)' }}
             >
-              {isBusy ? (
+              {isBusy || uploadingFile ? (
                 <Loader2 size={12} className="animate-spin" />
               ) : (
                 <Send size={12} />
