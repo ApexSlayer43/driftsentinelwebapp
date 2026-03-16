@@ -95,7 +95,7 @@ export function SessionDrillDown({ session, onClose }: SessionDrillDownProps) {
     : '—';
 
   return (
-    <GlowPanel className="p-0 relative overflow-hidden">
+    <GlowPanel className="p-0 relative overflow-hidden bg-[#0D0F15]">
       {/* Close button — prominent, top-right */}
       <button
         onClick={onClose}
