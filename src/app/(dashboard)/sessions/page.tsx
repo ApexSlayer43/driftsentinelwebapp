@@ -228,9 +228,9 @@ export default function SessionsPage() {
         </div>
       </div>
 
-      {/* Drill-Down Panel */}
+      {/* Drill-Down Panel — uses full width */}
       {selectedSession && (
-        <div className="px-8 py-3 shrink-0">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 shrink-0">
           <SessionDrillDown
             session={selectedSession}
             onClose={() => setSelectedSession(null)}
