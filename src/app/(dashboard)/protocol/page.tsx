@@ -7,6 +7,7 @@ import {
   Loader2, CheckCircle2, AlertCircle, HelpCircle,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { GlowCard } from '@/components/ui/glow-card';
 import {
   canonicalizeProtocol,
   type ProtocolData,
@@ -328,7 +329,7 @@ export default function ProtocolPage() {
 
       {/* ── Protocol Header ─────────────────────────────────── */}
       {protocol && (
-        <div className="rounded-2xl liquid-glass p-5">
+        <GlowCard className="rounded-2xl liquid-glass p-5">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stable/10">
@@ -369,7 +370,7 @@ export default function ProtocolPage() {
               />
             </div>
           </div>
-        </div>
+        </GlowCard>
       )}
 
       {/* ── Rule Categories ─────────────────────────────────── */}
@@ -379,7 +380,7 @@ export default function ProtocolPage() {
         const isExpanded = expandedCategories.has(category);
 
         return (
-          <div key={category} className="rounded-2xl liquid-glass overflow-hidden">
+          <GlowCard key={category} className="rounded-2xl liquid-glass overflow-hidden">
             {/* Category header */}
             <button
               onClick={() => toggleCategory(category)}
@@ -475,7 +476,7 @@ export default function ProtocolPage() {
                 })}
               </div>
             )}
-          </div>
+          </GlowCard>
         );
       })}
     </div>

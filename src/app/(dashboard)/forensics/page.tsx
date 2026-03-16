@@ -5,6 +5,7 @@ import { Clock, Layers, Search } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getModeLabel, getModeIcon, getModeWeight } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
+import { GlowCard } from '@/components/ui/glow-card';
 import type { ViolationDetail, FillCanonical, DailyScore } from '@/lib/types';
 
 /**
@@ -355,7 +356,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
         </div>
         <div className="space-y-4">
           {/* Situation */}
-          <div className="glass-card rounded-xl p-4 flex gap-3.5">
+          <GlowCard className="glass-card rounded-xl p-4 flex gap-3.5">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#6366F1]/15 font-mono text-[12px] font-bold text-[#6366F1]">
               S
             </div>
@@ -367,10 +368,10 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                 {instrument} session. {entries} entries executed over {windowMinutes} minutes between {windowStart}–{windowEnd} EST.
               </div>
             </div>
-          </div>
+          </GlowCard>
 
           {/* Behavior */}
-          <div className="glass-card rounded-xl p-4 flex gap-3.5">
+          <GlowCard className="glass-card rounded-xl p-4 flex gap-3.5">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#F59E0B]/15 font-mono text-[12px] font-bold text-[#F59E0B]">
               B
             </div>
@@ -383,10 +384,10 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                 {maxLot > 1 && ` Max lot size reached ${maxLot} contracts.`}
               </div>
             </div>
-          </div>
+          </GlowCard>
 
           {/* Impact */}
-          <div className="glass-card rounded-xl p-4 flex gap-3.5">
+          <GlowCard className="glass-card rounded-xl p-4 flex gap-3.5">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#EF4444]/15 font-mono text-[12px] font-bold text-[#EF4444]">
               I
             </div>
@@ -412,7 +413,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                 )}
               </div>
             </div>
-          </div>
+          </GlowCard>
         </div>
       </div>
 
@@ -423,7 +424,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
         </div>
 
         {/* Visual pipeline: penalty → DSI → BSS */}
-        <div className="glass-card rounded-xl p-5">
+        <GlowCard className="glass-card rounded-xl p-5">
           <div className="grid grid-cols-4 gap-3 items-center">
             {/* Step 1: DSI Penalty */}
             <div className="text-center">
@@ -481,7 +482,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
               : 'a smaller delta'}{' '}
             — not -{violation.points}.
           </div>
-        </div>
+        </GlowCard>
       </div>
 
       {/* ═══ SESSION CONTEXT ═══ */}
@@ -489,7 +490,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
         <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-3">
           Session Context
         </div>
-        <div className="glass-card rounded-xl overflow-hidden">
+        <GlowCard className="glass-card rounded-xl overflow-hidden">
           <div className="grid grid-cols-5 gap-px bg-border-dim">
             {[
               { label: 'Duration', value: `${windowMinutes} min`, color: 'text-text-primary' },
@@ -508,7 +509,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
               </div>
             ))}
           </div>
-        </div>
+        </GlowCard>
       </div>
 
       {/* ═══ RECURRENCE ═══ */}
@@ -517,7 +518,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
           <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-3">
             Recurrence · 30 Days
           </div>
-          <div className="glass-card rounded-xl px-5 py-4">
+          <GlowCard className="glass-card rounded-xl px-5 py-4">
             <div className="flex items-center gap-2 mb-3">
               {/* Occurrence bars */}
               {recurrence.map((r) => (
@@ -539,7 +540,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                 {avgInterval && ` · Avg interval: ${avgInterval} days`}
               </span>
             </div>
-          </div>
+          </GlowCard>
         </div>
       )}
 

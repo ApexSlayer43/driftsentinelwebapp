@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { getModeLabel, getModeIcon } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
+import { GlowCard } from '@/components/ui/glow-card';
 import type { ViolationDetail } from '@/lib/types';
 
 interface EvidenceViolationsProps {
@@ -103,7 +104,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
         const windowEnd = new Date(v.window_end_utc).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
         return (
-          <div key={v.violation_id}>
+          <GlowCard key={v.violation_id} className="rounded-2xl">
             <button
               onClick={() => setExpandedId(isExpanded ? null : v.violation_id)}
               className="flex w-full items-center gap-3 glass-card rounded-2xl p-3.5 transition-transform hover:scale-[1.01]"
@@ -145,7 +146,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
                 </div>
               </div>
             )}
-          </div>
+          </GlowCard>
         );
       })}
     </div>

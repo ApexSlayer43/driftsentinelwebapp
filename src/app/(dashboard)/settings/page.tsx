@@ -5,6 +5,7 @@ import { Save, Plus, Trash2, X, Shield, Plug, Unplug, ExternalLink, Loader2, Puz
 import { createClient } from '@/lib/supabase/client';
 import type { SessionConfig } from '@/lib/types';
 import Link from 'next/link';
+import { GlowCard } from '@/components/ui/glow-card';
 
 // ── Main page ──────────────────────────────────────────────────
 export default function SettingsPage() {
@@ -202,26 +203,28 @@ export default function SettingsPage() {
 
       <div className="mt-8 grid gap-6">
         {/* Protocol — managed on dedicated page */}
-        <Link
-          href="/protocol"
-          className="group flex items-center justify-between rounded-xl glass p-6 transition-colors hover:bg-raised/30"
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-primary/10">
-              <Shield size={16} className="text-positive" />
+        <GlowCard className="rounded-xl">
+          <Link
+            href="/protocol"
+            className="group flex items-center justify-between rounded-xl glass p-6 transition-colors hover:bg-raised/30"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-primary/10">
+                <Shield size={16} className="text-positive" />
+              </div>
+              <div>
+                <h3 className="font-display text-sm font-bold text-text-primary">Protocol</h3>
+                <p className="mt-0.5 font-mono text-[12px] text-text-muted">
+                  Upload and manage your trading protocol rules
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-display text-sm font-bold text-text-primary">Protocol</h3>
-              <p className="mt-0.5 font-mono text-[12px] text-text-muted">
-                Upload and manage your trading protocol rules
-              </p>
-            </div>
-          </div>
-          <ExternalLink size={14} className="text-text-dim group-hover:text-positive transition-colors" />
-        </Link>
+            <ExternalLink size={14} className="text-text-dim group-hover:text-positive transition-colors" />
+          </Link>
+        </GlowCard>
 
         {/* Trading Rules */}
-        <div className="rounded-xl glass p-6">
+        <GlowCard className="rounded-xl glass p-6">
           <h3 className="font-display text-sm font-bold text-text-primary">Trading Rules</h3>
           <p className="mt-1 font-mono text-[12px] text-text-muted">Define your maximum position sizes and activity limits</p>
           <div className="mt-4 grid grid-cols-2 gap-4">
@@ -250,10 +253,10 @@ export default function SettingsPage() {
               />
             </div>
           </div>
-        </div>
+        </GlowCard>
 
         {/* Session Windows */}
-        <div className="rounded-xl glass p-6">
+        <GlowCard className="rounded-xl glass p-6">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-display text-sm font-bold text-text-primary">Session Windows</h3>
@@ -319,10 +322,10 @@ export default function SettingsPage() {
               ))
             )}
           </div>
-        </div>
+        </GlowCard>
 
         {/* Baseline Configuration */}
-        <div className="rounded-xl glass p-6">
+        <GlowCard className="rounded-xl glass p-6">
           <h3 className="font-display text-sm font-bold text-text-primary">Baseline Configuration</h3>
           <p className="mt-1 font-mono text-[12px] text-text-muted">Controls how many fills are needed to establish your trading baseline</p>
           <div className="mt-4 grid grid-cols-2 gap-4">
@@ -351,10 +354,10 @@ export default function SettingsPage() {
               />
             </div>
           </div>
-        </div>
+        </GlowCard>
 
         {/* Connect Extension */}
-        <div className="rounded-xl glass p-6">
+        <GlowCard className="rounded-xl glass p-6">
           <h3 className="font-display text-sm font-bold text-text-primary">Chrome Extension</h3>
           <p className="mt-1 font-mono text-[12px] text-text-muted">
             Connect the Drift Sentinel extension for real-time monitoring
@@ -442,7 +445,7 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
-        </div>
+        </GlowCard>
       </div>
     </div>
   );

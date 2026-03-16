@@ -5,6 +5,7 @@ import { UserCircle, Copy, Check } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getTierStyle, ACCENT } from '@/lib/tokens';
 import type { StatePayload } from '@/lib/types';
+import { GlowCard } from '@/components/ui/glow-card';
 
 /**
  * DS Trader ID — behavioral profile card.
@@ -132,7 +133,7 @@ export default function TraderIdPage() {
         </div>
 
         {/* PROFILE HERO */}
-        <div className="glass-card rounded-2xl p-10 text-center mb-5 relative overflow-hidden">
+        <GlowCard className="glass-card rounded-2xl p-10 text-center mb-5 relative overflow-hidden">
           <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 80%, rgba(99,102,241,0.04) 0%, transparent 50%)` }} />
           <div className="relative z-10">
             <div className="w-[72px] h-[72px] rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: `linear-gradient(135deg, rgba(99,102,241,0.08), rgba(167,139,250,0.08))`, border: `2px solid ${ACCENT.primary}`, boxShadow: `0 0 30px rgba(99,102,241,0.15)` }}>
@@ -147,35 +148,35 @@ export default function TraderIdPage() {
               {data.bss_tier}
             </div>
           </div>
-        </div>
+        </GlowCard>
 
         {/* STATS 2×2 */}
         <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className="glass-card rounded-xl p-4">
+          <GlowCard className="glass-card rounded-xl p-4">
             <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted">Delta</div>
             <div className={`font-mono text-[22px] font-bold mt-1 ${delta >= 0 ? 'text-positive' : 'text-negative'}`} style={{ fontVariantNumeric: 'tabular-nums' }}>{delta >= 0 ? '+' : ''}{delta}</div>
             <div className="font-mono text-[12px] text-text-muted">from yesterday</div>
-          </div>
-          <div className="glass-card rounded-xl p-4">
+          </GlowCard>
+          <GlowCard className="glass-card rounded-xl p-4">
             <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted">Streak</div>
             <div className="font-mono text-[22px] font-bold mt-1 text-[#FFD700]" style={{ fontVariantNumeric: 'tabular-nums' }}>{data.bss_streak} days</div>
             <div className="font-mono text-[12px] text-text-muted">consecutive sessions</div>
-          </div>
-          <div className="glass-card rounded-xl p-4">
+          </GlowCard>
+          <GlowCard className="glass-card rounded-xl p-4">
             <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted">Yesterday</div>
             <div className="font-mono text-[22px] font-bold mt-1 text-text-primary" style={{ fontVariantNumeric: 'tabular-nums' }}>{data.bss_yesterday}</div>
             <div className="font-mono text-[12px] text-text-muted">BSS close</div>
-          </div>
-          <div className="glass-card rounded-xl p-4">
+          </GlowCard>
+          <GlowCard className="glass-card rounded-xl p-4">
             <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-muted">Alpha</div>
             <div className={`font-mono text-[22px] font-bold mt-1 ${data.bss_alpha >= 0 ? 'text-positive' : 'text-negative'}`} style={{ fontVariantNumeric: 'tabular-nums' }}>{data.bss_alpha >= 0 ? '+' : ''}{data.bss_alpha.toFixed(1)}</div>
             <div className="font-mono text-[12px] text-text-muted">above cohort avg</div>
-          </div>
+          </GlowCard>
         </div>
 
         {/* 90-DAY SPARKLINE — indigo accent */}
         {sparkline.length > 1 && (
-          <div className="glass-card rounded-xl p-5 mb-5">
+          <GlowCard className="glass-card rounded-xl p-5 mb-5">
             <div className="flex justify-between items-center mb-4">
               <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">{sparkline.length}-Day Trajectory</div>
               <div className="font-mono text-[12px] text-text-muted">{sparkline.length >= 90 ? '90 days' : `${sparkline.length} days`}</div>
@@ -191,11 +192,11 @@ export default function TraderIdPage() {
               <polyline points={sparkPoints} fill="none" stroke={ACCENT.primary} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
               {sparkline.length > 0 && <circle cx={sparkW} cy={sparkH - ((sparkline[sparkline.length - 1] / 100) * sparkH)} r="4" fill={ACCENT.primary} stroke="#0F1117" strokeWidth="2" />}
             </svg>
-          </div>
+          </GlowCard>
         )}
 
         {/* TIER PROGRESSION */}
-        <div className="glass-card rounded-xl p-5 mb-5">
+        <GlowCard className="glass-card rounded-xl p-5 mb-5">
           <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted mb-4">Tier Progression</div>
           <div className="flex gap-1 mb-3">
             {TIERS.map((tier, idx) => (
@@ -207,16 +208,16 @@ export default function TraderIdPage() {
               <span key={tier.key} className={`font-mono text-[9px] uppercase tracking-[0.1em] ${tier.key === data.bss_tier ? 'font-semibold' : 'text-text-muted'}`} style={{ color: tier.key === data.bss_tier ? tier.color : undefined }}>{tier.name}</span>
             ))}
           </div>
-        </div>
+        </GlowCard>
 
         {/* SHARE LINK — indigo accent */}
-        <div className="glass-card rounded-xl p-4 flex items-center gap-3">
+        <GlowCard className="glass-card rounded-xl p-4 flex items-center gap-3">
           <div className="flex-1 glass-inset rounded-lg px-3.5 py-2.5 font-mono text-[12px] text-text-muted truncate">{shareUrl}</div>
           <button onClick={handleCopy} className="bg-accent-primary text-white rounded-lg px-5 py-2.5 font-mono text-[12px] font-semibold tracking-[0.1em] uppercase transition-all hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] shrink-0 flex items-center gap-2">
             {copied ? <Check size={14} /> : <Copy size={14} />}
             {copied ? 'Copied' : 'Copy Link'}
           </button>
-        </div>
+        </GlowCard>
       </div>
     </div>
   );

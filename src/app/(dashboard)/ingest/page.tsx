@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Upload, CheckCircle, XCircle, Copy } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { GlowCard } from '@/components/ui/glow-card';
 import type { IngestRun } from '@/lib/types';
 
 export default function IngestPage() {
@@ -130,7 +131,7 @@ export default function IngestPage() {
 
       {/* Result */}
       {result && (
-        <div className="mt-4 rounded-xl border border-positive/20 bg-positive/[0.04] p-4">
+        <GlowCard className="mt-4 rounded-xl border border-positive/20 bg-positive/[0.04] p-4">
           <div className="flex items-center gap-2">
             <CheckCircle size={16} className="text-positive" />
             <span className="font-mono text-sm font-semibold text-positive">Upload Complete</span>
@@ -149,7 +150,7 @@ export default function IngestPage() {
               <div className="font-display text-xl font-bold text-negative">{result.rejected}</div>
             </div>
           </div>
-        </div>
+        </GlowCard>
       )}
 
       {error && (
@@ -170,7 +171,7 @@ export default function IngestPage() {
             <p className="mt-2 font-mono text-xs text-text-muted">No uploads yet</p>
           </div>
         ) : (
-          <div className="mt-3 overflow-hidden rounded-xl glass">
+          <GlowCard className="mt-3 overflow-hidden rounded-xl glass">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border-dim glass-raised">
@@ -195,7 +196,7 @@ export default function IngestPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </GlowCard>
         )}
       </div>
     </div>
