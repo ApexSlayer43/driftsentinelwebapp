@@ -185,7 +185,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="overflow-auto px-8 py-8">
+    <div data-onboard="protocol-settings" className="overflow-auto px-8 py-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-text-primary">Settings</h1>

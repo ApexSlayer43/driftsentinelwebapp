@@ -189,7 +189,7 @@ export default function SessionsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4">
           {/* Heatmap */}
-          <div className="relative">
+          <div data-onboard="session-heatmap" className="relative">
             <div className="relative rounded-[1.25rem] border-[0.75px] border-border-subtle p-2 md:rounded-[1.5rem] md:p-3">
               <GlowingEffect
                 spread={40}

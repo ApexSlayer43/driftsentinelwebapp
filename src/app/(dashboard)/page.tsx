@@ -170,6 +170,7 @@ export default function DashboardPage() {
 
         {/* 1. BSS Gauge — 240° arc, score centered, tap opens evidence sheet */}
         <div
+          data-onboard="bss-gauge"
           onClick={() => setSheetOpen(true)}
           className="relative cursor-pointer transition-transform hover:scale-[1.02] rounded-full p-4"
           role="button"
@@ -220,6 +221,12 @@ export default function DashboardPage() {
           </p>
         )}
       </div>
+
+      {/* ── LIFETIME PERFORMANCE SECTION ── */}
+      <div data-onboard="lifetime-performance" className="hidden"></div>
+
+      {/* ── SESSION OVERVIEW SECTION ── */}
+      <div data-onboard="session-overview" className="hidden"></div>
 
       {/* ── EVIDENCE SHEET: Opens from gauge tap (Layer 2) ── */}
       <EvidenceSheet

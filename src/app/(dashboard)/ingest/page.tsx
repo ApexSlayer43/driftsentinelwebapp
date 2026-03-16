@@ -176,6 +176,7 @@ export default function IngestPage() {
 
       {/* Upload zone — accepts both formats regardless of mode toggle */}
       <div
+        data-onboard="upload-zone"
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
@@ -225,7 +226,7 @@ export default function IngestPage() {
 
       {/* PDF Result */}
       {pdfResult && (
-        <GlowPanel className="mt-4 p-5 border border-positive/20 bg-positive/[0.04]">
+        <GlowPanel data-onboard="upload-results" className="mt-4 p-5 border border-positive/20 bg-positive/[0.04]">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle size={16} className="text-positive" />
             <span className="font-mono text-sm font-semibold text-positive">
@@ -274,7 +275,7 @@ export default function IngestPage() {
 
       {/* CSV Result */}
       {csvResult && (
-        <GlowPanel className="mt-4 p-5 border border-positive/20 bg-positive/[0.04]">
+        <GlowPanel data-onboard="upload-results" className="mt-4 p-5 border border-positive/20 bg-positive/[0.04]">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle size={16} className="text-positive" />
             <span className="font-mono text-sm font-semibold text-positive">

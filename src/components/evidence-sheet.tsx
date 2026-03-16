@@ -32,7 +32,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div data-onboard="evidence-sheet" className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
