@@ -171,20 +171,22 @@ export default function SessionsPage() {
         </div>
       )}
 
-      {/* Pulse Strip */}
-      <div className="px-8 py-2 shrink-0">
-        <h2 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-1.5">
-          Session Pulse
-        </h2>
-        <SessionPulseStrip
-          sessions={sessions}
-          selectedId={selectedSession?.session_id ?? null}
-          onSelect={setSelectedSession}
-        />
-      </div>
-
-      {/* Heatmap + Upload Cadence — shrink-to-fit, not flex-1 */}
+      {/* Heatmap + Upload Cadence */}
       <div className="px-8 py-3 shrink-0">
+        {/* Pulse Strip — centered above calendar */}
+        <div className="flex justify-center mb-3">
+          <div className="flex flex-col items-center">
+            <h2 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-1.5">
+              Session Pulse
+            </h2>
+            <SessionPulseStrip
+              sessions={sessions}
+              selectedId={selectedSession?.session_id ?? null}
+              onSelect={setSelectedSession}
+            />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4">
           {/* Heatmap */}
           <div className="relative">
