@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react'
 import { useChat } from '@ai-sdk/react';
 import { TextStreamChatTransport, type UIMessage } from 'ai';
 import { Bot, Loader2, RotateCcw, MessageSquare, Clock } from 'lucide-react';
-import { GlowCard } from '@/components/ui/glow-card';
 import { GradientAIChatInput } from '@/components/ui/gradient-ai-chat-input';
 
 type SentiMode = 'morningBriefing' | 'sessionCompanion' | 'postSessionAAR' | 'onboarding';
@@ -65,7 +64,6 @@ export default function SentiPage() {
   const [mode, setMode] = useState<SentiMode>('sessionCompanion');
   const [input, setInput] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
@@ -118,10 +116,10 @@ export default function SentiPage() {
     }
   }, []);
 
-  // Load history when panel opens
+  // Load history on mount
   useEffect(() => {
-    if (showHistory) fetchHistory();
-  }, [showHistory, fetchHistory]);
+    fetchHistory();
+  }, [fetchHistory]);
 
   // Load a past conversation
   async function loadConversation(convo: ConversationSummary) {
@@ -146,7 +144,6 @@ export default function SentiPage() {
         setMessages(uiMessages);
         setActiveConvoId(convo.id);
         setMode((convo.mode as SentiMode) || 'sessionCompanion');
-        setShowHistory(false);
       }
     } catch {
       // Silent fail
@@ -277,8 +274,9 @@ export default function SentiPage() {
 
   return (
     <div className="flex h-full max-h-[calc(100vh-60px)]">
-      {/* Left sidebar — Mode selector + History */}
-      <div className="w-56 shrink-0 p-4 flex flex-col gap-3 overflow-hidden">
+      {/* Left sidebar — Chat History */}
+      <div className="w-56 shrink-0 p-4 flex flex-col gap-3 overflow-hidden border-r border-white/[0.04]">
+        {/* Header */}
         <div className="flex items-center gap-2 mb-1">
           <Bot size={16} className="text-positive" />
           <span className="font-mono text-[13px] font-bold uppercase tracking-[0.15em] text-text-muted">
@@ -296,109 +294,63 @@ export default function SentiPage() {
           </div>
         </div>
 
-        {/* Tab toggle: Modes / History */}
-        <div className="flex gap-1 rounded-lg p-0.5" style={{ background: 'rgba(255,255,255,0.02)' }}>
-          <button
-            onClick={() => setShowHistory(false)}
-            className={`flex-1 rounded-md px-2 py-1 font-mono text-[10px] transition-all ${
-              !showHistory ? 'text-positive bg-white/[0.05]' : 'text-text-dim hover:text-text-muted'
-            }`}
-          >
-            Modes
-          </button>
-          <button
-            onClick={() => setShowHistory(true)}
-            className={`flex-1 rounded-md px-2 py-1 font-mono text-[10px] transition-all ${
-              showHistory ? 'text-positive bg-white/[0.05]' : 'text-text-dim hover:text-text-muted'
-            }`}
-          >
-            History
-          </button>
-        </div>
-
-        {/* Panel content */}
-        <div className="flex-1 overflow-auto" style={{ scrollbarWidth: 'none' }}>
-          {!showHistory ? (
-            // Mode cards
-            <div className="flex flex-col gap-2">
-              {MODE_OPTIONS.map((opt) => (
-                <GlowCard
-                  key={opt.value}
-                  variant={opt.value === mode ? 'teal' : 'gold'}
-                  className="rounded-xl"
-                >
-                  <button
-                    onClick={() => switchMode(opt.value)}
-                    className={`w-full text-left rounded-xl px-3 py-2.5 transition-all ${
-                      opt.value === mode
-                        ? 'ring-1 ring-positive/30 bg-raised/60'
-                        : 'liquid-glass hover:bg-raised/30'
-                    }`}
-                  >
-                    <div
-                      className={`font-mono text-[11px] font-semibold ${
-                        opt.value === mode ? 'text-positive' : 'text-text-muted'
-                      }`}
-                    >
-                      {opt.label}
-                    </div>
-                    <div className="font-mono text-[10px] text-text-dim mt-0.5 leading-snug">
-                      {opt.description}
-                    </div>
-                  </button>
-                </GlowCard>
-              ))}
-            </div>
-          ) : (
-            // Conversation history
-            <div className="flex flex-col gap-1.5">
-              {loadingHistory ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 size={14} className="animate-spin text-text-dim" />
-                </div>
-              ) : conversations.length === 0 ? (
-                <div className="text-center py-8">
-                  <MessageSquare size={20} className="mx-auto text-text-dim mb-2 opacity-40" />
-                  <p className="font-mono text-[10px] text-text-dim">No conversations yet.</p>
-                </div>
-              ) : (
-                conversations.map((convo) => (
-                  <button
-                    key={convo.id}
-                    onClick={() => loadConversation(convo)}
-                    className={`w-full text-left rounded-lg px-3 py-2 transition-all ${
-                      activeConvoId === convo.id
-                        ? 'bg-white/[0.04] ring-1 ring-positive/20'
-                        : 'hover:bg-white/[0.02]'
-                    }`}
-                  >
-                    <div className="font-mono text-[11px] text-text-muted truncate">
-                      {convo.title || 'Untitled'}
-                    </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <Clock size={9} className="text-text-dim" />
-                      <span className="font-mono text-[9px] text-text-dim">
-                        {formatRelativeDate(convo.updated_at)}
-                      </span>
-                      <span className="font-mono text-[9px] text-text-dim opacity-60">
-                        {convo.mode}
-                      </span>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* New conversation button */}
+        {/* New conversation button — top of sidebar */}
         <button
           onClick={resetConversation}
-          className="flex items-center gap-2 rounded-xl px-3 py-2 font-mono text-[11px] text-text-dim transition-colors hover:text-text-muted liquid-glass"
+          className="flex items-center gap-2 rounded-xl px-3 py-2.5 font-mono text-[11px] text-text-muted transition-all hover:text-positive liquid-glass"
         >
           <RotateCcw size={12} />
           New conversation
         </button>
+
+        {/* Section label */}
+        <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-text-dim px-1">
+          History
+        </div>
+
+        {/* Conversation history list */}
+        <div className="flex-1 overflow-auto" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex flex-col gap-1.5">
+            {loadingHistory ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 size={14} className="animate-spin text-text-dim" />
+              </div>
+            ) : conversations.length === 0 ? (
+              <div className="text-center py-8">
+                <MessageSquare size={20} className="mx-auto text-text-dim mb-2 opacity-40" />
+                <p className="font-mono text-[10px] text-text-dim">No conversations yet.</p>
+                <p className="font-mono text-[9px] text-text-dim mt-1 opacity-60">
+                  Start talking to Senti.
+                </p>
+              </div>
+            ) : (
+              conversations.map((convo) => (
+                <button
+                  key={convo.id}
+                  onClick={() => loadConversation(convo)}
+                  className={`w-full text-left rounded-lg px-3 py-2 transition-all ${
+                    activeConvoId === convo.id
+                      ? 'bg-white/[0.04] ring-1 ring-positive/20'
+                      : 'hover:bg-white/[0.02]'
+                  }`}
+                >
+                  <div className="font-mono text-[11px] text-text-muted truncate">
+                    {convo.title || 'Untitled'}
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <Clock size={9} className="text-text-dim" />
+                    <span className="font-mono text-[9px] text-text-dim">
+                      {formatRelativeDate(convo.updated_at)}
+                    </span>
+                    <span className="font-mono text-[9px] text-text-dim opacity-60">
+                      {convo.mode}
+                    </span>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Main chat area */}
