@@ -38,7 +38,7 @@ export function BssGauge({
   const [animatedScore, setAnimatedScore] = useState(0);
   const tierStyle = getTierStyle(tier);
 
-  const dimension = size === 'lg' ? 280 : 180;
+  const dimension = size === 'lg' ? 380 : 180;
   const cx = dimension / 2;
   const cy = dimension / 2;
   const radius = (dimension / 2) - 24;
@@ -179,13 +179,13 @@ export function BssGauge({
         {/* Score number — 48px JetBrains Mono 700 in #E2E8F0 (neutral) */}
         <text
           x={cx}
-          y={cy - (size === 'lg' ? 6 : 2)}
+          y={cy - (size === 'lg' ? 10 : 2)}
           textAnchor="middle"
           dominantBaseline="central"
           fill="#E2E8F0"
           fontFamily="var(--font-mono)"
           fontWeight="700"
-          fontSize={size === 'lg' ? 48 : 32}
+          fontSize={size === 'lg' ? 64 : 32}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
           {isBuilding ? `${Math.round(progressValue * 100)}%` : animatedScore}
@@ -195,13 +195,13 @@ export function BssGauge({
         {!isBuilding && (
           <text
             x={cx}
-            y={cy + (size === 'lg' ? 28 : 18)}
+            y={cy + (size === 'lg' ? 36 : 18)}
             textAnchor="middle"
             dominantBaseline="central"
             fill={deltaColor}
             fontFamily="var(--font-mono)"
             fontWeight="500"
-            fontSize={size === 'lg' ? 12 : 10}
+            fontSize={size === 'lg' ? 14 : 10}
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
             {deltaSymbol} {deltaText}
