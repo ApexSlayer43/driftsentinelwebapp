@@ -11,8 +11,10 @@ interface MetricCardProps {
 }
 
 export function MetricCard({ label, value, accent, state = 'STABLE' }: MetricCardProps) {
+  // Map behavioral state to glow variant
+  const variant = state === 'STABLE' ? 'teal' : state === 'BUILDING' ? 'teal-gold' : 'gold';
   return (
-    <GlowPanel state={state} className="p-5">
+    <GlowPanel variant={variant} className="p-5">
       <div className="font-mono text-[7px] font-semibold uppercase tracking-[0.18em] text-text-muted">
         {label}
       </div>
