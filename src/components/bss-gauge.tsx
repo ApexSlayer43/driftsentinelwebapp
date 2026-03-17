@@ -15,15 +15,11 @@ interface BssGaugeProps {
 }
 
 /**
- * BSS Score Gauge — spec Section 7
+ * BSS Precision Gauge
  *
- * 240° arc (150°→390°), 14px stroke, stroke-linecap: round
- * Track color: #242836
- * Score: 48px JetBrains Mono 700, #E2E8F0 (neutral — tier info is in badge)
- * Delta: 12px, cyan positive (#22D3EE), orange negative (#FB923C)
- * Tier badge: below score, color-coded capsule
- * Tick marks at tier boundaries (6 segments)
- * 1.2s transition with cubic-bezier(0.4, 0, 0.2, 1)
+ * Thin arc ring with inward-facing tick marks — like a watch bezel.
+ * Ticks point toward center. Arc is 2px (lg) / 1px (sm) — just a ring.
+ * Score centered. Delta below. Tier badge underneath.
  */
 export function BssGauge({
   score,
@@ -42,11 +38,11 @@ export function BssGauge({
   const cx = dimension / 2;
   const cy = dimension / 2;
   const radius = (dimension / 2) - 24;
-  const strokeWidth = size === 'lg' ? 14 : 5;
+  const arcStroke = size === 'lg' ? 2 : 1; // Thin precision ring
 
-  // Arc calculation: 240° sweep
-  const startAngle = 150;
-  const sweepAngle = 240;
+  // Arc: 270° sweep (wider than before for more instrument feel)
+  const startAngle = 135;
+  const sweepAngle = 270;
   const circumference = 2 * Math.PI * radius;
   const arcLength = (sweepAngle / 360) * circumference;
 
@@ -82,17 +78,15 @@ export function BssGauge({
     return () => cancelAnimationFrame(raf);
   }, [score]);
 
-  // Delta display — monochrome: brighter white for positive, dimmer for negative
   const deltaColor = delta > 0 ? '#FFFFFF' : delta < 0 ? '#8891A0' : '#4A5568';
   const deltaSymbol = delta > 0 ? '\u25B2' : delta < 0 ? '\u25BC' : '\u2014';
   const deltaText = delta !== 0 ? `${Math.abs(delta)}` : '';
 
-  // Pulse animation for drift states
   const shouldPulse = ['DRIFT_FORMING', 'COMPROMISED', 'BREAKDOWN'].includes(state);
 
-  // Precision tick marks — outside the arc, clean separation
-  const tickCount = 48;
-  const tickRadius = radius + (size === 'lg' ? 16 : 8); // Outside the arc
+  // Tick config — inward-facing from the arc ring
+  const tickCount = 60;
+  const majorEvery = 5; // Major tick every 5th mark
 
   return (
     <div className="bss-orb relative flex flex-col items-center gap-2">
@@ -101,83 +95,68 @@ export function BssGauge({
         height={dimension}
         viewBox={`0 0 ${dimension} ${dimension}`}
       >
-        <defs>
-          <linearGradient id={`gauge-grad-${tier}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={tierStyle.color} stopOpacity="0.4" />
-            <stop offset="100%" stopColor={tierStyle.color} stopOpacity="1" />
-          </linearGradient>
-          <filter id="gauge-glow">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feFlood floodColor={tierStyle.color} floodOpacity="0.25" result="flood" />
-            <feComposite in="flood" in2="blur" operator="in" result="colorBlur" />
-            <feMerge>
-              <feMergeNode in="colorBlur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        {/* Precision tick marks — outside the arc */}
+        {/* Inward-facing tick marks */}
         {Array.from({ length: tickCount + 1 }).map((_, i) => {
           const angle = startAngle + (sweepAngle / tickCount) * i;
           const rad = (angle * Math.PI) / 180;
-          const isMajor = i % 8 === 0;
-          const tickLen = size === 'lg' ? (isMajor ? 10 : 5) : (isMajor ? 5 : 3);
-          const innerR = tickRadius;
-          const outerR = tickRadius + tickLen;
+          const isMajor = i % majorEvery === 0;
+          const tickLen = size === 'lg' ? (isMajor ? 12 : 6) : (isMajor ? 6 : 3);
+
+          // Outer end sits on the arc ring, inner end points toward center
+          const outerR = radius;
+          const innerR = radius - tickLen;
           const tickProgress = i / tickCount;
           const isActive = tickProgress <= progressValue;
 
           return (
             <line
               key={i}
-              x1={cx + innerR * Math.cos(rad)}
-              y1={cy + innerR * Math.sin(rad)}
-              x2={cx + outerR * Math.cos(rad)}
-              y2={cy + outerR * Math.sin(rad)}
-              stroke={isActive ? tierStyle.color : 'rgba(255,255,255,0.08)'}
+              x1={cx + outerR * Math.cos(rad)}
+              y1={cy + outerR * Math.sin(rad)}
+              x2={cx + innerR * Math.cos(rad)}
+              y2={cy + innerR * Math.sin(rad)}
+              stroke={isActive ? tierStyle.color : 'rgba(255,255,255,0.12)'}
               strokeWidth={isMajor ? 1.5 : 0.75}
-              strokeLinecap="round"
-              opacity={isActive ? (isMajor ? 0.8 : 0.35) : 0.2}
+              strokeLinecap="butt"
+              opacity={isActive ? (isMajor ? 0.9 : 0.5) : 0.25}
             />
           );
         })}
 
-        {/* Background arc — subtle dark track */}
+        {/* Background arc — thin ring track */}
         <circle
           cx={cx}
           cy={cy}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.06)"
-          strokeWidth={strokeWidth}
+          stroke="rgba(255,255,255,0.1)"
+          strokeWidth={arcStroke}
           strokeDasharray={`${arcLength} ${circumference - arcLength}`}
           strokeDashoffset={0}
           strokeLinecap="round"
           transform={`rotate(${startAngle + 90} ${cx} ${cy})`}
         />
 
-        {/* Score arc — tier-colored, precision glow */}
+        {/* Score arc — thin tier-colored ring */}
         <circle
           cx={cx}
           cy={cy}
           r={radius}
           fill="none"
-          stroke={`url(#gauge-grad-${tier})`}
-          strokeWidth={strokeWidth}
+          stroke={tierStyle.color}
+          strokeWidth={arcStroke}
           strokeDasharray={`${arcLength} ${circumference}`}
           strokeDashoffset={dashOffset}
           strokeLinecap="round"
           transform={`rotate(${startAngle + 90} ${cx} ${cy})`}
-          filter="url(#gauge-glow)"
           style={{
             transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
-            ...(isBuilding ? { strokeDasharray: `${strokeWidth * 2} ${strokeWidth * 3}` } : {}),
+            ...(isBuilding ? { strokeDasharray: `${arcStroke * 4} ${arcStroke * 6}` } : {}),
           }}
           className={shouldPulse ? 'animate-pulse' : ''}
         />
 
-        {/* Score number — 48px JetBrains Mono 700 in #E2E8F0 (neutral) */}
+        {/* Score number */}
         <text
           x={cx}
           y={cy - (size === 'lg' ? 10 : 2)}
@@ -192,7 +171,7 @@ export function BssGauge({
           {isBuilding ? `${Math.round(progressValue * 100)}%` : animatedScore}
         </text>
 
-        {/* Delta indicator — 12px, cyan/orange */}
+        {/* Delta indicator */}
         {!isBuilding && (
           <text
             x={cx}
@@ -210,7 +189,7 @@ export function BssGauge({
         )}
       </svg>
 
-      {/* Tier badge — color-coded capsule below score */}
+      {/* Tier badge */}
       <span
         className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[14px] font-medium"
         style={{
