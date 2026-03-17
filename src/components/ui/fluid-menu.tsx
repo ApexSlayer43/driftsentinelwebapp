@@ -68,10 +68,11 @@ export function MenuContainer({ children, className }: MenuContainerProps) {
         <div
           className="relative w-12 h-12 cursor-pointer rounded-full will-change-transform z-50"
           style={{
-            background: 'rgba(13, 15, 21, 0.85)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.03)',
+            background: 'rgba(255, 255, 255, 0.07)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
           }}
           onClick={handleToggle}
         >
@@ -84,9 +85,11 @@ export function MenuContainer({ children, className }: MenuContainerProps) {
             key={index}
             className="absolute top-0 left-0 w-12 h-12 will-change-transform"
             style={{
-              background: 'rgba(13, 15, 21, 0.85)',
-              backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(255,255,255,0.04)',
+              background: 'rgba(255, 255, 255, 0.06)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.08)',
               transform: `translateY(${isExpanded ? (index + 1) * 44 : 0}px)`,
               opacity: isExpanded ? 1 : 0,
               zIndex: 40 - index,
