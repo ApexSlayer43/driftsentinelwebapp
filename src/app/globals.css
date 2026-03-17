@@ -14,7 +14,7 @@
   /* ── Invisible Interface Color System ── */
 
   /* Backgrounds (spec Section 5) */
-  --color-void: #1a3a2a;
+  --color-void: #0a0a0f;
   --color-surface: #1A1D27;
   --color-raised: #242836;
   --color-elevated: #2E3346;
@@ -108,7 +108,7 @@
 }
 
 :root {
-  --background: #1a3a2a;
+  --background: #0a0a0f;
   --foreground: #E2E8F0;
   --card: #1A1D27;
   --card-foreground: #E2E8F0;

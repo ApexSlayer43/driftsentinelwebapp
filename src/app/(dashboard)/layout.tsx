@@ -167,9 +167,7 @@ function DashboardShell({
   const { isActive, promptSequence, activationId, deactivate } = useCooldown();
 
   return (
-    <div className="relative h-screen overflow-hidden bg-[#1a3a2a]">
-      {/* Subtle depth gradient over the solid green base */}
-      <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(34,60,45,0.6)_0%,transparent_70%)]" />
+    <div className="relative h-screen overflow-hidden bg-[#0a0a0f]">
 
       {/* Silver particles floating over the green */}
       <Particles
