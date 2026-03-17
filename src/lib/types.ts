@@ -75,9 +75,12 @@ export interface StatePayload {
 // Session config from user_configs.sessions_utc
 export interface SessionConfig {
   name: string;
-  start_utc: string; // "HH:MM"
-  end_utc: string;   // "HH:MM"
+  start_utc: string; // "HH:MM" — legacy field name, now treated as local time
+  end_utc: string;   // "HH:MM" — legacy field name, now treated as local time
+  start_local?: string; // "HH:MM" — preferred alias
+  end_local?: string;   // "HH:MM" — preferred alias
   days: string[];     // ["Mon","Tue",...]
+  market_tz?: string; // IANA timezone for exchange, e.g. "America/Chicago"
 }
 
 // Violation detail (full row from violations table)

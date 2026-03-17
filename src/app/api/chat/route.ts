@@ -6,8 +6,9 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { streamText, convertToModelMessages, type UIMessage } from 'ai';
 import { createClient } from '@/lib/supabase/server';
-import { composeSentiPromptString, type SentiMode } from '@/lib/senti';
+import { composeSentiPromptString, computeSessionState, type SentiMode } from '@/lib/senti';
 import type { TraderProfile } from '@/lib/senti';
+import type { SessionConfig } from '@/lib/types';
 
 export const maxDuration = 60;
 
@@ -61,6 +62,7 @@ export async function POST(req: Request) {
     const [
       driversResult, violationsResult, dailyResult, driftResult,
       profileResult, streakResult, fillsResult, protocolResult,
+      configResult,
     ] = await Promise.all([
         // Active drift drivers
         supabase
@@ -116,6 +118,12 @@ export async function POST(req: Request) {
           .select('rule_id, category, name, description, params, enabled, enforcement')
           .eq('account_ref', accountRef)
           .eq('enabled', true),
+        // User config (sessions + timezone)
+        supabase
+          .from('user_configs')
+          .select('sessions_utc, timezone')
+          .eq('account_ref', accountRef)
+          .maybeSingle(),
       ]);
 
     // 5. Build trader profile for dynamic context
@@ -126,6 +134,11 @@ export async function POST(req: Request) {
     const protocolRules = protocolResult.data ?? [];
     const totalDeductions = violations.reduce((sum, v) => sum + (v.points ?? 0), 0);
     const streakData = streakResult.data ?? [];
+
+    // Compute session state from user config
+    const userSessions = (configResult.data?.sessions_utc as SessionConfig[]) ?? [];
+    const userTimezone = (configResult.data?.timezone as string) ?? null;
+    const sessionState = computeSessionState(userSessions, userTimezone);
 
     const traderProfile: TraderProfile = {
       displayName: profileResult.data?.display_name || 'Trader',
@@ -146,6 +159,7 @@ export async function POST(req: Request) {
       totalDeductions,
       fills,
       protocolRules,
+      sessionState,
     };
 
     // 6. Build the full layered system prompt

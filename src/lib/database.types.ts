@@ -146,6 +146,7 @@ export type Database = {
           max_fills_per_day: number
           scoring_window_fills: number
           sessions_utc: Json
+          timezone: string | null
           updated_at: string
         }
         Insert: {
@@ -155,6 +156,7 @@ export type Database = {
           max_fills_per_day?: number
           scoring_window_fills?: number
           sessions_utc?: Json
+          timezone?: string | null
           updated_at?: string
         }
         Update: {
@@ -164,6 +166,7 @@ export type Database = {
           max_fills_per_day?: number
           scoring_window_fills?: number
           sessions_utc?: Json
+          timezone?: string | null
           updated_at?: string
         }
         Relationships: []

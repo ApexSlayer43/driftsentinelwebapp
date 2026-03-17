@@ -47,6 +47,16 @@ export interface DailyScore {
   alpha_effective?: number;
 }
 
+export interface SessionStateInfo {
+  state: 'IN_SESSION' | 'PRE_SESSION' | 'POST_SESSION' | 'OFF_DAY';
+  currentSession?: string;
+  minutesElapsed?: number;
+  minutesRemaining?: number;
+  nextSessionStart?: string;
+  userLocalTime?: string;
+  userTimezone?: string;
+}
+
 export interface TraderProfile {
   displayName: string;
   accountRef: string;
@@ -66,6 +76,7 @@ export interface TraderProfile {
   totalDeductions: number;
   fills: Fill[];
   protocolRules: ProtocolRule[];
+  sessionState?: SessionStateInfo;
 }
 
 function formatDrivers(drivers: TraderProfile['activeDrivers']): string {
@@ -132,6 +143,19 @@ function formatProtocolRules(rules: ProtocolRule[]): string {
     .join('\n');
 }
 
+function formatSessionState(ss?: SessionStateInfo): string {
+  if (!ss) return 'Session state: Unknown (no timezone configured)';
+  const lines: string[] = [];
+  lines.push(`Session State: ${ss.state}`);
+  if (ss.userLocalTime) lines.push(`Your Local Time: ${ss.userLocalTime}`);
+  if (ss.userTimezone) lines.push(`Timezone: ${ss.userTimezone}`);
+  if (ss.currentSession) lines.push(`Active Session: ${ss.currentSession}`);
+  if (ss.minutesElapsed != null) lines.push(`Minutes Into Session: ${ss.minutesElapsed}`);
+  if (ss.minutesRemaining != null) lines.push(`Minutes Remaining: ${ss.minutesRemaining}`);
+  if (ss.nextSessionStart) lines.push(`Next Session Starts: ${ss.nextSessionStart}`);
+  return lines.map(l => `- ${l}`).join('\n');
+}
+
 export function buildDynamicContext(user: TraderProfile): string {
   return `<current_context>
 TRADER OVERVIEW:
@@ -149,6 +173,9 @@ TRADER OVERVIEW:
 - Total Historical Violations: ${user.totalViolations}
 - Total Historical Deductions: -${user.totalDeductions} points
 - Total Fills on Record: ${user.fills.length}
+
+SESSION CLOCK:
+${formatSessionState(user.sessionState)}
 
 ACTIVE DRIFT DRIVERS:
 ${formatDrivers(user.activeDrivers)}

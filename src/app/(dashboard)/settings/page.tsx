@@ -1,11 +1,101 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, X, Shield, Plug, Unplug, ExternalLink, Loader2, Puzzle } from 'lucide-react';
+import { Save, Plus, Trash2, X, Shield, Plug, Unplug, ExternalLink, Loader2, Puzzle, Globe, Clock, Zap } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { SessionConfig } from '@/lib/types';
 import Link from 'next/link';
 import { GlowPanel } from '@/components/ui/glow-panel';
+
+// ── Common IANA timezones for user timezone ────────────────────
+const COMMON_TIMEZONES = [
+  'America/New_York',
+  'America/Chicago',
+  'America/Denver',
+  'America/Los_Angeles',
+  'America/Anchorage',
+  'Pacific/Honolulu',
+  'America/Sao_Paulo',
+  'Europe/London',
+  'Europe/Berlin',
+  'Europe/Paris',
+  'Europe/Moscow',
+  'Asia/Dubai',
+  'Asia/Kolkata',
+  'Asia/Singapore',
+  'Asia/Tokyo',
+  'Asia/Shanghai',
+  'Asia/Hong_Kong',
+  'Australia/Sydney',
+];
+
+// ── Market timezone options for session configs ────────────────
+const MARKET_TIMEZONES = [
+  { value: 'America/Chicago', label: 'Chicago (CME/CBOT)' },
+  { value: 'America/New_York', label: 'New York (NYSE/NASDAQ)' },
+  { value: 'Europe/Berlin', label: 'Berlin (Eurex)' },
+  { value: 'Europe/London', label: 'London (ICE/LSE)' },
+  { value: 'Asia/Tokyo', label: 'Tokyo (JPX)' },
+  { value: 'Asia/Singapore', label: 'Singapore (SGX)' },
+  { value: 'Asia/Hong_Kong', label: 'Hong Kong (HKEX)' },
+];
+
+// ── Market session presets ─────────────────────────────────────
+const MARKET_PRESETS: SessionConfig[] = [
+  {
+    name: 'US Futures RTH',
+    start_utc: '09:30',
+    end_utc: '16:00',
+    start_local: '09:30',
+    end_local: '16:00',
+    days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    market_tz: 'America/Chicago',
+  },
+  {
+    name: 'CME Globex',
+    start_utc: '17:00',
+    end_utc: '16:00',
+    start_local: '17:00',
+    end_local: '16:00',
+    days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'],
+    market_tz: 'America/Chicago',
+  },
+  {
+    name: 'US Equities RTH',
+    start_utc: '09:30',
+    end_utc: '16:00',
+    start_local: '09:30',
+    end_local: '16:00',
+    days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    market_tz: 'America/New_York',
+  },
+  {
+    name: 'EU Futures (Eurex)',
+    start_utc: '08:00',
+    end_utc: '22:00',
+    start_local: '08:00',
+    end_local: '22:00',
+    days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+    market_tz: 'Europe/Berlin',
+  },
+];
+
+// ── Format timezone for display ────────────────────────────────
+function formatTzLabel(tz: string): string {
+  try {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      timeZoneName: 'shortOffset',
+    });
+    const parts = formatter.formatToParts(now);
+    const offsetPart = parts.find(p => p.type === 'timeZoneName')?.value ?? '';
+    const city = tz.split('/').pop()?.replace(/_/g, ' ') ?? tz;
+    return `${city} (${offsetPart})`;
+  } catch {
+    return tz;
+  }
+}
 
 // ── Main page ──────────────────────────────────────────────────
 export default function SettingsPage() {
@@ -14,6 +104,7 @@ export default function SettingsPage() {
   const [baselineWindowFills, setBaselineWindowFills] = useState(50);
   const [scoringWindowFills, setScoringWindowFills] = useState(20);
   const [sessions, setSessions] = useState<SessionConfig[]>([]);
+  const [timezone, setTimezone] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -130,7 +221,19 @@ export default function SettingsPage() {
         setBaselineWindowFills(config.baseline_window_fills);
         setScoringWindowFills(config.scoring_window_fills);
         setSessions((config.sessions_utc as SessionConfig[]) || []);
+        setTimezone((config.timezone as string) || '');
       }
+
+      // Auto-detect timezone from browser if not set yet
+      if (!config?.timezone) {
+        try {
+          const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          if (detected) setTimezone(detected);
+        } catch {
+          // ignore — will use empty
+        }
+      }
+
       setLoading(false);
     }
 
@@ -152,6 +255,7 @@ export default function SettingsPage() {
         baseline_window_fills: baselineWindowFills,
         scoring_window_fills: scoringWindowFills,
         sessions_utc: sessions as unknown as Record<string, unknown>,
+        timezone: timezone || null,
         updated_at: new Date().toISOString(),
       });
 
@@ -163,7 +267,22 @@ export default function SettingsPage() {
   }
 
   function addSession() {
-    setSessions([...sessions, { name: '', start_utc: '09:30', end_utc: '16:00', days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] }]);
+    setSessions([...sessions, {
+      name: '',
+      start_utc: '09:30',
+      end_utc: '16:00',
+      start_local: '09:30',
+      end_local: '16:00',
+      days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      market_tz: 'America/Chicago',
+    }]);
+  }
+
+  function addPreset(preset: SessionConfig) {
+    // Don't add duplicates
+    const exists = sessions.some(s => s.name === preset.name);
+    if (exists) return;
+    setSessions([...sessions, { ...preset }]);
   }
 
   function removeSession(index: number) {
@@ -172,8 +291,26 @@ export default function SettingsPage() {
 
   function updateSession(index: number, field: keyof SessionConfig, value: string | string[]) {
     const updated = [...sessions];
-    updated[index] = { ...updated[index], [field]: value };
+    const current = updated[index];
+    updated[index] = { ...current, [field]: value };
+
+    // Keep start_local/end_local synced with start_utc/end_utc
+    if (field === 'start_utc') {
+      updated[index] = { ...updated[index], start_local: value as string };
+    } else if (field === 'end_utc') {
+      updated[index] = { ...updated[index], end_local: value as string };
+    }
+
     setSessions(updated);
+  }
+
+  function autoDetectTimezone() {
+    try {
+      const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (detected) setTimezone(detected);
+    } catch {
+      // ignore
+    }
   }
 
   if (loading) {
@@ -189,7 +326,7 @@ export default function SettingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-text-primary">Settings</h1>
-          <p className="mt-1 font-mono text-xs text-text-muted">Configure trading rules and session windows</p>
+          <p className="mt-1 font-mono text-xs text-text-muted">Configure trading rules, timezone, and session windows</p>
         </div>
         <button
           onClick={handleSave}
@@ -221,6 +358,41 @@ export default function SettingsPage() {
             </div>
             <ExternalLink size={14} className="text-text-dim group-hover:text-positive transition-colors" />
           </Link>
+        </GlowPanel>
+
+        {/* Timezone */}
+        <GlowPanel className="p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Globe size={14} className="text-positive" />
+            <h3 className="font-display text-sm font-bold text-text-primary">Your Timezone</h3>
+          </div>
+          <p className="font-mono text-[12px] text-text-muted">
+            Used to correctly resolve session windows across DST transitions
+          </p>
+          <div className="mt-4 flex items-center gap-3">
+            <select
+              value={timezone}
+              onChange={(e) => setTimezone(e.target.value)}
+              className="flex-1 rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary bg-transparent"
+            >
+              <option value="">Select timezone...</option>
+              {COMMON_TIMEZONES.map(tz => (
+                <option key={tz} value={tz}>{formatTzLabel(tz)}</option>
+              ))}
+            </select>
+            <button
+              onClick={autoDetectTimezone}
+              className="flex items-center gap-1.5 rounded-lg border border-border-subtle px-3 py-2 font-mono text-[12px] text-text-secondary hover:border-accent-primary hover:text-positive transition-colors"
+              title="Auto-detect from browser"
+            >
+              <Zap size={12} /> Detect
+            </button>
+          </div>
+          {timezone && (
+            <div className="mt-2 font-mono text-[12px] text-text-dim">
+              Current: {formatTzLabel(timezone)}
+            </div>
+          )}
         </GlowPanel>
 
         {/* Trading Rules */}
@@ -258,9 +430,14 @@ export default function SettingsPage() {
         {/* Session Windows */}
         <GlowPanel className="p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-display text-sm font-bold text-text-primary">Session Windows</h3>
-              <p className="mt-1 font-mono text-[12px] text-text-muted">Define when you trade. Fills outside these windows are flagged.</p>
+            <div className="flex items-center gap-2">
+              <Clock size={14} className="text-positive" />
+              <div>
+                <h3 className="font-display text-sm font-bold text-text-primary">Session Windows</h3>
+                <p className="mt-1 font-mono text-[12px] text-text-muted">
+                  Define when you trade. Times are in the market&apos;s local timezone. Fills outside these windows are flagged.
+                </p>
+              </div>
             </div>
             <button
               onClick={addSession}
@@ -269,55 +446,97 @@ export default function SettingsPage() {
               <Plus size={12} /> Add Session
             </button>
           </div>
+
+          {/* Market Presets */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-dim self-center mr-1">Presets:</span>
+            {MARKET_PRESETS.map((preset) => {
+              const alreadyAdded = sessions.some(s => s.name === preset.name);
+              return (
+                <button
+                  key={preset.name}
+                  onClick={() => addPreset(preset)}
+                  disabled={alreadyAdded}
+                  className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
+                    alreadyAdded
+                      ? 'bg-accent-primary/10 text-positive/50 cursor-default'
+                      : 'bg-elevated text-text-secondary hover:bg-accent-primary/15 hover:text-positive'
+                  }`}
+                >
+                  {preset.name}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="mt-4 space-y-3">
             {sessions.length === 0 ? (
-              <p className="font-mono text-xs text-text-muted">No sessions configured. All trading times are considered valid.</p>
+              <p className="font-mono text-xs text-text-muted">No sessions configured. Add a preset or create a custom session.</p>
             ) : (
               sessions.map((session, i) => (
-                <div key={i} className="flex items-center gap-3 rounded-lg glass-raised p-3">
-                  <input
-                    type="text"
-                    placeholder="Session name"
-                    value={session.name}
-                    onChange={(e) => updateSession(i, 'name', e.target.value)}
-                    className="w-32 rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
-                  />
-                  <input
-                    type="time"
-                    value={session.start_utc}
-                    onChange={(e) => updateSession(i, 'start_utc', e.target.value)}
-                    className="rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
-                  />
-                  <span className="font-mono text-[12px] text-text-muted">to</span>
-                  <input
-                    type="time"
-                    value={session.end_utc}
-                    onChange={(e) => updateSession(i, 'end_utc', e.target.value)}
-                    className="rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
-                  />
-                  <div className="flex-1 flex gap-1">
-                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day) => (
-                      <button
-                        key={day}
-                        onClick={() => {
-                          const days = session.days.includes(day)
-                            ? session.days.filter(d => d !== day)
-                            : [...session.days, day];
-                          updateSession(i, 'days', days);
-                        }}
-                        className={`rounded px-1.5 py-0.5 font-mono text-[12px] font-bold ${
-                          session.days.includes(day)
-                            ? 'bg-accent-primary/20 text-positive'
-                            : 'bg-elevated text-text-dim'
-                        }`}
-                      >
-                        {day}
-                      </button>
-                    ))}
+                <div key={i} className="rounded-lg glass-raised p-3 space-y-2">
+                  {/* Row 1: Name + Market Timezone + Delete */}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      placeholder="Session name"
+                      value={session.name}
+                      onChange={(e) => updateSession(i, 'name', e.target.value)}
+                      className="w-36 rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
+                    />
+                    <select
+                      value={session.market_tz || ''}
+                      onChange={(e) => updateSession(i, 'market_tz', e.target.value)}
+                      className="flex-1 rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[11px] text-text-primary outline-none focus:border-accent-primary bg-transparent"
+                    >
+                      <option value="">Market timezone...</option>
+                      {MARKET_TIMEZONES.map(mtz => (
+                        <option key={mtz.value} value={mtz.value}>{mtz.label}</option>
+                      ))}
+                    </select>
+                    <button onClick={() => removeSession(i)} className="text-text-dim hover:text-negative">
+                      <Trash2 size={12} />
+                    </button>
                   </div>
-                  <button onClick={() => removeSession(i)} className="text-text-dim hover:text-negative">
-                    <Trash2 size={12} />
-                  </button>
+                  {/* Row 2: Times + Days */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[10px] uppercase text-text-dim">Local</span>
+                      <input
+                        type="time"
+                        value={session.start_utc}
+                        onChange={(e) => updateSession(i, 'start_utc', e.target.value)}
+                        className="rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
+                      />
+                      <span className="font-mono text-[12px] text-text-muted">to</span>
+                      <input
+                        type="time"
+                        value={session.end_utc}
+                        onChange={(e) => updateSession(i, 'end_utc', e.target.value)}
+                        className="rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
+                      />
+                    </div>
+                    <div className="flex-1 flex gap-1">
+                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                        <button
+                          key={day}
+                          onClick={() => {
+                            const days = session.days.includes(day)
+                              ? session.days.filter(d => d !== day)
+                              : [...session.days, day];
+                            updateSession(i, 'days', days);
+                          }}
+                          className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-bold transition-colors ${
+                            session.days.includes(day)
+                              ? 'bg-accent-primary/20 text-positive'
+                              : 'bg-elevated text-text-dim'
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ))
             )}
