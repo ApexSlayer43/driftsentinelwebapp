@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Target,
   Pause,
@@ -10,7 +10,6 @@ import {
   ChevronDown,
   ChevronUp,
   Calendar,
-  X,
 } from 'lucide-react';
 import { GlowPanel } from '@/components/ui/glow-panel';
 
@@ -51,37 +50,22 @@ interface WeeklyWrapData {
 export function WeeklyWrap() {
   const [data, setData] = useState<WeeklyWrapData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dismissed, setDismissed] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    // Check if already dismissed this week
-    const dismissedWeek = sessionStorage.getItem('ds_weekly_wrap_dismissed');
-    const currentWeek = getWeekKey();
-    if (dismissedWeek === currentWeek) {
-      setDismissed(true);
-      setLoading(false);
-      return;
-    }
-
     async function fetchWrap() {
       try {
         const res = await fetch('/api/insights/weekly-wrap');
         if (!res.ok) {
+          setFetchError(true);
           setLoading(false);
           return;
         }
         const json: WeeklyWrapData = await res.json();
-
-        // Only show if there's meaningful data (at least 1 intention or 1 score)
-        if (json.intentions.days_set === 0 && json.bss.daily.length === 0) {
-          setLoading(false);
-          return;
-        }
-
         setData(json);
       } catch {
-        // Silently fail — wrap is non-critical
+        setFetchError(true);
       } finally {
         setLoading(false);
       }
@@ -90,12 +74,45 @@ export function WeeklyWrap() {
     fetchWrap();
   }, []);
 
-  const handleDismiss = useCallback(() => {
-    sessionStorage.setItem('ds_weekly_wrap_dismissed', getWeekKey());
-    setDismissed(true);
-  }, []);
+  // ── Loading state ──
+  if (loading) {
+    return (
+      <div className="w-full">
+        <GlowPanel>
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar size={14} className="text-positive" />
+            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-positive">
+              Weekly Wrap
+            </span>
+          </div>
+          <div className="space-y-2">
+            <div className="h-3 w-3/4 rounded bg-white/[0.06] animate-pulse" />
+            <div className="h-3 w-1/2 rounded bg-white/[0.04] animate-pulse" />
+            <div className="h-3 w-2/3 rounded bg-white/[0.05] animate-pulse" />
+          </div>
+        </GlowPanel>
+      </div>
+    );
+  }
 
-  if (loading || dismissed || !data) return null;
+  // ── Empty / error state ──
+  if (fetchError || !data || (data.intentions.days_set === 0 && data.bss.daily.length === 0)) {
+    return (
+      <div className="w-full">
+        <GlowPanel>
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar size={14} className="text-text-dim" />
+            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-text-muted">
+              Weekly Wrap
+            </span>
+          </div>
+          <p className="font-mono text-[12px] leading-relaxed text-text-dim">
+            No activity recorded this week yet. Set intentions and trade to see your weekly behavioral summary here.
+          </p>
+        </GlowPanel>
+      </div>
+    );
+  }
 
   const deltaIcon =
     data.bss.delta != null && data.bss.delta > 0 ? (
@@ -109,15 +126,6 @@ export function WeeklyWrap() {
   return (
     <div className="w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
       <GlowPanel className="relative">
-        {/* Dismiss */}
-        <button
-          onClick={handleDismiss}
-          className="absolute top-4 right-4 rounded-full p-1 text-text-dim hover:text-text-muted transition-colors z-10"
-          aria-label="Dismiss weekly wrap"
-        >
-          <X size={14} />
-        </button>
-
         {/* Header */}
         <div className="flex items-center gap-2 mb-4">
           <Calendar size={14} className="text-positive" />

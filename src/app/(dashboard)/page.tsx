@@ -313,16 +313,17 @@ export default function DashboardPage() {
       </div>
 
       {/* ── RIGHT PANEL: Compact Session Notepad (toggleable) ── */}
+      {/* Always mounted so CSS transition works. pointer-events-none when hidden. */}
       <div
-        className={`absolute bottom-4 right-4 z-30 transition-all duration-300 ease-in-out ${
-          notepadOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        className={`absolute bottom-6 right-14 z-30 transition-all duration-300 ease-in-out ${
+          notepadOpen
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 translate-y-3 pointer-events-none'
         }`}
       >
-        {notepadOpen && (
-          <div className="w-64 rounded-2xl bg-white/[0.05] backdrop-blur-xl border border-white/[0.1] p-3 shadow-[0_8px_32px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.08)]">
-            <SessionNotepad />
-          </div>
-        )}
+        <div className="w-60 rounded-xl bg-white/[0.05] backdrop-blur-xl border border-white/[0.1] p-3 shadow-[0_8px_32px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.08)]">
+          <SessionNotepad />
+        </div>
       </div>
 
       {/* ── EVIDENCE SHEET: Opens from gauge tap (Layer 2) ── */}
