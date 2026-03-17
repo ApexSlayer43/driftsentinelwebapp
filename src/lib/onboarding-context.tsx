@@ -99,7 +99,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     title: 'Meet Senti — your AI companion',
     description: 'Senti is your behavioral co-pilot. It speaks from your data — morning briefings, post-session after-action reviews, or ambient session companion mode. It knows your timezone, session state, and every fill on record.',
     href: '/senti',
-    targetSelector: '[data-onboard="senti-chat"]',
+    targetSelector: '[data-onboard="senti-header"]',
     tooltipPosition: 'bottom',
   },
   {

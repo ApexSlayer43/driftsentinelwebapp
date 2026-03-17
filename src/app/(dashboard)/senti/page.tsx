@@ -277,7 +277,7 @@ export default function SentiPage() {
       {/* Left sidebar — Chat History */}
       <div className="w-56 shrink-0 p-4 flex flex-col gap-3 overflow-hidden border-r border-white/[0.04]">
         {/* Header */}
-        <div className="flex items-center gap-2 mb-1">
+        <div data-onboard="senti-header" className="flex items-center gap-2 mb-1">
           <Bot size={16} className="text-positive" />
           <span className="font-mono text-[13px] font-bold uppercase tracking-[0.15em] text-text-muted">
             Senti
