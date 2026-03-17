@@ -66,41 +66,38 @@ export default function OnboardingTooltip() {
 
   const stepIndex = ONBOARDING_STEPS.findIndex((s) => s.id === currentTooltipStep);
 
-  // Calculate tooltip position
+  // Calculate tooltip position — always use top/left with viewport clamping
+  const TOOLTIP_WIDTH = 320;
+  const TOOLTIP_HEIGHT_EST = 180; // approximate max height
   let tooltipStyle: React.CSSProperties = {};
   if (position) {
     const pos = step.tooltipPosition ?? 'bottom';
     const gap = 12;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    let top: number;
+    let left: number;
 
     if (pos === 'bottom') {
-      tooltipStyle = {
-        position: 'fixed',
-        top: position.y + position.height + gap,
-        left: Math.max(16, position.x + position.width / 2 - 160),
-        zIndex: 9999,
-      };
+      top = position.y + position.height + gap;
+      left = position.x + position.width / 2 - TOOLTIP_WIDTH / 2;
     } else if (pos === 'top') {
-      tooltipStyle = {
-        position: 'fixed',
-        bottom: window.innerHeight - position.y + gap,
-        left: Math.max(16, position.x + position.width / 2 - 160),
-        zIndex: 9999,
-      };
+      top = position.y - TOOLTIP_HEIGHT_EST - gap;
+      left = position.x + position.width / 2 - TOOLTIP_WIDTH / 2;
     } else if (pos === 'right') {
-      tooltipStyle = {
-        position: 'fixed',
-        top: position.y + position.height / 2 - 60,
-        left: position.x + position.width + gap,
-        zIndex: 9999,
-      };
+      top = position.y + position.height / 2 - TOOLTIP_HEIGHT_EST / 2;
+      left = position.x + position.width + gap;
     } else {
-      tooltipStyle = {
-        position: 'fixed',
-        top: position.y + position.height / 2 - 60,
-        right: window.innerWidth - position.x + gap,
-        zIndex: 9999,
-      };
+      top = position.y + position.height / 2 - TOOLTIP_HEIGHT_EST / 2;
+      left = position.x - TOOLTIP_WIDTH - gap;
     }
+
+    // Clamp within viewport with 16px padding
+    top = Math.max(16, Math.min(top, vh - TOOLTIP_HEIGHT_EST - 16));
+    left = Math.max(16, Math.min(left, vw - TOOLTIP_WIDTH - 16));
+
+    tooltipStyle = { position: 'fixed', top, left, zIndex: 9999 };
   } else {
     // No target found — center on screen
     tooltipStyle = {
