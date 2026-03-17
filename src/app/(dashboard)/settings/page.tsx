@@ -106,6 +106,7 @@ export default function SettingsPage() {
   const [scoringWindowFills, setScoringWindowFills] = useState(20);
   const [sessions, setSessions] = useState<SessionConfig[]>([]);
   const [timezone, setTimezone] = useState<string>('');
+  const [profileGoal, setProfileGoal] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -226,6 +227,7 @@ export default function SettingsPage() {
         setScoringWindowFills(config.scoring_window_fills);
         setSessions((config.sessions_utc as SessionConfig[]) || []);
         setTimezone((config.timezone as string) || '');
+        setProfileGoal((config.profile_goal as string) || '');
       }
 
       // Auto-detect timezone from browser if not set yet
@@ -260,6 +262,7 @@ export default function SettingsPage() {
         scoring_window_fills: scoringWindowFills,
         sessions_utc: sessions as unknown as Record<string, unknown>,
         timezone: timezone || null,
+        profile_goal: profileGoal || null,
         updated_at: new Date().toISOString(),
       });
 
@@ -416,6 +419,29 @@ export default function SettingsPage() {
           )}
         </GlowPanel>
         </div>
+
+        {/* Profile Goal — North Star */}
+        <GlowPanel className="p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Rocket size={14} className="text-positive" />
+            <h3 className="font-display text-sm font-bold text-text-primary">Your Trading Goal</h3>
+          </div>
+          <p className="font-mono text-[12px] text-text-muted">
+            Your north star — why you trade. Senti will reflect this back during cooldown interventions.
+          </p>
+          <textarea
+            value={profileGoal}
+            onChange={(e) => setProfileGoal(e.target.value)}
+            placeholder="e.g., Build a funded account to replace my disability income"
+            rows={2}
+            className="mt-4 w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary bg-transparent resize-none placeholder:text-text-dim"
+          />
+          {profileGoal && (
+            <div className="mt-2 font-mono text-[10px] text-text-dim uppercase tracking-widest">
+              Senti will use this during cooldown mode
+            </div>
+          )}
+        </GlowPanel>
 
         {/* Trading Rules */}
         <div data-onboard="trading-rules">

@@ -11,6 +11,7 @@ import { EvidenceSheet } from '@/components/evidence-sheet';
 import { useStrategies } from '@/hooks/use-strategies';
 import { STRATEGY_ALL, type StrategyFilter } from '@/lib/strategies';
 import { useOnboarding } from '@/lib/onboarding-context';
+import { IntentionModal } from '@/components/intention-modal';
 import type { StatePayload } from '@/lib/types';
 
 /** Step IDs that require the evidence sheet to be open */
@@ -277,6 +278,9 @@ export default function DashboardPage() {
         }}
         accountRef={data.account_ref}
       />
+
+      {/* Pre-session intention capture — shows once per day if no intention set */}
+      <IntentionModal />
     </div>
   );
 }
