@@ -246,30 +246,41 @@ export default function SettingsPage() {
     loadSettings();
   }, []);
 
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   async function handleSave() {
     if (!accountRef) return;
     setSaving(true);
     setSaved(false);
+    setSaveError(null);
 
-    const supabase = createClient();
-    const { error } = await supabase
-      .from('user_configs')
-      .upsert({
-        account_ref: accountRef,
-        max_contracts: maxContracts,
-        max_fills_per_day: maxFillsPerDay,
-        baseline_window_fills: baselineWindowFills,
-        scoring_window_fills: scoringWindowFills,
-        sessions_utc: sessions as unknown as Record<string, unknown>,
-        timezone: timezone || null,
-        profile_goal: profileGoal || null,
-        updated_at: new Date().toISOString(),
+    try {
+      const res = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          account_ref: accountRef,
+          max_contracts: maxContracts,
+          max_fills_per_day: maxFillsPerDay,
+          baseline_window_fills: baselineWindowFills,
+          scoring_window_fills: scoringWindowFills,
+          sessions_utc: sessions,
+          timezone: timezone || null,
+          profile_goal: profileGoal || null,
+        }),
       });
 
-    setSaving(false);
-    if (!error) {
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Save failed (${res.status})`);
+      }
+
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save settings');
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -356,10 +367,20 @@ export default function SettingsPage() {
             className="flex items-center gap-2 rounded-lg bg-accent-primary px-4 py-2 font-mono text-sm font-bold text-void transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             <Save size={14} />
-            {saving ? 'Saving...' : saved ? 'Saved' : 'Save Changes'}
+            {saving ? 'Saving...' : saved ? 'Saved ✓' : 'Save Changes'}
           </button>
         </div>
       </div>
+
+      {saveError && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-negative/20 bg-negative/[0.06] px-4 py-2.5">
+          <X size={14} className="text-negative shrink-0" />
+          <span className="font-mono text-[12px] text-negative">{saveError}</span>
+          <button onClick={() => setSaveError(null)} className="ml-auto text-negative/50 hover:text-negative">
+            <X size={12} />
+          </button>
+        </div>
+      )}
 
       <div className="mt-8 grid gap-6">
         {/* Protocol — managed on dedicated page */}
