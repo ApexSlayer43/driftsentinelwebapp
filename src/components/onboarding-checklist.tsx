@@ -56,7 +56,7 @@ export default function OnboardingChecklist() {
   if (!mounted || !isActive) return null;
 
   // All steps done
-  const allDone = progress === 100;
+  const allDone = progress >= 100;
 
   function handleStepClick(step: OnboardingStep) {
     // Navigate if needed
@@ -112,7 +112,7 @@ export default function OnboardingChecklist() {
         <div className="px-4 py-2 border-b border-white/[0.04]">
           <div className="flex items-center justify-between mb-1.5">
             <span className="font-mono text-[10px] text-text-muted">
-              {completedSteps.size} of {ONBOARDING_STEPS.length} complete
+              {Math.min(completedSteps.size, ONBOARDING_STEPS.length)} of {ONBOARDING_STEPS.length} complete
             </span>
             <span className="font-mono text-[10px] font-bold text-positive">{progress}%</span>
           </div>
@@ -212,11 +212,23 @@ export default function OnboardingChecklist() {
             {/* Footer */}
             <div className="px-4 py-3 border-t border-white/[0.04]">
               {allDone ? (
-                <div className="flex items-center gap-2">
-                  <Sparkles size={14} className="text-positive" />
-                  <span className="font-mono text-[11px] font-semibold text-positive">
-                    All set! You&apos;re ready to go.
-                  </span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={14} className="text-positive" />
+                    <span className="font-mono text-[11px] font-bold text-positive">
+                      Setup complete. You&apos;re operational.
+                    </span>
+                  </div>
+                  <p className="font-mono text-[10px] text-text-muted leading-relaxed">
+                    Your timezone, sessions, and rules are locked in. Upload data and let the engine work. Stay disciplined.
+                  </p>
+                  <button
+                    onClick={dismissOnboarding}
+                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-positive/[0.1] px-3 py-2 font-mono text-[11px] font-bold text-positive hover:bg-positive/[0.15] transition-colors"
+                  >
+                    <Sparkles size={12} />
+                    Dismiss
+                  </button>
                 </div>
               ) : (
                 <button

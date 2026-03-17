@@ -180,16 +180,24 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [completedSteps, setCompletedSteps] = useState<Set<string>>(new Set());
   const [currentTooltipStep, setCurrentTooltipStep] = useState<string | null>(null);
 
+  // Valid step IDs — used to filter out stale localStorage entries
+  const validStepIds = new Set(ONBOARDING_STEPS.map((s) => s.id));
+
   // Load from localStorage on mount
   useEffect(() => {
     const saved = loadState();
-    const steps = new Set(saved.completedSteps);
+    // Only keep step IDs that still exist in current ONBOARDING_STEPS
+    const steps = new Set(saved.completedSteps.filter((id) => validStepIds.has(id)));
     setCompletedSteps(steps);
+
+    // Also persist the cleaned-up set so stale IDs are removed from storage
+    saveState(Array.from(steps), saved.dismissed || false);
 
     // Auto-activate if not dismissed and not all complete
     if (!saved.dismissed && steps.size < ONBOARDING_STEPS.length) {
       setIsActive(true);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Persist changes
@@ -199,7 +207,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     saveState(Array.from(completedSteps), saved.dismissed || false);
   }, [completedSteps]);
 
-  const progress = Math.round((completedSteps.size / ONBOARDING_STEPS.length) * 100);
+  // Only count completions for steps that actually exist
+  const validCompletions = [...completedSteps].filter((id) => validStepIds.has(id)).length;
+  const progress = Math.min(100, Math.round((validCompletions / ONBOARDING_STEPS.length) * 100));
 
   const startOnboarding = useCallback(() => {
     setIsActive(true);
