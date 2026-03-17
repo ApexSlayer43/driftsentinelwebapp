@@ -67,28 +67,10 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     id: 'check-bss',
     group: 'dashboard',
     title: 'Check your BSS score',
-    description: 'Your Behavioral Stability Score (BSS) tracks discipline over time using an exponential moving average. Clean sessions build it up — violations knock it down. This is your north star metric.',
+    description: 'Your Behavioral Stability Score (BSS) tracks discipline over time using an exponential moving average. Clean sessions build it up — violations knock it down. Tap the gauge to open the evidence sheet.',
     href: '/',
     targetSelector: '[data-onboard="bss-gauge"]',
     tooltipPosition: 'bottom',
-  },
-  {
-    id: 'lifetime-performance',
-    group: 'dashboard',
-    title: 'Review lifetime performance',
-    description: 'Gross P/L, win rate, expectancy, max drawdown — all computed from your uploaded fills. This updates every time you upload new data.',
-    href: '/',
-    targetSelector: '[data-onboard="lifetime-performance"]',
-    tooltipPosition: 'bottom',
-  },
-  {
-    id: 'session-overview',
-    group: 'dashboard',
-    title: 'Understand your session overview',
-    description: 'See total sessions, fills, violations, clean rate, and average DSI at a glance. Clean rate is the percentage of sessions with zero violations — aim for 80%+.',
-    href: '/',
-    targetSelector: '[data-onboard="session-overview"]',
-    tooltipPosition: 'top',
   },
   // ── Sessions & Evidence ───────────────────────────────────────
   {
@@ -99,15 +81,6 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     href: '/sessions',
     targetSelector: '[data-onboard="session-heatmap"]',
     tooltipPosition: 'bottom',
-  },
-  {
-    id: 'evidence-sheet',
-    group: 'sessions',
-    title: 'Dive into the evidence sheet',
-    description: 'The evidence sheet shows sessions, violations, and trends side by side. Each violation lists what triggered it, severity, and the exact fills involved. This is your behavioral forensics layer.',
-    href: '/',
-    targetSelector: '[data-onboard="evidence-sheet"]',
-    tooltipPosition: 'top',
   },
   // ── Protocol ──────────────────────────────────────────────────
   {

@@ -255,12 +255,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* ── LIFETIME PERFORMANCE SECTION ── */}
-      <div data-onboard="lifetime-performance" className="hidden"></div>
-
-      {/* ── SESSION OVERVIEW SECTION ── */}
-      <div data-onboard="session-overview" className="hidden"></div>
-
       {/* ── EVIDENCE SHEET: Opens from gauge tap (Layer 2) ── */}
       <EvidenceSheet
         isOpen={sheetOpen}

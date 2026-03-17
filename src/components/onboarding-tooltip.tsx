@@ -32,6 +32,11 @@ export default function OnboardingTooltip() {
       return;
     }
     const rect = el.getBoundingClientRect();
+    // Treat zero-size elements (hidden divs) as not found
+    if (rect.width === 0 && rect.height === 0) {
+      setPosition(null);
+      return;
+    }
     setPosition({
       x: rect.left,
       y: rect.top,
