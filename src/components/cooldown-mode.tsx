@@ -2,8 +2,26 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { X } from 'lucide-react';
-import { MorphingLight } from '@/components/ui/morphing-light';
+import { GradientBackground } from '@/components/ui/noisy-gradient-backgrounds';
 import type { PromptSequenceItem } from '@/lib/cooldown-context';
+
+/**
+ * Sunset palette — warm golden core radiating up through
+ * soft peach → lavender → cool blue-gray sky. Matches the
+ * reference image Casey provided. The prompts float just
+ * above the "sun" in the lower third.
+ */
+const SUNSET_COLORS = [
+  { color: 'rgba(220,120,10,1)', stop: '5%' },
+  { color: 'rgba(245,140,30,1)', stop: '12%' },
+  { color: 'rgba(248,165,70,1)', stop: '18%' },
+  { color: 'rgba(245,175,110,1)', stop: '25%' },
+  { color: 'rgba(238,174,192,1)', stop: '38%' },
+  { color: 'rgba(212,178,210,1)', stop: '52%' },
+  { color: 'rgba(185,180,215,1)', stop: '68%' },
+  { color: 'rgba(160,185,220,1)', stop: '82%' },
+  { color: 'rgba(148,195,228,1)', stop: '100%' },
+];
 
 interface CooldownModeProps {
   isOpen: boolean;
@@ -171,60 +189,71 @@ export function CooldownMode({
         : 'duration-[300ms]';
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#020408]">
-      {/* WebGL shader background */}
-      <MorphingLight speed={0.6} />
+    <div className="fixed inset-0 z-[100] overflow-hidden" style={{ animation: 'cooldownFadeIn 1.5s ease-out' }}>
+      {/* Noisy sunset gradient background */}
+      <GradientBackground
+        gradientOrigin="bottom-middle"
+        gradientSize="130% 130%"
+        colors={SUNSET_COLORS}
+        noiseIntensity={0.9}
+        noisePatternSize={100}
+        noisePatternRefreshInterval={2}
+        noisePatternAlpha={40}
+      />
 
-      {/* Close button — always visible, subtle */}
+      {/* Close button — top-right, subtle against the gradient */}
       <button
         onClick={handleClose}
-        className="absolute top-6 right-6 z-[110] rounded-full p-2 text-white/20 transition-colors hover:text-white/50 hover:bg-white/5"
+        className="absolute top-6 right-6 z-[110] rounded-full p-2 text-white/25 transition-colors hover:text-white/60 hover:bg-white/10 backdrop-blur-sm"
         aria-label="Close cooldown mode"
       >
         <X size={20} />
       </button>
 
-      {/* Prompt carousel — floats over shader, no container box */}
+      {/* Prompt carousel — positioned in upper-center, above the "sun" */}
       <div
-        className={`absolute inset-0 z-[105] flex items-center justify-center transition-opacity ease-in-out ${textOpacity} ${transitionDuration}`}
+        className={`absolute inset-0 z-[105] flex flex-col items-center justify-center transition-opacity ease-in-out ${textOpacity} ${transitionDuration}`}
+        style={{ paddingBottom: '15%' }}
       >
         {currentPrompt && (
-          <div className="max-w-lg mx-8 text-center">
-            {/* Main prompt text — floating with text shadow for readability */}
+          <div className="max-w-xl mx-8 text-center">
+            {/* Main prompt — serif-style feel, warm shadow against gradient */}
             <p
-              className="font-mono text-[16px] leading-[1.8] text-white/90 whitespace-pre-line"
+              className="text-[18px] sm:text-[20px] leading-[1.9] text-white/95 whitespace-pre-line font-light tracking-wide"
               style={{
+                fontFamily: "'Georgia', 'Times New Roman', serif",
                 textShadow:
-                  '0 0 40px rgba(0,0,0,0.9), 0 0 80px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.8)',
+                  '0 1px 3px rgba(80,30,0,0.5), 0 0 40px rgba(120,60,0,0.3), 0 0 80px rgba(0,0,0,0.15)',
               }}
             >
               {currentPrompt.text}
             </p>
 
-            {/* Attribution for Mark Douglas quotes */}
+            {/* Mark Douglas attribution */}
             {isMarkDouglas && (
               <p
-                className="mt-4 font-mono text-[11px] tracking-[0.15em] uppercase text-white/30"
+                className="mt-5 text-[11px] tracking-[0.18em] uppercase text-white/40 font-light"
                 style={{
-                  textShadow: '0 0 20px rgba(0,0,0,0.8)',
+                  fontFamily: "'Georgia', serif",
+                  textShadow: '0 1px 8px rgba(80,30,0,0.3)',
                 }}
               >
                 — Mark Douglas, Trading in the Zone
               </p>
             )}
 
-            {/* Subtle progress dots */}
+            {/* Progress dots — warm tones to match gradient */}
             {promptSequence.length > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-2">
+              <div className="mt-10 flex items-center justify-center gap-2">
                 {promptSequence.map((_, i) => (
                   <div
                     key={i}
                     className={`h-1 rounded-full transition-all duration-700 ${
                       i === currentIndex
-                        ? 'w-4 bg-white/40'
+                        ? 'w-5 bg-white/50'
                         : i < currentIndex
-                          ? 'w-1.5 bg-white/15'
-                          : 'w-1.5 bg-white/8'
+                          ? 'w-1.5 bg-white/25'
+                          : 'w-1.5 bg-white/10'
                     }`}
                   />
                 ))}
@@ -234,7 +263,7 @@ export function CooldownMode({
         )}
       </div>
 
-      {/* Overlay entry animation */}
+      {/* Entry animation keyframes */}
       <style>{`
         @keyframes cooldownFadeIn {
           from { opacity: 0; }
