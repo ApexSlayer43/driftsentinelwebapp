@@ -311,7 +311,7 @@ export function AuthFlow() {
               type="button"
               onClick={handleGoogleAuth}
               disabled={loading}
-              className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] flex w-full items-center justify-center gap-2.5 rounded-full px-5 py-3 font-mono text-sm text-text-primary transition-all hover:border-white/[0.12] disabled:opacity-50"
+              className="bg-[rgba(200,169,110,0.03)] backdrop-blur-xl border border-[rgba(200,169,110,0.06)] flex w-full items-center justify-center gap-2.5 rounded-full px-5 py-3 font-mono text-sm text-text-primary transition-all hover:border-[rgba(200,169,110,0.09)] disabled:opacity-50"
             >
               <GoogleIcon className="h-4 w-4" />
               Google
@@ -319,11 +319,11 @@ export function AuthFlow() {
 
             {/* Divider */}
             <div className="my-6 flex items-center gap-4">
-              <div className="h-px flex-1 bg-white/[0.06]" />
+              <div className="h-px flex-1 bg-[rgba(200,169,110,0.04)]" />
               <span className="font-mono text-[12px] uppercase tracking-[0.12em] text-text-dim">
                 or
               </span>
-              <div className="h-px flex-1 bg-white/[0.06]" />
+              <div className="h-px flex-1 bg-[rgba(200,169,110,0.04)]" />
             </div>
 
             <form onSubmit={handleEmailSubmit}>
@@ -334,7 +334,7 @@ export function AuthFlow() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoFocus
-                  className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] w-full rounded-full px-5 py-3 pl-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
+                  className="bg-[rgba(200,169,110,0.03)] backdrop-blur-xl border border-[rgba(200,169,110,0.06)] w-full rounded-full px-5 py-3 pl-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-[rgba(200,169,110,0.09)]"
                   placeholder="Email"
                 />
                 <svg
@@ -391,7 +391,7 @@ export function AuthFlow() {
             <button
               type="button"
               onClick={goBack}
-              className="mx-auto mb-5 flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 font-mono text-[12px] text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
+              className="mx-auto mb-5 flex items-center gap-2 rounded-full border border-[rgba(200,169,110,0.06)] bg-[rgba(200,169,110,0.03)] px-4 py-1.5 font-mono text-[12px] text-text-secondary transition-colors hover:border-[rgba(200,169,110,0.1)] hover:text-text-primary"
             >
               <ArrowLeft size={10} />
               {email}
@@ -405,7 +405,7 @@ export function AuthFlow() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoFocus
-                  className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
+                  className="bg-[rgba(200,169,110,0.03)] backdrop-blur-xl border border-[rgba(200,169,110,0.06)] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-[rgba(200,169,110,0.09)]"
                   placeholder="Password"
                 />
                 <button
@@ -472,7 +472,7 @@ export function AuthFlow() {
             <button
               type="button"
               onClick={goBack}
-              className="mx-auto mb-5 flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 font-mono text-[12px] text-text-secondary transition-colors hover:border-white/[0.14] hover:text-text-primary"
+              className="mx-auto mb-5 flex items-center gap-2 rounded-full border border-[rgba(200,169,110,0.06)] bg-[rgba(200,169,110,0.03)] px-4 py-1.5 font-mono text-[12px] text-text-secondary transition-colors hover:border-[rgba(200,169,110,0.1)] hover:text-text-primary"
             >
               <ArrowLeft size={10} />
               {email}
@@ -486,7 +486,7 @@ export function AuthFlow() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoFocus
-                  className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
+                  className="bg-[rgba(200,169,110,0.03)] backdrop-blur-xl border border-[rgba(200,169,110,0.06)] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-[rgba(200,169,110,0.09)]"
                   placeholder="Password (min 6 chars)"
                 />
                 <button
@@ -504,7 +504,7 @@ export function AuthFlow() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
+                  className="bg-[rgba(200,169,110,0.03)] backdrop-blur-xl border border-[rgba(200,169,110,0.06)] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-[rgba(200,169,110,0.09)]"
                   placeholder="Confirm password"
                 />
                 <button
@@ -581,7 +581,7 @@ export function AuthFlow() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.1 }}
-              className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-white/5"
+              className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(200,169,110,0.15)] bg-[rgba(200,169,110,0.035)]"
             >
               <Check size={24} className="text-white" />
             </motion.div>
@@ -597,7 +597,7 @@ export function AuthFlow() {
             </p>
 
             {/* Loading bar */}
-            <div className="mt-4 h-0.5 w-32 overflow-hidden rounded-full bg-white/[0.06]">
+            <div className="mt-4 h-0.5 w-32 overflow-hidden rounded-full bg-[rgba(200,169,110,0.04)]">
               <motion.div
                 className="h-full bg-white"
                 initial={{ width: 0 }}

@@ -15,7 +15,7 @@ export function MenuItem({ children, onClick, disabled = false, icon, isActive =
     <button
       className={`relative block w-full h-12 text-center group
         ${disabled ? "text-text-dim cursor-not-allowed" : "text-text-muted"}
-        ${isActive ? "text-white" : ""}
+        ${isActive ? "text-[#c8a96e]" : ""}
       `}
       role="menuitem"
       onClick={onClick}
@@ -24,7 +24,7 @@ export function MenuItem({ children, onClick, disabled = false, icon, isActive =
     >
       <span className="flex items-center justify-center h-full">
         {icon && (
-          <span className="h-5 w-5 transition-all duration-200 group-hover:[&_svg]:stroke-[2.5] group-hover:text-white">
+          <span className="h-5 w-5 transition-all duration-200 group-hover:[&_svg]:stroke-[2.5] group-hover:text-[#ede9e1]">
             {icon}
           </span>
         )}
@@ -68,11 +68,11 @@ export function MenuContainer({ children, className }: MenuContainerProps) {
         <div
           className="relative w-12 h-12 cursor-pointer rounded-full will-change-transform z-50"
           style={{
-            background: 'rgba(255, 255, 255, 0.07)',
+            background: 'rgba(200,169,110,0.06)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
+            border: '1px solid rgba(200,169,110,0.12)',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(200,169,110,0.08)',
           }}
           onClick={handleToggle}
         >
@@ -85,11 +85,11 @@ export function MenuContainer({ children, className }: MenuContainerProps) {
             key={index}
             className="absolute top-0 left-0 w-12 h-12 will-change-transform"
             style={{
-              background: 'rgba(255, 255, 255, 0.06)',
+              background: 'rgba(200,169,110,0.05)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.08)',
+              border: '1px solid rgba(200,169,110,0.1)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15), inset 0 1px 0 rgba(200,169,110,0.06)',
               transform: `translateY(${isExpanded ? (index + 1) * 44 : 0}px)`,
               opacity: isExpanded ? 1 : 0,
               zIndex: 40 - index,

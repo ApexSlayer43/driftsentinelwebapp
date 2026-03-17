@@ -29,7 +29,7 @@ export function GaugeSkeleton({ size = 'lg' }: { size?: 'lg' | 'sm' }) {
           cy={cy}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.04)"
+          stroke="rgba(200,169,110,0.03)"
           strokeWidth={size === 'lg' ? 8 : 5}
           strokeDasharray={`${arcLength} ${circumference - arcLength}`}
           strokeDashoffset={0}
@@ -44,12 +44,12 @@ export function GaugeSkeleton({ size = 'lg' }: { size?: 'lg' | 'sm' }) {
           width="64"
           height="28"
           rx="6"
-          fill="rgba(255,255,255,0.04)"
+          fill="rgba(200,169,110,0.03)"
         />
       </svg>
 
       {/* Ghost tier label */}
-      <div className="h-3 w-16 rounded bg-white/[0.04]" />
+      <div className="h-3 w-16 rounded bg-[rgba(200,169,110,0.03)]" />
     </div>
   );
 }

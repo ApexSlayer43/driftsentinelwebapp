@@ -167,17 +167,20 @@ function DashboardShell({
   const { isActive, promptSequence, activationId, deactivate } = useCooldown();
 
   return (
-    <div className="relative h-screen overflow-hidden bg-[#0a0a0f]">
+    <div className="relative h-screen overflow-hidden bg-[#080a0e]">
 
-      {/* Silver particles floating over the green */}
+      {/* Gold dust particles */}
       <Particles
         className="absolute inset-0 z-[1]"
-        quantity={100}
+        quantity={80}
         ease={80}
-        color="#c0c0c0"
-        size={0.4}
-        staticity={50}
+        color="#c8a96e"
+        size={0.3}
+        staticity={60}
       />
+
+      {/* Scan line — editorial luxury detail */}
+      <div className="scan-line z-[2]" />
 
       {/* Fluid nav — fixed top-right */}
       <div className="fixed top-5 right-5 z-50">

@@ -27,13 +27,13 @@ export function GlowPanel({
 }: GlowPanelProps) {
   const variantStyles = {
     default:
-      "bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.06)]",
+      "bg-[rgba(200,169,110,0.03)] backdrop-blur-xl border border-[rgba(200,169,110,0.06)] shadow-[0_4px_24px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(200,169,110,0.05)]",
     raised:
-      "bg-white/[0.05] backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.08)]",
+      "bg-[rgba(200,169,110,0.04)] backdrop-blur-2xl border border-[rgba(200,169,110,0.06)] shadow-[0_8px_32px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(200,169,110,0.065)]",
     elevated:
-      "bg-white/[0.06] backdrop-blur-2xl border border-white/[0.1] shadow-[0_12px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]",
+      "bg-[rgba(200,169,110,0.045)] backdrop-blur-2xl border border-[rgba(200,169,110,0.08)] shadow-[0_12px_40px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(200,169,110,0.08)]",
     inset:
-      "bg-white/[0.02] backdrop-blur-md border border-white/[0.04] shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]",
+      "bg-[rgba(200,169,110,0.015)] backdrop-blur-md border border-[rgba(200,169,110,0.03)] shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]",
   };
 
   return (

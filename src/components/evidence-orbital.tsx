@@ -41,7 +41,7 @@ export function EvidenceOrbital({ violation, fills }: EvidenceOrbitalProps) {
           cy="150"
           r="100"
           fill="none"
-          stroke="rgba(255,255,255,0.04)"
+          stroke="rgba(200,169,110,0.03)"
           strokeWidth="1"
           strokeDasharray="4 4"
         />
@@ -54,7 +54,7 @@ export function EvidenceOrbital({ violation, fills }: EvidenceOrbitalProps) {
             y1="150"
             x2={node.x}
             y2={node.y}
-            stroke="rgba(255,255,255,0.04)"
+            stroke="rgba(200,169,110,0.03)"
             strokeWidth="1"
           />
         ))}
@@ -136,7 +136,7 @@ export function EvidenceOrbital({ violation, fills }: EvidenceOrbitalProps) {
           y="158"
           textAnchor="middle"
           dominantBaseline="central"
-          fill="rgba(255,255,255,0.4)"
+          fill="rgba(200,169,110,0.3)"
           fontSize="7"
           fontFamily="var(--font-mono)"
         >

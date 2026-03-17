@@ -218,14 +218,14 @@ export function SentinelChat() {
             maxHeight: '480px',
             background: 'rgba(13, 15, 21, 0.92)',
             backdropFilter: 'blur(24px) saturate(1.3)',
-            border: '1px solid rgba(255,255,255,0.06)',
-            boxShadow: '0 24px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)',
+            border: '1px solid rgba(200,169,110,0.05)',
+            boxShadow: '0 24px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(200,169,110,0.02)',
             animation: 'sentinel-pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
             transformOrigin: 'bottom right',
           }}
         >
           {/* Header */}
-          <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.04]">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-[rgba(200,169,110,0.03)]">
             <Bot size={14} className="text-positive" />
             <span className="font-mono text-[12px] font-bold uppercase tracking-[0.15em] text-text-muted">
               Senti
@@ -236,7 +236,7 @@ export function SentinelChat() {
               <button
                 onClick={() => setShowModeMenu(!showModeMenu)}
                 className="flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[10px] text-text-dim transition-colors hover:text-text-muted"
-                style={{ background: 'rgba(255,255,255,0.04)' }}
+                style={{ background: 'rgba(200,169,110,0.03)' }}
               >
                 {activeMode?.short}
                 <ChevronDown size={10} />
@@ -247,7 +247,7 @@ export function SentinelChat() {
                   className="absolute left-0 top-full mt-1 w-44 rounded-lg py-1 z-50"
                   style={{
                     background: 'rgba(13, 15, 21, 0.96)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(200,169,110,0.06)',
                     boxShadow: '0 12px 24px rgba(0,0,0,0.4)',
                   }}
                 >
@@ -257,8 +257,8 @@ export function SentinelChat() {
                       onClick={() => switchMode(opt.value)}
                       className={`w-full text-left px-3 py-1.5 font-mono text-[11px] transition-colors ${
                         opt.value === mode
-                          ? 'text-positive bg-white/[0.04]'
-                          : 'text-text-muted hover:text-text-primary hover:bg-white/[0.02]'
+                          ? 'text-positive bg-[rgba(200,169,110,0.03)]'
+                          : 'text-text-muted hover:text-text-primary hover:bg-[rgba(200,169,110,0.015)]'
                       }`}
                     >
                       {opt.label}
@@ -299,7 +299,7 @@ export function SentinelChat() {
                   {msg.role === 'assistant' && text === '' && isBusy ? (
                     <div
                       className="max-w-[85%] rounded-xl px-3 py-2"
-                      style={{ background: 'rgba(255,255,255,0.03)' }}
+                      style={{ background: 'rgba(200,169,110,0.02)' }}
                     >
                       <div className="flex items-center gap-1.5">
                         <div className="h-1 w-1 rounded-full bg-text-dim animate-pulse" style={{ animationDelay: '0ms' }} />
@@ -317,7 +317,7 @@ export function SentinelChat() {
                       style={{
                         background:
                           msg.role === 'assistant'
-                            ? 'rgba(255,255,255,0.03)'
+                            ? 'rgba(200,169,110,0.02)'
                             : 'rgba(99, 102, 241, 0.12)',
                       }}
                     >
@@ -331,7 +331,7 @@ export function SentinelChat() {
 
           {/* Upload status bar */}
           {uploadingFile && uploadedFileName && (
-            <div className="flex items-center gap-2 border-t border-white/[0.04] px-3 py-1.5" style={{ background: 'rgba(34, 211, 238, 0.04)' }}>
+            <div className="flex items-center gap-2 border-t border-[rgba(200,169,110,0.03)] px-3 py-1.5" style={{ background: 'rgba(34, 211, 238, 0.04)' }}>
               <FileText size={10} className="text-positive" />
               <span className="font-mono text-[9px] text-positive truncate flex-1">
                 Analyzing {uploadedFileName}...
@@ -341,7 +341,7 @@ export function SentinelChat() {
           )}
 
           {/* Input */}
-          <div className="flex items-center gap-2 border-t border-white/[0.04] px-3 py-2.5">
+          <div className="flex items-center gap-2 border-t border-[rgba(200,169,110,0.03)] px-3 py-2.5">
             {/* Hidden file input */}
             <input
               ref={fileInputRef}
@@ -355,7 +355,7 @@ export function SentinelChat() {
               onClick={() => fileInputRef.current?.click()}
               disabled={isBusy || uploadingFile}
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors text-text-dim hover:text-positive disabled:opacity-30 disabled:pointer-events-none"
-              style={{ background: 'rgba(255,255,255,0.04)' }}
+              style={{ background: 'rgba(200,169,110,0.03)' }}
               title="Upload Performance PDF or CSV"
             >
               <Paperclip size={12} />
@@ -373,7 +373,7 @@ export function SentinelChat() {
               onClick={handleSend}
               disabled={isBusy || uploadingFile || !input.trim()}
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors text-text-muted hover:text-positive disabled:opacity-30 disabled:pointer-events-none"
-              style={{ background: 'rgba(255,255,255,0.04)' }}
+              style={{ background: 'rgba(200,169,110,0.03)' }}
             >
               {isBusy || uploadingFile ? (
                 <Loader2 size={12} className="animate-spin" />

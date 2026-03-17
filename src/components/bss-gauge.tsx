@@ -78,7 +78,7 @@ export function BssGauge({
     return () => cancelAnimationFrame(raf);
   }, [score]);
 
-  const deltaColor = delta > 0 ? '#FFFFFF' : delta < 0 ? '#8891A0' : '#4A5568';
+  const deltaColor = delta > 0 ? '#ede9e1' : delta < 0 ? '#7a766d' : '#4a473f';
   const deltaSymbol = delta > 0 ? '\u25B2' : delta < 0 ? '\u25BC' : '\u2014';
   const deltaText = delta !== 0 ? `${Math.abs(delta)}` : '';
 
@@ -115,7 +115,7 @@ export function BssGauge({
               y1={cy + outerR * Math.sin(rad)}
               x2={cx + innerR * Math.cos(rad)}
               y2={cy + innerR * Math.sin(rad)}
-              stroke={isActive ? tierStyle.color : 'rgba(255,255,255,0.12)'}
+              stroke={isActive ? tierStyle.color : 'rgba(200,169,110,0.1)'}
               strokeWidth={isMajor ? 1.5 : 0.75}
               strokeLinecap="butt"
               opacity={isActive ? (isMajor ? 0.9 : 0.5) : 0.25}
@@ -129,7 +129,7 @@ export function BssGauge({
           cy={cy}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.1)"
+          stroke="rgba(200,169,110,0.08)"
           strokeWidth={arcStroke}
           strokeDasharray={`${arcLength} ${circumference - arcLength}`}
           strokeDashoffset={0}
@@ -162,7 +162,7 @@ export function BssGauge({
           y={cy - (size === 'lg' ? 10 : 2)}
           textAnchor="middle"
           dominantBaseline="central"
-          fill="#E2E8F0"
+          fill="#ede9e1"
           fontFamily="var(--font-mono)"
           fontWeight="700"
           fontSize={size === 'lg' ? 64 : 32}

@@ -42,18 +42,18 @@ const BLUR: Record<BlurIntensity, string> = {
 
 // ── Edge layer (inner highlights) — tuned for dark backgrounds ──
 const EDGE: Record<GlassVariant, string> = {
-  card: 'inset 1px 1px 1px 0 rgba(255,255,255,0.04), inset -1px -1px 1px 0 rgba(255,255,255,0.02)',
-  raised: 'inset 2px 2px 2px 0 rgba(255,255,255,0.05), inset -1px -1px 1px 0 rgba(255,255,255,0.03)',
-  elevated: 'inset 1px 1px 2px 0 rgba(255,255,255,0.06), inset -1px -1px 1px 0 rgba(255,255,255,0.03)',
-  inset: 'inset 0 2px 6px 0 rgba(0,0,0,0.35), inset 0 -1px 2px 0 rgba(255,255,255,0.02)',
+  card: 'inset 1px 1px 1px 0 rgba(200,169,110,0.03), inset -1px -1px 1px 0 rgba(200,169,110,0.015)',
+  raised: 'inset 2px 2px 2px 0 rgba(200,169,110,0.04), inset -1px -1px 1px 0 rgba(200,169,110,0.02)',
+  elevated: 'inset 1px 1px 2px 0 rgba(200,169,110,0.05), inset -1px -1px 1px 0 rgba(200,169,110,0.02)',
+  inset: 'inset 0 2px 6px 0 rgba(0,0,0,0.35), inset 0 -1px 2px 0 rgba(200,169,110,0.015)',
 };
 
 // ── Face layer (outer glow/shadow) ──────────────────────────
 const GLOW: Record<GlowIntensity, string> = {
   none: '0 2px 8px rgba(0,0,0,0.2)',
-  xs: '0 4px 12px rgba(0,0,0,0.25), 0 0 8px rgba(255,255,255,0.02)',
-  sm: '0 4px 16px rgba(0,0,0,0.3), 0 0 16px rgba(255,255,255,0.03)',
-  md: '0 8px 32px rgba(0,0,0,0.35), 0 0 24px rgba(255,255,255,0.04)',
+  xs: '0 4px 12px rgba(0,0,0,0.25), 0 0 8px rgba(200,169,110,0.015)',
+  sm: '0 4px 16px rgba(0,0,0,0.3), 0 0 16px rgba(200,169,110,0.02)',
+  md: '0 8px 32px rgba(0,0,0,0.35), 0 0 24px rgba(200,169,110,0.03)',
 };
 
 // ── Variant presets ─────────────────────────────────────────
@@ -66,28 +66,28 @@ const VARIANT_DEFAULTS: Record<GlassVariant, {
 }> = {
   card: {
     bg: 'rgba(30, 36, 51, 0.55)',
-    border: '1px solid rgba(255,255,255,0.05)',
+    border: '1px solid rgba(200,169,110,0.04)',
     blur: 'lg',
     glow: 'xs',
     radius: '24px',
   },
   raised: {
     bg: 'rgba(26, 29, 39, 0.75)',
-    border: '1px solid rgba(255,255,255,0.07)',
+    border: '1px solid rgba(200,169,110,0.05)',
     blur: 'xl',
     glow: 'sm',
     radius: '24px',
   },
   elevated: {
     bg: 'rgba(36, 40, 54, 0.70)',
-    border: '1px solid rgba(255,255,255,0.06)',
+    border: '1px solid rgba(200,169,110,0.045)',
     blur: 'xl',
     glow: 'md',
     radius: '20px',
   },
   inset: {
     bg: 'rgba(15, 17, 23, 0.55)',
-    border: '1px solid rgba(255,255,255,0.02)',
+    border: '1px solid rgba(200,169,110,0.015)',
     blur: 'sm',
     glow: 'none',
     radius: '16px',

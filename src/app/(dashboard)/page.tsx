@@ -141,7 +141,7 @@ export default function DashboardPage() {
     return (
       <div className="flex h-full flex-col items-center justify-center">
         <div className="mb-6">
-          <span className="font-mono text-[12px] font-semibold uppercase tracking-[0.12em] text-text-muted">
+          <span className="section-label">
             Behavioral Stability Score
           </span>
         </div>
@@ -162,7 +162,7 @@ export default function DashboardPage() {
 
         <Link
           href="/ingest"
-          className="mt-4 flex items-center gap-2 rounded-2xl bg-accent-primary px-5 py-2.5 font-mono text-[14px] font-bold text-white transition-opacity hover:opacity-90"
+          className="mt-4 flex items-center gap-2 rounded-full bg-gold px-5 py-2.5 font-mono text-[13px] font-bold text-void uppercase tracking-[0.1em] transition-all hover:bg-gold-light"
         >
           <Upload size={14} />
           Upload CSV
@@ -180,10 +180,10 @@ export default function DashboardPage() {
       <div className="absolute top-3 left-4 z-40">
         <button
           onClick={() => setWrapOpen(!wrapOpen)}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all border backdrop-blur-md ${
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.15em] transition-all border backdrop-blur-md ${
             wrapOpen
-              ? 'bg-white/[0.1] border-white/[0.15] text-text-primary'
-              : 'bg-white/[0.04] border-white/[0.08] text-text-dim hover:text-text-muted hover:bg-white/[0.06]'
+              ? 'bg-[rgba(200,169,110,0.1)] border-[rgba(200,169,110,0.2)] text-gold'
+              : 'bg-[rgba(200,169,110,0.03)] border-[rgba(200,169,110,0.08)] text-text-dim hover:text-warm-muted hover:bg-[rgba(200,169,110,0.06)]'
           }`}
           title="Toggle Weekly Wrap"
         >
@@ -195,10 +195,10 @@ export default function DashboardPage() {
       <div className="absolute top-3 right-16 z-40">
         <button
           onClick={() => setNotepadOpen(!notepadOpen)}
-          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all border backdrop-blur-md ${
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.15em] transition-all border backdrop-blur-md ${
             notepadOpen
-              ? 'bg-white/[0.1] border-white/[0.15] text-text-primary'
-              : 'bg-white/[0.04] border-white/[0.08] text-text-dim hover:text-text-muted hover:bg-white/[0.06]'
+              ? 'bg-[rgba(200,169,110,0.1)] border-[rgba(200,169,110,0.2)] text-gold'
+              : 'bg-[rgba(200,169,110,0.03)] border-[rgba(200,169,110,0.08)] text-text-dim hover:text-warm-muted hover:bg-[rgba(200,169,110,0.06)]'
           }`}
           title="Toggle Session Notes"
         >
@@ -225,13 +225,13 @@ export default function DashboardPage() {
 
         {/* Strategy pill tabs — only show when user has 2+ strategies */}
         {strategies.length > 1 && (
-          <div className="mb-4 flex items-center gap-1 rounded-full bg-white/[0.03] p-1 border border-white/[0.04]">
+          <div className="mb-4 flex items-center gap-1 rounded-full bg-[rgba(200,169,110,0.03)] p-1 border border-[rgba(200,169,110,0.06)]">
             <button
               onClick={() => setActiveStrategy(STRATEGY_ALL)}
-              className={`rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all ${
+              className={`rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.15em] transition-all ${
                 activeStrategy === STRATEGY_ALL
-                  ? 'bg-white/[0.08] text-text-primary shadow-sm'
-                  : 'text-text-dim hover:text-text-muted'
+                  ? 'bg-[rgba(200,169,110,0.1)] text-gold shadow-sm'
+                  : 'text-text-dim hover:text-warm-muted'
               }`}
             >
               All
@@ -240,10 +240,10 @@ export default function DashboardPage() {
               <button
                 key={s.strategy_id}
                 onClick={() => setActiveStrategy(s.strategy_id)}
-                className={`rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all ${
+                className={`rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.15em] transition-all ${
                   activeStrategy === s.strategy_id
-                    ? 'bg-white/[0.08] text-text-primary shadow-sm'
-                    : 'text-text-dim hover:text-text-muted'
+                    ? 'bg-[rgba(200,169,110,0.1)] text-gold shadow-sm'
+                    : 'text-text-dim hover:text-warm-muted'
                 }`}
               >
                 {s.tag}
@@ -254,7 +254,7 @@ export default function DashboardPage() {
 
         {/* BSS label + freshness indicator */}
         <div className="mb-6 flex flex-col items-center gap-1.5">
-          <span className="font-mono text-[12px] font-semibold uppercase tracking-[0.12em] text-text-muted">
+          <span className="section-label">
             Behavioral Stability Score
           </span>
           <DataFreshnessIndicator computedAt={data.drift.computed_at} />
@@ -321,7 +321,7 @@ export default function DashboardPage() {
             : 'opacity-0 translate-y-3 pointer-events-none'
         }`}
       >
-        <div className="w-60 rounded-xl bg-white/[0.05] backdrop-blur-xl border border-white/[0.1] p-3 shadow-[0_8px_32px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.08)]">
+        <div className="w-60 glass-card p-3">
           <SessionNotepad />
         </div>
       </div>
