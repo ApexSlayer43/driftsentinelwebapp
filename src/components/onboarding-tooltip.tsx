@@ -129,16 +129,16 @@ export default function OnboardingTooltip() {
       <div
         ref={tooltipRef}
         style={tooltipStyle}
-        className="w-[320px] rounded-xl border border-white/[0.08] bg-[rgba(15,17,23,0.95)] backdrop-blur-xl shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-300"
+        className="w-[320px] rounded-xl border border-[rgba(200,169,110,0.1)] bg-[rgba(8,10,14,0.95)] backdrop-blur-xl shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-300"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-3 pb-2">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-positive">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#c8a96e]">
             Step {stepIndex + 1} of {ONBOARDING_STEPS.length}
           </span>
           <button
             onClick={hideTooltip}
-            className="rounded-full p-1 hover:bg-white/[0.06] transition-colors"
+            className="rounded-full p-1 hover:bg-[rgba(200,169,110,0.06)] transition-colors"
           >
             <X size={14} className="text-text-muted" />
           </button>
@@ -155,7 +155,7 @@ export default function OnboardingTooltip() {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between px-4 py-3 border-t border-white/[0.04]">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-[rgba(200,169,110,0.06)]">
           <button
             onClick={hideTooltip}
             className="font-mono text-[10px] font-semibold uppercase tracking-wider text-text-muted hover:text-text-secondary transition-colors"
@@ -164,7 +164,7 @@ export default function OnboardingTooltip() {
           </button>
           <button
             onClick={() => completeStep(currentTooltipStep)}
-            className="flex items-center gap-1.5 rounded-full bg-positive/[0.12] px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-positive hover:bg-positive/[0.2] transition-colors"
+            className="flex items-center gap-1.5 rounded-full bg-[rgba(200,169,110,0.1)] px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#c8a96e] hover:bg-[rgba(200,169,110,0.18)] transition-colors"
           >
             <CheckCircle size={12} />
             Got it

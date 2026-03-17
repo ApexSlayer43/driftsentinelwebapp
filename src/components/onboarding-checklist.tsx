@@ -79,19 +79,19 @@ export default function OnboardingChecklist() {
 
   return (
     <div className="fixed bottom-5 left-5 z-40 w-[300px] animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="rounded-2xl border border-white/[0.1] bg-white/[0.06] backdrop-blur-2xl shadow-2xl overflow-hidden">
+      <div className="rounded-2xl border border-[rgba(200,169,110,0.1)] bg-[rgba(200,169,110,0.04)] backdrop-blur-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(200,169,110,0.08)]">
           <div className="flex items-center gap-2">
-            <Rocket size={16} className="text-positive" />
-            <span className="font-display text-xs font-bold uppercase tracking-wider text-text-primary">
+            <Rocket size={16} className="text-[#c8a96e]" />
+            <span className="font-[family-name:var(--font-display)] text-sm font-light tracking-wide text-[#ede9e1]">
               Getting Started
             </span>
           </div>
           <div className="flex items-center gap-1">
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="rounded-full p-1 hover:bg-white/[0.06] transition-colors"
+              className="rounded-full p-1 hover:bg-[rgba(200,169,110,0.06)] transition-colors"
             >
               {collapsed ? (
                 <ChevronUp size={14} className="text-text-muted" />
@@ -101,7 +101,7 @@ export default function OnboardingChecklist() {
             </button>
             <button
               onClick={dismissOnboarding}
-              className="rounded-full p-1 hover:bg-white/[0.06] transition-colors"
+              className="rounded-full p-1 hover:bg-[rgba(200,169,110,0.06)] transition-colors"
             >
               <X size={14} className="text-text-muted" />
             </button>
@@ -109,16 +109,16 @@ export default function OnboardingChecklist() {
         </div>
 
         {/* Progress bar */}
-        <div className="px-4 py-2 border-b border-white/[0.08]">
+        <div className="px-4 py-2 border-b border-[rgba(200,169,110,0.08)]">
           <div className="flex items-center justify-between mb-1.5">
             <span className="font-mono text-[10px] text-text-muted">
               {Math.min(completedSteps.size, ONBOARDING_STEPS.length)} of {ONBOARDING_STEPS.length} complete
             </span>
-            <span className="font-mono text-[10px] font-bold text-positive">{progress}%</span>
+            <span className="font-mono text-[10px] font-bold text-[#c8a96e]">{progress}%</span>
           </div>
-          <div className="h-1 rounded-full bg-white/[0.08] overflow-hidden">
+          <div className="h-1 rounded-full bg-[rgba(200,169,110,0.08)] overflow-hidden">
             <div
-              className="h-full rounded-full bg-positive transition-all duration-500 ease-out"
+              className="h-full rounded-full bg-[#c8a96e] transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -132,7 +132,7 @@ export default function OnboardingChecklist() {
                 setCollapsed(false);
                 handleContinue();
               }}
-              className="w-full flex items-center justify-center gap-2 rounded-lg bg-positive/[0.1] px-3 py-2 font-mono text-[11px] font-bold text-positive hover:bg-positive/[0.15] transition-colors"
+              className="w-full flex items-center justify-center gap-2 rounded-lg bg-[rgba(200,169,110,0.1)] px-3 py-2 font-mono text-[11px] font-bold text-[#c8a96e] hover:bg-[rgba(200,169,110,0.15)] transition-colors uppercase tracking-[0.1em]"
             >
               Continue Setup
               <ChevronRight size={14} />
@@ -149,18 +149,18 @@ export default function OnboardingChecklist() {
                 const GroupIcon = meta.icon;
 
                 return (
-                  <div key={groupKey} className="border-b border-white/[0.06] last:border-0">
+                  <div key={groupKey} className="border-b border-[rgba(200,169,110,0.06)] last:border-0">
                     {/* Group header */}
                     <div className="flex items-center gap-2 px-4 py-2">
-                      <GroupIcon size={12} className={groupDone ? 'text-positive' : 'text-text-dim'} />
+                      <GroupIcon size={12} className={groupDone ? 'text-[#c8a96e]' : 'text-text-dim'} />
                       <span
                         className={`font-mono text-[9px] font-bold uppercase tracking-[0.15em] ${
-                          groupDone ? 'text-positive' : 'text-text-muted'
+                          groupDone ? 'text-[#c8a96e]' : 'text-text-muted'
                         }`}
                       >
                         {meta.label}
                       </span>
-                      {groupDone && <CheckCircle2 size={10} className="text-positive" />}
+                      {groupDone && <CheckCircle2 size={10} className="text-[#c8a96e]" />}
                     </div>
 
                     {/* Steps */}
@@ -176,15 +176,15 @@ export default function OnboardingChecklist() {
                           className={`w-full flex items-center gap-2.5 px-4 py-2 text-left transition-colors ${
                             done
                               ? 'opacity-50 cursor-default'
-                              : 'hover:bg-white/[0.03] cursor-pointer'
-                          } ${isNext ? 'bg-positive/[0.04]' : ''}`}
+                              : 'hover:bg-[rgba(200,169,110,0.03)] cursor-pointer'
+                          } ${isNext ? 'bg-[rgba(200,169,110,0.04)]' : ''}`}
                         >
                           {done ? (
-                            <CheckCircle2 size={14} className="text-positive shrink-0" />
+                            <CheckCircle2 size={14} className="text-[#c8a96e] shrink-0" />
                           ) : (
                             <Circle
                               size={14}
-                              className={`shrink-0 ${isNext ? 'text-positive' : 'text-text-dim'}`}
+                              className={`shrink-0 ${isNext ? 'text-[#c8a96e]' : 'text-text-dim'}`}
                             />
                           )}
                           <span
@@ -199,7 +199,7 @@ export default function OnboardingChecklist() {
                             {step.title}
                           </span>
                           {isNext && (
-                            <ChevronRight size={12} className="text-positive ml-auto shrink-0" />
+                            <ChevronRight size={12} className="text-[#c8a96e] ml-auto shrink-0" />
                           )}
                         </button>
                       );
@@ -210,12 +210,12 @@ export default function OnboardingChecklist() {
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-3 border-t border-white/[0.08]">
+            <div className="px-4 py-3 border-t border-[rgba(200,169,110,0.08)]">
               {allDone ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Sparkles size={14} className="text-positive" />
-                    <span className="font-mono text-[11px] font-bold text-positive">
+                    <Sparkles size={14} className="text-[#c8a96e]" />
+                    <span className="font-mono text-[11px] font-bold text-[#c8a96e]">
                       Setup complete. You&apos;re operational.
                     </span>
                   </div>
@@ -224,7 +224,7 @@ export default function OnboardingChecklist() {
                   </p>
                   <button
                     onClick={dismissOnboarding}
-                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-positive/[0.1] px-3 py-2 font-mono text-[11px] font-bold text-positive hover:bg-positive/[0.15] transition-colors"
+                    className="w-full flex items-center justify-center gap-2 rounded-lg bg-[rgba(200,169,110,0.1)] px-3 py-2 font-mono text-[11px] font-bold text-[#c8a96e] hover:bg-[rgba(200,169,110,0.15)] transition-colors"
                   >
                     <Sparkles size={12} />
                     Dismiss
@@ -233,7 +233,7 @@ export default function OnboardingChecklist() {
               ) : (
                 <button
                   onClick={handleContinue}
-                  className="w-full flex items-center justify-center gap-2 rounded-lg bg-positive/[0.1] px-3 py-2 font-mono text-[11px] font-bold text-positive hover:bg-positive/[0.15] transition-colors"
+                  className="w-full flex items-center justify-center gap-2 rounded-lg bg-[rgba(200,169,110,0.1)] px-3 py-2 font-mono text-[11px] font-bold text-[#c8a96e] hover:bg-[rgba(200,169,110,0.15)] transition-colors"
                 >
                   Continue
                   <ChevronRight size={14} />
