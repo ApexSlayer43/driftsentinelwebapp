@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, X, Shield, Plug, Unplug, ExternalLink, Loader2, Puzzle, Globe, Clock, Zap } from 'lucide-react';
+import { Save, Plus, Trash2, X, Shield, Plug, Unplug, ExternalLink, Loader2, Puzzle, Globe, Clock, Zap, Rocket } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { SessionConfig } from '@/lib/types';
 import Link from 'next/link';
 import { GlowPanel } from '@/components/ui/glow-panel';
+import { useOnboarding } from '@/lib/onboarding-context';
 
 // ── Common IANA timezones for user timezone ────────────────────
 const COMMON_TIMEZONES = [
@@ -109,6 +110,9 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [accountRef, setAccountRef] = useState<string | null>(null);
+
+  // ── Onboarding ───────────────────────────────────────────────
+  const { isActive: onboardingActive, startOnboarding, progress: onboardingProgress } = useOnboarding();
 
   // ── Extension connection state ──────────────────────────────
   const [extStatus, setExtStatus] = useState<'loading' | 'not_installed' | 'detected' | 'connecting' | 'connected'>('loading');
@@ -328,14 +332,28 @@ export default function SettingsPage() {
           <h1 className="font-display text-2xl font-bold text-text-primary">Settings</h1>
           <p className="mt-1 font-mono text-xs text-text-muted">Configure trading rules, timezone, and session windows</p>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-accent-primary px-4 py-2 font-mono text-sm font-bold text-void transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          <Save size={14} />
-          {saving ? 'Saving...' : saved ? 'Saved' : 'Save Changes'}
-        </button>
+        <div className="flex items-center gap-3">
+          {!onboardingActive && onboardingProgress < 100 && (
+            <button
+              onClick={startOnboarding}
+              className="flex items-center gap-2 rounded-lg border border-positive/20 bg-positive/[0.06] px-3 py-2 font-mono text-xs font-semibold text-positive transition-colors hover:bg-positive/[0.12]"
+            >
+              <Rocket size={14} />
+              Tutorial
+              <span className="ml-0.5 rounded bg-positive/20 px-1.5 py-0.5 font-mono text-[10px] font-bold">
+                {onboardingProgress}%
+              </span>
+            </button>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 rounded-lg bg-accent-primary px-4 py-2 font-mono text-sm font-bold text-void transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            <Save size={14} />
+            {saving ? 'Saving...' : saved ? 'Saved' : 'Save Changes'}
+          </button>
+        </div>
       </div>
 
       <div className="mt-8 grid gap-6">
