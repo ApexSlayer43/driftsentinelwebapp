@@ -2,6 +2,7 @@ import { createClient as createAuthClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import {
   selectCooldownPrompt,
+  buildCooldownSequence,
   type BehavioralInsightData,
 } from '@/config/cooldownPrompts';
 
@@ -113,8 +114,14 @@ export async function POST(req: Request) {
     }
   }
 
-  /* 5. Select prompt — three-tier cascade */
+  /* 5. Select prompt — three-tier cascade (primary for DB) + full sequence */
   const { prompt, promptType } = selectCooldownPrompt({
+    todayGoal,
+    profileGoal,
+    insightData,
+  });
+
+  const promptSequence = buildCooldownSequence({
     todayGoal,
     profileGoal,
     insightData,
@@ -156,6 +163,7 @@ export async function POST(req: Request) {
     activation_id: activation.activation_id,
     prompt,
     prompt_type: promptType,
+    prompt_sequence: promptSequence,
     bss_at_activation: bssAtActivation,
   });
 }

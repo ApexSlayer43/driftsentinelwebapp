@@ -164,7 +164,7 @@ function DashboardShell({
   bssScore?: number;
   bssTier?: string;
 }) {
-  const { isActive, prompt, activationId, deactivate } = useCooldown();
+  const { isActive, promptSequence, activationId, deactivate } = useCooldown();
 
   return (
     <div className="relative h-screen overflow-hidden">
@@ -237,7 +237,7 @@ function DashboardShell({
       <CooldownMode
         isOpen={isActive}
         onClose={deactivate}
-        prompt={prompt}
+        promptSequence={promptSequence}
         activationId={activationId}
       />
     </div>

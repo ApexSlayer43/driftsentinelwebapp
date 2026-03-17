@@ -8,11 +8,19 @@ import {
   type ReactNode,
 } from 'react';
 
+export interface PromptSequenceItem {
+  text: string;
+  type: string;
+}
+
 interface CooldownState {
   isActive: boolean;
   activationId: string | null;
+  /** Primary prompt (for DB record) */
   prompt: string | null;
   promptType: string | null;
+  /** Full prompt sequence for the carousel */
+  promptSequence: PromptSequenceItem[];
   bssAtActivation: number | null;
 }
 
@@ -33,6 +41,7 @@ export function CooldownProvider({ children }: { children: ReactNode }) {
     activationId: null,
     prompt: null,
     promptType: null,
+    promptSequence: [],
     bssAtActivation: null,
   });
   const [loading, setLoading] = useState(false);
@@ -61,6 +70,7 @@ export function CooldownProvider({ children }: { children: ReactNode }) {
         activationId: data.activation_id,
         prompt: data.prompt,
         promptType: data.prompt_type,
+        promptSequence: data.prompt_sequence ?? [],
         bssAtActivation: data.bss_at_activation,
       });
     } catch (err) {
@@ -76,6 +86,7 @@ export function CooldownProvider({ children }: { children: ReactNode }) {
       activationId: null,
       prompt: null,
       promptType: null,
+      promptSequence: [],
       bssAtActivation: null,
     });
   }, []);

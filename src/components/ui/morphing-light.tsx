@@ -43,7 +43,7 @@ export function MorphingLight({ speed = 0.6, className = "" }: MorphingLightProp
     `
 
     // Fragment shader — morphing light with DS color palette
-    // Shifted from pink/cyan to deep-blue/teal to match brand
+    // Deep navy void → breathing teal/cyan core → no pink/magenta
     const fragmentShader = `
       precision highp float;
       uniform vec2 u_resolution;
@@ -61,21 +61,34 @@ export function MorphingLight({ speed = 0.6, className = "" }: MorphingLightProp
         float c = distance(uv, vec2(0.0));
         float a = u_time * 2.5;
 
-        vec3 light = vec3(
-          0.5 - acos(sin(c * 4.0 + a)),
-          0.5 - acos(sin(c * 8.0 + a)),
-          0.0
-        );
-        vec3 source = mix(light, vec3(5.0), 0.5 - c);
+        // Organic distortion pattern — used for breathing movement
+        float wave1 = sin(c * 4.0 + a) * 0.5 + 0.5;
+        float wave2 = sin(c * 8.0 + a * 0.7) * 0.5 + 0.5;
+        float wave3 = sin(c * 2.0 - a * 0.4 + uv.x * 3.0) * 0.5 + 0.5;
+        float pattern = mix(wave1, wave2, wave3);
 
-        // DS palette: deep blue → brand teal/cyan
-        vec3 hue = mix(
-          vec3(0.05, 0.12, 0.55),   // Deep blue (void)
-          vec3(0.13, 0.83, 0.93),   // #22D3EE (--positive / brand teal)
-          (uv.y - sin(u_time)) * 0.5
-        );
+        // Three DS palette anchors
+        vec3 deepNavy = vec3(0.02, 0.04, 0.12);    // Almost black — the void
+        vec3 midBlue  = vec3(0.06, 0.16, 0.55);    // Deep blue
+        vec3 teal     = vec3(0.13, 0.83, 0.93);    // #22D3EE brand cyan
 
-        vec3 color = mix(source, hue, uv.x);
+        // Radial gradient: teal center → blue → navy edge
+        float radialFade = smoothstep(0.0, 0.7, c);
+        vec3 baseColor = mix(teal, midBlue, radialFade);
+        baseColor = mix(baseColor, deepNavy, smoothstep(0.4, 1.0, c));
+
+        // Breathing brightness modulation from pattern
+        float brightness = 0.6 + pattern * 0.6;
+        vec3 color = baseColor * brightness;
+
+        // Hot white core glow — tight center bloom
+        float coreGlow = exp(-c * c * 12.0);
+        color += vec3(0.7, 0.9, 1.0) * coreGlow * (0.5 + 0.3 * sin(a * 0.5));
+
+        // Subtle teal atmospheric scatter
+        float scatter = exp(-c * c * 3.0) * pattern * 0.15;
+        color += teal * scatter;
+
         gl_FragColor = vec4(color, 1.0);
       }
     `

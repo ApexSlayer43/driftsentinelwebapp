@@ -122,8 +122,21 @@ function pickRandom<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+/** Pick N unique random items from an array (Fisher-Yates partial shuffle) */
+function pickUniqueRandom<T>(arr: readonly T[], n: number): T[] {
+  const pool = [...arr];
+  const result: T[] = [];
+  for (let i = 0; i < Math.min(n, pool.length); i++) {
+    const idx = Math.floor(Math.random() * (pool.length - i)) + i;
+    [pool[i], pool[idx]] = [pool[idx], pool[i]];
+    result.push(pool[i]);
+  }
+  return result;
+}
+
 /**
  * Select the best available prompt given the trader's current context.
+ * Returns a single prompt (legacy — used for DB storage of primary prompt).
  *
  * Three-tier cascade:
  *   Tier 1: Personal reflection (daily goal, profile goal, or both)
@@ -179,4 +192,73 @@ export function selectCooldownPrompt(opts: {
     prompt: pickRandom(MARK_DOUGLAS_QUOTES),
     promptType: 'mark_douglas',
   };
+}
+
+// ── Prompt Sequence Builder ─────────────────────────────────────
+
+export interface PromptSequenceItem {
+  text: string;
+  type: PromptType;
+}
+
+/**
+ * Build the full cooldown prompt sequence — multiple messages that
+ * fade in one at a time during the cooldown experience.
+ *
+ * Ordering:
+ *   1. Personal reflection (if available)
+ *   2. Behavioral insight (if available)
+ *   3. Socratic question
+ *   4. Mark Douglas quote
+ *
+ * Always returns 3-4 items. Fills from lower tiers when upper tiers
+ * don't have data.
+ */
+export function buildCooldownSequence(opts: {
+  todayGoal?: string | null;
+  profileGoal?: string | null;
+  insightData?: BehavioralInsightData | null;
+}): PromptSequenceItem[] {
+  const sequence: PromptSequenceItem[] = [];
+
+  // Slot 1: Personal reflection
+  if (opts.todayGoal && opts.profileGoal) {
+    sequence.push({
+      text: blendedReflectionPrompt(opts.todayGoal, opts.profileGoal),
+      type: 'blended_reflection',
+    });
+  } else if (opts.todayGoal) {
+    sequence.push({
+      text: goalReflectionPrompt(opts.todayGoal),
+      type: 'goal_reflection',
+    });
+  } else if (opts.profileGoal) {
+    sequence.push({
+      text: profileReflectionPrompt(opts.profileGoal),
+      type: 'profile_reflection',
+    });
+  }
+
+  // Slot 2: Behavioral insight
+  if (opts.insightData) {
+    const insight = behavioralInsightPrompt(opts.insightData);
+    if (insight) {
+      sequence.push({ text: insight, type: 'behavioral_insight' });
+    }
+  }
+
+  // Slot 3: Socratic question(s) — fill to ensure at least 3 total
+  const questionsNeeded = Math.max(1, 3 - sequence.length);
+  const questions = pickUniqueRandom(QUESTION_BANK, questionsNeeded);
+  for (const q of questions) {
+    sequence.push({ text: q, type: 'question_bank' });
+  }
+
+  // Slot 4: Always end with Mark Douglas
+  sequence.push({
+    text: pickRandom(MARK_DOUGLAS_QUOTES),
+    type: 'mark_douglas',
+  });
+
+  return sequence;
 }

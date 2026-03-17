@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { X } from 'lucide-react';
 import { MorphingLight } from '@/components/ui/morphing-light';
+import type { PromptSequenceItem } from '@/lib/cooldown-context';
 
 interface CooldownModeProps {
   isOpen: boolean;
   onClose: () => void;
-  prompt: string | null;
+  promptSequence: PromptSequenceItem[];
   activationId: string | null;
 }
 
@@ -15,32 +16,106 @@ interface CooldownModeProps {
  * Cooldown Mode — full-screen behavioral intervention overlay.
  *
  * Timing sequence:
- *   0s:  Visual appears. Full opacity. No text. Just the light breathing.
- *   8s:  Senti prompt fades in over 2 seconds.
- *   ∞:   No auto-close. Trader closes when ready.
+ *   0s:       Visual appears. Full opacity. No text. Just the light breathing.
+ *   8s:       First prompt fades in over 2s.
+ *   8+8=16s:  First prompt fades out over 1.5s.
+ *   17.5s:    Second prompt fades in over 2s.
+ *   ...       Each subsequent prompt: 8s hold → 1.5s out → 2s in
+ *   ∞:        No auto-close. Trader closes when ready.
  *
  * The silence is the feature. Do not shorten it.
  */
+
+// Timing constants (ms)
+const INITIAL_SILENCE = 8000;
+const FADE_IN_DURATION = 2000;
+const HOLD_DURATION = 8000;
+const FADE_OUT_DURATION = 1500;
+const CYCLE = FADE_IN_DURATION + HOLD_DURATION + FADE_OUT_DURATION; // 11500ms per prompt
+
+type FadePhase = 'silent' | 'fading-in' | 'visible' | 'fading-out';
+
 export function CooldownMode({
   isOpen,
   onClose,
-  prompt,
+  promptSequence,
   activationId,
 }: CooldownModeProps) {
-  const [showPrompt, setShowPrompt] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [phase, setPhase] = useState<FadePhase>('silent');
   const [closing, setClosing] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 8-second silence before prompt reveal
+  const clearTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  // Master sequencer — drives the prompt carousel
   useEffect(() => {
-    if (!isOpen) {
-      setShowPrompt(false);
+    if (!isOpen || promptSequence.length === 0) {
+      setCurrentIndex(0);
+      setPhase('silent');
       setClosing(false);
+      clearTimer();
       return;
     }
 
-    const timer = setTimeout(() => setShowPrompt(true), 8000);
-    return () => clearTimeout(timer);
-  }, [isOpen]);
+    let cancelled = false;
+
+    function schedulePhase(newPhase: FadePhase, delay: number) {
+      clearTimer();
+      timerRef.current = setTimeout(() => {
+        if (cancelled) return;
+        setPhase(newPhase);
+      }, delay);
+    }
+
+    // Start the initial silence → first fade-in
+    setPhase('silent');
+    setCurrentIndex(0);
+
+    schedulePhase('fading-in', INITIAL_SILENCE);
+
+    return () => {
+      cancelled = true;
+      clearTimer();
+    };
+  }, [isOpen, promptSequence]);
+
+  // Phase transitions after first fade-in
+  useEffect(() => {
+    if (!isOpen || promptSequence.length === 0) return;
+
+    let cancelled = false;
+
+    if (phase === 'fading-in') {
+      // After fade-in animation completes → visible (hold)
+      timerRef.current = setTimeout(() => {
+        if (!cancelled) setPhase('visible');
+      }, FADE_IN_DURATION);
+    } else if (phase === 'visible') {
+      // After hold → fade out
+      timerRef.current = setTimeout(() => {
+        if (!cancelled) setPhase('fading-out');
+      }, HOLD_DURATION);
+    } else if (phase === 'fading-out') {
+      // After fade-out → advance to next prompt or loop
+      timerRef.current = setTimeout(() => {
+        if (cancelled) return;
+        const nextIndex = (currentIndex + 1) % promptSequence.length;
+        setCurrentIndex(nextIndex);
+        setPhase('fading-in');
+      }, FADE_OUT_DURATION);
+    }
+
+    return () => {
+      cancelled = true;
+      clearTimer();
+    };
+  }, [phase, currentIndex, isOpen, promptSequence]);
 
   // Escape key to close
   useEffect(() => {
@@ -74,37 +149,92 @@ export function CooldownMode({
 
   if (!isOpen) return null;
 
+  const currentPrompt = promptSequence[currentIndex];
+  const isMarkDouglas = currentPrompt?.type === 'mark_douglas';
+
+  // Opacity based on phase
+  const textOpacity =
+    phase === 'fading-in'
+      ? 'opacity-100'
+      : phase === 'visible'
+        ? 'opacity-100'
+        : phase === 'fading-out'
+          ? 'opacity-0'
+          : 'opacity-0';
+
+  // Transition duration matches the current phase
+  const transitionDuration =
+    phase === 'fading-in'
+      ? 'duration-[2000ms]'
+      : phase === 'fading-out'
+        ? 'duration-[1500ms]'
+        : 'duration-[300ms]';
+
   return (
-    <div className="fixed inset-0 z-[100] bg-[#0a0a0f]">
+    <div className="fixed inset-0 z-[100] bg-[#020408]">
       {/* WebGL shader background */}
       <MorphingLight speed={0.6} />
 
       {/* Close button — always visible, subtle */}
       <button
         onClick={handleClose}
-        className="absolute top-6 right-6 z-[110] rounded-full p-2 text-white/30 transition-colors hover:text-white/70 hover:bg-white/5"
+        className="absolute top-6 right-6 z-[110] rounded-full p-2 text-white/20 transition-colors hover:text-white/50 hover:bg-white/5"
         aria-label="Close cooldown mode"
       >
         <X size={20} />
       </button>
 
-      {/* Senti prompt — fades in at 8 seconds */}
+      {/* Prompt carousel — floats over shader, no container box */}
       <div
-        className={`absolute inset-0 z-[105] flex items-center justify-center transition-opacity duration-[2000ms] ${
-          showPrompt ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 z-[105] flex items-center justify-center transition-opacity ease-in-out ${textOpacity} ${transitionDuration}`}
       >
-        <div className="max-w-lg mx-8 text-center">
-          {/* Semi-transparent backdrop for readability */}
-          <div className="rounded-2xl bg-black/40 backdrop-blur-sm px-8 py-10 border border-white/[0.06]">
-            <p className="font-mono text-[15px] leading-relaxed text-white/90 whitespace-pre-line">
-              {prompt}
+        {currentPrompt && (
+          <div className="max-w-lg mx-8 text-center">
+            {/* Main prompt text — floating with text shadow for readability */}
+            <p
+              className="font-mono text-[16px] leading-[1.8] text-white/90 whitespace-pre-line"
+              style={{
+                textShadow:
+                  '0 0 40px rgba(0,0,0,0.9), 0 0 80px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.8)',
+              }}
+            >
+              {currentPrompt.text}
             </p>
+
+            {/* Attribution for Mark Douglas quotes */}
+            {isMarkDouglas && (
+              <p
+                className="mt-4 font-mono text-[11px] tracking-[0.15em] uppercase text-white/30"
+                style={{
+                  textShadow: '0 0 20px rgba(0,0,0,0.8)',
+                }}
+              >
+                — Mark Douglas, Trading in the Zone
+              </p>
+            )}
+
+            {/* Subtle progress dots */}
+            {promptSequence.length > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-2">
+                {promptSequence.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1 rounded-full transition-all duration-700 ${
+                      i === currentIndex
+                        ? 'w-4 bg-white/40'
+                        : i < currentIndex
+                          ? 'w-1.5 bg-white/15'
+                          : 'w-1.5 bg-white/8'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Fade-in animation for the whole overlay */}
+      {/* Overlay entry animation */}
       <style>{`
         @keyframes cooldownFadeIn {
           from { opacity: 0; }
