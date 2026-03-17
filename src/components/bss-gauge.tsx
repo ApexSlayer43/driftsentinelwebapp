@@ -90,6 +90,10 @@ export function BssGauge({
   // Pulse animation for drift states
   const shouldPulse = ['DRIFT_FORMING', 'COMPROMISED', 'BREAKDOWN'].includes(state);
 
+  // Precision tick marks — outside the arc, clean separation
+  const tickCount = 48;
+  const tickRadius = radius + (size === 'lg' ? 16 : 8); // Outside the arc
+
   return (
     <div className="bss-orb relative flex flex-col items-center gap-2">
       <svg
@@ -112,6 +116,32 @@ export function BssGauge({
             </feMerge>
           </filter>
         </defs>
+
+        {/* Precision tick marks — outside the arc */}
+        {Array.from({ length: tickCount + 1 }).map((_, i) => {
+          const angle = startAngle + (sweepAngle / tickCount) * i;
+          const rad = (angle * Math.PI) / 180;
+          const isMajor = i % 8 === 0;
+          const tickLen = size === 'lg' ? (isMajor ? 10 : 5) : (isMajor ? 5 : 3);
+          const innerR = tickRadius;
+          const outerR = tickRadius + tickLen;
+          const tickProgress = i / tickCount;
+          const isActive = tickProgress <= progressValue;
+
+          return (
+            <line
+              key={i}
+              x1={cx + innerR * Math.cos(rad)}
+              y1={cy + innerR * Math.sin(rad)}
+              x2={cx + outerR * Math.cos(rad)}
+              y2={cy + outerR * Math.sin(rad)}
+              stroke={isActive ? tierStyle.color : 'rgba(255,255,255,0.08)'}
+              strokeWidth={isMajor ? 1.5 : 0.75}
+              strokeLinecap="round"
+              opacity={isActive ? (isMajor ? 0.8 : 0.35) : 0.2}
+            />
+          );
+        })}
 
         {/* Background arc — subtle dark track */}
         <circle
