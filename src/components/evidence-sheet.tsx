@@ -69,7 +69,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
         {/* 3-column grid filling the panel */}
         <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-0 overflow-hidden">
           {/* Sessions column */}
-          <div className="flex flex-col min-h-0 border-r border-white/[0.04]">
+          <div data-onboard="evidence-sessions" className="flex flex-col min-h-0 border-r border-white/[0.04]">
             <div className="px-4 py-2.5 shrink-0">
               <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
                 Sessions
@@ -81,7 +81,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
           </div>
 
           {/* Violations column */}
-          <div className="flex flex-col min-h-0 border-r border-white/[0.04]">
+          <div data-onboard="evidence-violations" className="flex flex-col min-h-0 border-r border-white/[0.04]">
             <div className="px-4 py-2.5 shrink-0">
               <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
                 Violations
@@ -93,7 +93,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
           </div>
 
           {/* Trends column */}
-          <div className="flex flex-col min-h-0">
+          <div data-onboard="evidence-trends" className="flex flex-col min-h-0">
             <div className="px-4 py-2.5 shrink-0">
               <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
                 Trends

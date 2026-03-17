@@ -10,7 +10,11 @@ import { Upload } from 'lucide-react';
 import { EvidenceSheet } from '@/components/evidence-sheet';
 import { useStrategies } from '@/hooks/use-strategies';
 import { STRATEGY_ALL, type StrategyFilter } from '@/lib/strategies';
+import { useOnboarding } from '@/lib/onboarding-context';
 import type { StatePayload } from '@/lib/types';
+
+/** Step IDs that require the evidence sheet to be open */
+const EVIDENCE_STEP_IDS = new Set(['evidence-sessions', 'evidence-violations', 'evidence-trends']);
 
 /**
  * Dashboard — The Cockpit (Invisible Interface spec, Screen 01)
@@ -72,6 +76,14 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const { strategies } = useStrategies();
   const [activeStrategy, setActiveStrategy] = useState<StrategyFilter>(STRATEGY_ALL);
+  const { currentTooltipStep, isActive: onboardingActive } = useOnboarding();
+
+  // Auto-open evidence sheet when onboarding navigates to evidence breakdown steps
+  useEffect(() => {
+    if (onboardingActive && currentTooltipStep && EVIDENCE_STEP_IDS.has(currentTooltipStep)) {
+      setSheetOpen(true);
+    }
+  }, [onboardingActive, currentTooltipStep]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -258,7 +270,11 @@ export default function DashboardPage() {
       {/* ── EVIDENCE SHEET: Opens from gauge tap (Layer 2) ── */}
       <EvidenceSheet
         isOpen={sheetOpen}
-        onClose={() => setSheetOpen(false)}
+        onClose={() => {
+          // Don't close the sheet if onboarding is pointing at evidence elements
+          if (onboardingActive && currentTooltipStep && EVIDENCE_STEP_IDS.has(currentTooltipStep)) return;
+          setSheetOpen(false);
+        }}
         accountRef={data.account_ref}
       />
     </div>

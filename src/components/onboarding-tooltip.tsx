@@ -50,13 +50,17 @@ export default function OnboardingTooltip() {
       setPosition(null);
       return;
     }
-    // Small delay to let the page render first
-    const timer = setTimeout(updatePosition, 200);
+    // Retry with increasing delay — handles modals/sheets that animate open
+    const timers = [
+      setTimeout(updatePosition, 200),
+      setTimeout(updatePosition, 500),
+      setTimeout(updatePosition, 900),
+    ];
     window.addEventListener('resize', updatePosition);
     window.addEventListener('scroll', updatePosition, true);
 
     return () => {
-      clearTimeout(timer);
+      timers.forEach(clearTimeout);
       window.removeEventListener('resize', updatePosition);
       window.removeEventListener('scroll', updatePosition, true);
     };
