@@ -1,31 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Upload, CheckCircle, XCircle, Copy, FileText, FileSpreadsheet, Plus, ChevronDown } from 'lucide-react';
+import { Upload, CheckCircle, XCircle, Copy, Plus, ChevronDown } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { GlowPanel } from '@/components/ui/glow-panel';
 import { useStrategies } from '@/hooks/use-strategies';
 import type { IngestRun } from '@/lib/types';
-
-type UploadMode = 'csv' | 'pdf';
-
-interface PdfResult {
-  summary: {
-    grossPnl: number;
-    totalPnl: number;
-    tradeCount: number;
-    contractCount: number;
-    winRate: number;
-    expectancy: number;
-    fees: number;
-    maxDrawdown: number;
-    maxRunUp: number;
-  };
-  trades_parsed: number;
-  date_range: { start: string; end: string } | null;
-  fills_generated: number;
-  ingest: { fills_new?: number; fills_duplicate?: number; fills_rejected?: number } | null;
-}
 
 interface CsvResult {
   summary: {
@@ -47,9 +27,7 @@ interface CsvResult {
 export default function IngestPage() {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [mode, setMode] = useState<UploadMode>('pdf');
   const [csvResult, setCsvResult] = useState<CsvResult | null>(null);
-  const [pdfResult, setPdfResult] = useState<PdfResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [recentRuns, setRecentRuns] = useState<IngestRun[]>([]);
   const { strategies, defaultStrategy, createStrategy } = useStrategies();
@@ -81,68 +59,46 @@ export default function IngestPage() {
       if (data) setRecentRuns(data as IngestRun[]);
     }
     loadRuns();
-  }, [csvResult, pdfResult]);
+  }, [csvResult]);
 
   const handleFile = useCallback(async (file: File) => {
-    const isPdf = file.name.toLowerCase().endsWith('.pdf');
     const isCsv = file.name.toLowerCase().endsWith('.csv');
 
-    if (!isPdf && !isCsv) {
-      setError('Supported formats: PDF (Performance Report) or CSV (Position History)');
+    if (!isCsv) {
+      setError('Please upload a Tradovate Performance CSV file');
       return;
     }
 
     setUploading(true);
     setError(null);
     setCsvResult(null);
-    setPdfResult(null);
 
     try {
-      if (isPdf) {
-        const formData = new FormData();
-        formData.append('file', file);
+      const csvText = await file.text();
 
-        const res = await fetch('/api/ingest/performance-pdf', {
-          method: 'POST',
-          body: formData,
-        });
+      const res = await fetch('/api/ingest/csv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          csv_text: csvText,
+          source_file: file.name,
+          strategy_id: selectedStrategyId || undefined,
+        }),
+      });
 
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => null);
-          throw new Error(errBody?.error || `Upload failed: ${res.status}`);
-        }
-
-        const data: PdfResult = await res.json();
-        setPdfResult(data);
-        setMode('pdf');
-      } else {
-        const csvText = await file.text();
-
-        const res = await fetch('/api/ingest/csv', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            csv_text: csvText,
-            source_file: file.name,
-            strategy_id: selectedStrategyId || undefined,
-          }),
-        });
-
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => null);
-          throw new Error(errBody?.error || `Upload failed: ${res.status}`);
-        }
-
-        const data: CsvResult = await res.json();
-        setCsvResult(data);
-        setMode('csv');
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        throw new Error(errBody?.error || `Upload failed: ${res.status}`);
       }
+
+      const data: CsvResult = await res.json();
+      setCsvResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setUploading(false);
     }
-  }, []);
+  }, [selectedStrategyId]);
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
@@ -162,34 +118,8 @@ export default function IngestPage() {
         Upload
       </h1>
       <p className="mt-1 font-mono text-xs text-text-muted">
-        Import your trading data — Performance PDF or Performance CSV
+        Import your trading data — Tradovate Performance CSV
       </p>
-
-      {/* Format toggle */}
-      <div className="mt-4 flex gap-2">
-        <button
-          onClick={() => setMode('pdf')}
-          className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-colors ${
-            mode === 'pdf'
-              ? 'bg-white/[0.06] text-text-primary'
-              : 'hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary'
-          }`}
-        >
-          <FileText size={12} />
-          Performance PDF
-        </button>
-        <button
-          onClick={() => setMode('csv')}
-          className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-colors ${
-            mode === 'csv'
-              ? 'bg-white/[0.06] text-text-primary'
-              : 'hover:bg-white/[0.04] transition-colors text-text-muted hover:text-text-secondary'
-          }`}
-        >
-          <FileSpreadsheet size={12} />
-          Performance CSV
-        </button>
-      </div>
 
       {/* Strategy picker */}
       {strategies.length > 0 && (
@@ -283,32 +213,24 @@ export default function IngestPage() {
           <>
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-positive border-t-transparent" />
             <p className="mt-3 font-mono text-sm text-text-secondary">
-              {mode === 'pdf' ? 'Parsing performance report...' : 'Processing CSV...'}
+              Processing CSV...
             </p>
           </>
         ) : (
           <>
-            {mode === 'pdf' ? (
-              <FileText size={32} className="text-text-muted" strokeWidth={1} />
-            ) : (
-              <Upload size={32} className="text-text-muted" strokeWidth={1} />
-            )}
+            <Upload size={32} className="text-text-muted" strokeWidth={1} />
             <p className="mt-3 font-mono text-sm text-text-secondary">
-              {mode === 'pdf'
-                ? 'Drop your Tradovate Performance PDF here'
-                : 'Drop your Tradovate Performance CSV here'}
+              Drop your Tradovate Performance CSV here
             </p>
             <p className="mt-1 font-mono text-[12px] text-text-muted">
               or click to browse
             </p>
             <p className="mt-3 font-mono text-[12px] text-text-dim">
-              {mode === 'pdf'
-                ? 'Extracts trades, summary stats, and P&L data automatically'
-                : 'Supports Tradovate Performance CSV exports'}
+              Supports Tradovate Performance CSV exports
             </p>
             <input
               type="file"
-              accept=".pdf,.csv"
+              accept=".csv"
               onChange={handleInputChange}
               className="absolute inset-0 cursor-pointer opacity-0"
               style={{ position: 'relative', width: 'auto', marginTop: 12 }}
@@ -316,55 +238,6 @@ export default function IngestPage() {
           </>
         )}
       </div>
-
-      {/* PDF Result */}
-      {pdfResult && (
-        <GlowPanel data-onboard="upload-results" className="mt-4 p-5 border border-positive/20 bg-positive/[0.04]">
-          <div className="flex items-center gap-2 mb-3">
-            <CheckCircle size={16} className="text-positive" />
-            <span className="font-mono text-sm font-semibold text-positive">
-              Performance Report Parsed — {pdfResult.trades_parsed} Trades
-            </span>
-          </div>
-
-          {pdfResult.date_range && (
-            <p className="font-mono text-[11px] text-text-muted mb-3">
-              Date range: {pdfResult.date_range.start} → {pdfResult.date_range.end}
-            </p>
-          )}
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
-            <PdfStat label="Gross P/L" value={`$${pdfResult.summary.grossPnl.toFixed(2)}`} color={pdfResult.summary.grossPnl >= 0 ? '#FFFFFF' : '#8891A0'} />
-            <PdfStat label="Net P/L" value={`$${pdfResult.summary.totalPnl.toFixed(2)}`} color={pdfResult.summary.totalPnl >= 0 ? '#FFFFFF' : '#8891A0'} />
-            <PdfStat label="Win Rate" value={`${pdfResult.summary.winRate}%`} color={pdfResult.summary.winRate >= 50 ? '#FFFFFF' : '#8891A0'} />
-            <PdfStat label="Expectancy" value={`$${pdfResult.summary.expectancy.toFixed(2)}`} color={pdfResult.summary.expectancy >= 0 ? '#FFFFFF' : '#8891A0'} />
-            <PdfStat label="Trades" value={String(pdfResult.summary.tradeCount)} />
-            <PdfStat label="Contracts" value={String(pdfResult.summary.contractCount)} />
-            <PdfStat label="Max Run-up" value={`$${pdfResult.summary.maxRunUp.toFixed(2)}`} color="#FFFFFF" />
-            <PdfStat label="Max Drawdown" value={`$${Math.abs(pdfResult.summary.maxDrawdown).toFixed(2)}`} color="#8891A0" />
-          </div>
-
-          {pdfResult.ingest && (
-            <div className="border-t border-border-dim pt-3 mt-3">
-              <p className="font-mono text-[10px] uppercase tracking-wider text-text-muted mb-2">Pipeline Result</p>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Accepted</div>
-                  <div className="font-display text-xl font-bold text-positive">{pdfResult.ingest.fills_new ?? 0}</div>
-                </div>
-                <div>
-                  <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Duplicate</div>
-                  <div className="font-display text-xl font-bold text-text-secondary">{pdfResult.ingest.fills_duplicate ?? 0}</div>
-                </div>
-                <div>
-                  <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Rejected</div>
-                  <div className="font-display text-xl font-bold text-negative">{pdfResult.ingest.fills_rejected ?? 0}</div>
-                </div>
-              </div>
-            </div>
-          )}
-        </GlowPanel>
-      )}
 
       {/* CSV Result */}
       {csvResult && (
@@ -383,13 +256,13 @@ export default function IngestPage() {
           )}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
-            <PdfStat label="Gross P/L" value={`$${csvResult.summary.grossPnl.toFixed(2)}`} color={csvResult.summary.grossPnl >= 0 ? '#FFFFFF' : '#8891A0'} />
-            <PdfStat label="Win Rate" value={`${csvResult.summary.winRate}%`} color={csvResult.summary.winRate >= 50 ? '#FFFFFF' : '#8891A0'} />
-            <PdfStat label="Winning" value={String(csvResult.summary.winningTrades)} />
-            <PdfStat label="Losing" value={String(csvResult.summary.losingTrades)} />
-            <PdfStat label="Trades" value={String(csvResult.summary.totalTrades)} />
-            <PdfStat label="Fills" value={String(csvResult.fills_generated)} />
-            <PdfStat label="Contracts" value={csvResult.summary.contracts.join(', ')} />
+            <StatCell label="Gross P/L" value={`$${csvResult.summary.grossPnl.toFixed(2)}`} color={csvResult.summary.grossPnl >= 0 ? '#FFFFFF' : '#8891A0'} />
+            <StatCell label="Win Rate" value={`${csvResult.summary.winRate}%`} color={csvResult.summary.winRate >= 50 ? '#FFFFFF' : '#8891A0'} />
+            <StatCell label="Winning" value={String(csvResult.summary.winningTrades)} />
+            <StatCell label="Losing" value={String(csvResult.summary.losingTrades)} />
+            <StatCell label="Trades" value={String(csvResult.summary.totalTrades)} />
+            <StatCell label="Fills" value={String(csvResult.fills_generated)} />
+            <StatCell label="Contracts" value={csvResult.summary.contracts.join(', ')} />
           </div>
 
           <div className="border-t border-border-dim pt-3 mt-3">
@@ -462,7 +335,7 @@ export default function IngestPage() {
   );
 }
 
-function PdfStat({ label, value, color }: { label: string; value: string; color?: string }) {
+function StatCell({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div className="rounded-lg border border-border-dim px-3 py-2">
       <div className="font-mono text-[8px] uppercase tracking-wider text-text-muted">{label}</div>
