@@ -144,6 +144,7 @@ interface OnboardingState {
 interface OnboardingContextValue extends OnboardingState {
   startOnboarding: () => void;
   dismissOnboarding: () => void;
+  resetOnboarding: () => void;
   completeStep: (stepId: string) => void;
   showTooltip: (stepId: string) => void;
   hideTooltip: () => void;
@@ -222,6 +223,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     saveState(Array.from(completedSteps), true);
   }, [completedSteps]);
 
+  const resetOnboarding = useCallback(() => {
+    setCompletedSteps(new Set());
+    setCurrentTooltipStep(null);
+    setIsActive(true);
+    saveState([], false);
+  }, []);
+
   const completeStep = useCallback((stepId: string) => {
     setCompletedSteps((prev) => {
       const next = new Set(prev);
@@ -257,6 +265,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         progress,
         startOnboarding,
         dismissOnboarding,
+        resetOnboarding,
         completeStep,
         showTooltip,
         hideTooltip,

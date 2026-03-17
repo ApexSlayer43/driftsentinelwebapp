@@ -112,7 +112,7 @@ export default function SettingsPage() {
   const [accountRef, setAccountRef] = useState<string | null>(null);
 
   // ── Onboarding ───────────────────────────────────────────────
-  const { isActive: onboardingActive, startOnboarding, progress: onboardingProgress } = useOnboarding();
+  const { isActive: onboardingActive, startOnboarding, resetOnboarding, progress: onboardingProgress } = useOnboarding();
 
   // ── Extension connection state ──────────────────────────────
   const [extStatus, setExtStatus] = useState<'loading' | 'not_installed' | 'detected' | 'connecting' | 'connected'>('loading');
@@ -333,16 +333,18 @@ export default function SettingsPage() {
           <p className="mt-1 font-mono text-xs text-text-muted">Configure trading rules, timezone, and session windows</p>
         </div>
         <div className="flex items-center gap-3">
-          {!onboardingActive && onboardingProgress < 100 && (
+          {!onboardingActive && (
             <button
-              onClick={startOnboarding}
+              onClick={onboardingProgress >= 100 ? resetOnboarding : startOnboarding}
               className="flex items-center gap-2 rounded-lg border border-positive/20 bg-positive/[0.06] px-3 py-2 font-mono text-xs font-semibold text-positive transition-colors hover:bg-positive/[0.12]"
             >
               <Rocket size={14} />
-              Tutorial
-              <span className="ml-0.5 rounded bg-positive/20 px-1.5 py-0.5 font-mono text-[10px] font-bold">
-                {onboardingProgress}%
-              </span>
+              {onboardingProgress >= 100 ? 'Restart Tutorial' : 'Tutorial'}
+              {onboardingProgress < 100 && (
+                <span className="ml-0.5 rounded bg-positive/20 px-1.5 py-0.5 font-mono text-[10px] font-bold">
+                  {onboardingProgress}%
+                </span>
+              )}
             </button>
           )}
           <button
