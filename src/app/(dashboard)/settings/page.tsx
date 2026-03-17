@@ -361,6 +361,7 @@ export default function SettingsPage() {
         </GlowPanel>
 
         {/* Timezone */}
+        <div data-onboard="timezone-picker">
         <GlowPanel className="p-6">
           <div className="flex items-center gap-2 mb-1">
             <Globe size={14} className="text-positive" />
@@ -394,8 +395,10 @@ export default function SettingsPage() {
             </div>
           )}
         </GlowPanel>
+        </div>
 
         {/* Trading Rules */}
+        <div data-onboard="trading-rules">
         <GlowPanel className="p-6">
           <h3 className="font-display text-sm font-bold text-text-primary">Trading Rules</h3>
           <p className="mt-1 font-mono text-[12px] text-text-muted">Define your maximum position sizes and activity limits</p>
@@ -426,8 +429,10 @@ export default function SettingsPage() {
             </div>
           </div>
         </GlowPanel>
+        </div>
 
         {/* Session Windows */}
+        <div data-onboard="session-windows">
         <GlowPanel className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -542,6 +547,7 @@ export default function SettingsPage() {
             )}
           </div>
         </GlowPanel>
+        </div>
 
         {/* Baseline Configuration */}
         <GlowPanel className="p-6">

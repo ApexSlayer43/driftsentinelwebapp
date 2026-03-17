@@ -6,7 +6,7 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 
 export interface OnboardingStep {
   id: string;
-  group: 'upload' | 'dashboard' | 'sessions' | 'protocol' | 'senti' | 'traderId';
+  group: 'setup' | 'upload' | 'dashboard' | 'sessions' | 'protocol' | 'senti' | 'traderId';
   title: string;
   description: string;
   href: string;            // page to navigate to
@@ -15,12 +15,40 @@ export interface OnboardingStep {
 }
 
 export const ONBOARDING_STEPS: OnboardingStep[] = [
-  // Upload flow
+  // ── Setup — first things first ────────────────────────────────
+  {
+    id: 'set-timezone',
+    group: 'setup',
+    title: 'Set your timezone',
+    description: 'We detected your timezone automatically. Confirm it here — this lets Drift Sentinel resolve your session windows correctly across daylight saving transitions. No manual clock math required.',
+    href: '/settings',
+    targetSelector: '[data-onboard="timezone-picker"]',
+    tooltipPosition: 'bottom',
+  },
+  {
+    id: 'configure-sessions',
+    group: 'setup',
+    title: 'Choose your trading sessions',
+    description: 'Pick a market preset (US Futures, CME Globex, Eurex) or create a custom window. Times are in the exchange\'s local timezone — the system converts for you. Any fill outside these windows gets flagged.',
+    href: '/settings',
+    targetSelector: '[data-onboard="session-windows"]',
+    tooltipPosition: 'bottom',
+  },
+  {
+    id: 'set-trading-rules',
+    group: 'setup',
+    title: 'Define your trading rules',
+    description: 'Set your max contracts and max fills per day. These are your guardrails — the rules you\'re imposing on yourself. The engine enforces them back on you so you stay disciplined even when emotions say otherwise.',
+    href: '/settings',
+    targetSelector: '[data-onboard="trading-rules"]',
+    tooltipPosition: 'bottom',
+  },
+  // ── Upload ────────────────────────────────────────────────────
   {
     id: 'upload-data',
     group: 'upload',
     title: 'Upload your trading data',
-    description: 'Drop a Tradovate Performance CSV or PDF here. Drift Sentinel will parse your trades, generate fills, and run the compute pipeline automatically.',
+    description: 'Drop a Tradovate CSV here. Drift Sentinel will parse your trades, generate fills, and run the full behavioral compute pipeline automatically.',
     href: '/ingest',
     targetSelector: '[data-onboard="upload-zone"]',
     tooltipPosition: 'bottom',
@@ -34,7 +62,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     targetSelector: '[data-onboard="upload-results"]',
     tooltipPosition: 'top',
   },
-  // Dashboard metrics
+  // ── Dashboard ─────────────────────────────────────────────────
   {
     id: 'check-bss',
     group: 'dashboard',
@@ -62,7 +90,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     targetSelector: '[data-onboard="session-overview"]',
     tooltipPosition: 'top',
   },
-  // Sessions & Evidence
+  // ── Sessions & Evidence ───────────────────────────────────────
   {
     id: 'session-heatmap',
     group: 'sessions',
@@ -81,22 +109,22 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     targetSelector: '[data-onboard="evidence-sheet"]',
     tooltipPosition: 'top',
   },
-  // Protocol
+  // ── Protocol ──────────────────────────────────────────────────
   {
     id: 'setup-protocol',
     group: 'protocol',
-    title: 'Set up your trading protocol',
-    description: 'Define your max contracts, max fills per day, and trading session windows. These become the rules the engine uses to detect violations. Your protocol is your discipline framework.',
+    title: 'Upload your trading protocol',
+    description: 'Upload your written trading protocol and the engine will extract rules automatically. These rules power violation detection — turning your own plan into enforceable guardrails.',
     href: '/settings',
     targetSelector: '[data-onboard="protocol-settings"]',
     tooltipPosition: 'bottom',
   },
-  // Senti AI
+  // ── Senti AI ──────────────────────────────────────────────────
   {
     id: 'meet-senti',
     group: 'senti',
     title: 'Meet Senti — your AI companion',
-    description: 'Senti is your behavioral co-pilot. It speaks from your data — morning briefings, post-session after-action reviews, or ambient session companion mode. Ask it anything about your trading patterns.',
+    description: 'Senti is your behavioral co-pilot. It speaks from your data — morning briefings, post-session after-action reviews, or ambient session companion mode. It knows your timezone, session state, and every fill on record.',
     href: '/senti',
     targetSelector: '[data-onboard="senti-chat"]',
     tooltipPosition: 'bottom',
@@ -110,7 +138,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     targetSelector: '[data-onboard="senti-input"]',
     tooltipPosition: 'top',
   },
-  // DS Trader ID
+  // ── DS Trader ID ──────────────────────────────────────────────
   {
     id: 'view-trader-id',
     group: 'traderId',

@@ -17,11 +17,13 @@ import {
   CheckCircle2,
   Circle,
   Sparkles,
+  Settings,
   type LucideIcon,
 } from 'lucide-react';
 import { useOnboarding, ONBOARDING_STEPS, type OnboardingStep } from '@/lib/onboarding-context';
 
 const GROUP_META: Record<string, { label: string; icon: LucideIcon }> = {
+  setup: { label: 'Setup', icon: Settings },
   upload: { label: 'Upload', icon: Upload },
   dashboard: { label: 'Dashboard', icon: BarChart3 },
   sessions: { label: 'Sessions', icon: Radar },
@@ -73,7 +75,7 @@ export default function OnboardingChecklist() {
   }
 
   // Group steps
-  const groups = ['upload', 'dashboard', 'sessions', 'protocol', 'senti', 'traderId'];
+  const groups = ['setup', 'upload', 'dashboard', 'sessions', 'protocol', 'senti', 'traderId'];
 
   return (
     <div className="fixed bottom-5 left-5 z-40 w-[300px] animate-in fade-in slide-in-from-bottom-4 duration-500">
