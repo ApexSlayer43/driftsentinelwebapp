@@ -12,6 +12,7 @@ import { useStrategies } from '@/hooks/use-strategies';
 import { STRATEGY_ALL, type StrategyFilter } from '@/lib/strategies';
 import { useOnboarding } from '@/lib/onboarding-context';
 import { IntentionModal } from '@/components/intention-modal';
+import { WeeklyWrap } from '@/components/weekly-wrap';
 import type { StatePayload } from '@/lib/types';
 
 /** Step IDs that require the evidence sheet to be open */
@@ -266,6 +267,11 @@ export default function DashboardPage() {
             Using cached data. {error}
           </p>
         )}
+
+        {/* Weekly Wrap — Senti's behavioral reflection, trailing 7 days */}
+        <div className="mt-6 w-full max-w-md px-4">
+          <WeeklyWrap />
+        </div>
       </div>
 
       {/* ── EVIDENCE SHEET: Opens from gauge tap (Layer 2) ── */}
