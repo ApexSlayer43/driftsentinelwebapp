@@ -6,30 +6,26 @@ import { BssGauge } from '@/components/bss-gauge';
 import { GaugeSkeleton } from '@/components/gauge-skeleton';
 import { VerdictLine } from '@/components/verdict-line';
 import { Sparkline } from '@/components/sparkline';
-import { Upload } from 'lucide-react';
+import { Upload, Calendar, PenLine } from 'lucide-react';
 import { EvidenceSheet } from '@/components/evidence-sheet';
 import { useStrategies } from '@/hooks/use-strategies';
 import { STRATEGY_ALL, type StrategyFilter } from '@/lib/strategies';
 import { useOnboarding } from '@/lib/onboarding-context';
 import { IntentionModal } from '@/components/intention-modal';
 import { WeeklyWrap } from '@/components/weekly-wrap';
+import { SessionNotepad } from '@/components/session-notepad';
 import type { StatePayload } from '@/lib/types';
 
 /** Step IDs that require the evidence sheet to be open */
 const EVIDENCE_STEP_IDS = new Set(['evidence-sessions', 'evidence-violations', 'evidence-trends']);
 
 /**
- * Dashboard — The Cockpit (Invisible Interface spec, Screen 01)
+ * Dashboard — The Cockpit
  *
- * Surface layer: exactly 5 elements, nothing else.
- *   1. BSS Score (240° arc gauge, 48px score)
- *   2. Tier Badge (color-coded capsule below score)
- *   3. Delta Indicator ("+3 from last week", cyan/orange)
- *   4. 7-Day Sparkline (40×16px, adjacent to delta)
- *   5. Verdict Line (one sentence, natural language)
- *
- * Tap gauge → evidence sheet (Layer 2).
- * Never show more than 5 data points on the surface layer.
+ * Three-column layout:
+ *   Left:   Weekly Wrap (toggleable)
+ *   Center: BSS orb + verdict (always visible)
+ *   Right:  Session Notepad (toggleable)
  */
 
 /** Data freshness — ambient indicator, not a surface element */
@@ -79,6 +75,10 @@ export default function DashboardPage() {
   const { strategies } = useStrategies();
   const [activeStrategy, setActiveStrategy] = useState<StrategyFilter>(STRATEGY_ALL);
   const { currentTooltipStep, isActive: onboardingActive } = useOnboarding();
+
+  // Side panel toggles
+  const [wrapOpen, setWrapOpen] = useState(false);
+  const [notepadOpen, setNotepadOpen] = useState(false);
 
   // Auto-open evidence sheet when onboarding navigates to evidence breakdown steps
   useEffect(() => {
@@ -174,9 +174,54 @@ export default function DashboardPage() {
   const effectiveState = data.onboarding.is_building ? 'BUILDING' : data.drift.state;
 
   return (
-    <div className="relative flex min-h-full flex-col">
-      {/* ── SURFACE LAYER: Exactly 5 Elements (spec Section 2) ── */}
-      <div className="flex flex-1 flex-col items-center justify-center">
+    <div className="relative flex h-full overflow-hidden">
+
+      {/* ── LEFT PANEL: Weekly Wrap (toggleable) ── */}
+      <div
+        className={`absolute top-0 left-0 h-full z-20 transition-all duration-300 ease-in-out ${
+          wrapOpen ? 'w-80 opacity-100 translate-x-0' : 'w-0 opacity-0 -translate-x-4'
+        }`}
+      >
+        {wrapOpen && (
+          <div className="h-full w-80 p-4 overflow-y-auto">
+            <WeeklyWrap />
+          </div>
+        )}
+      </div>
+
+      {/* ── CENTER: BSS Orb + Surface Layer ── */}
+      <div className="flex-1 flex flex-col items-center justify-center relative z-10">
+
+        {/* Toggle buttons — flanking the top */}
+        <div className="absolute top-3 left-4 z-30">
+          <button
+            onClick={() => setWrapOpen(!wrapOpen)}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all border ${
+              wrapOpen
+                ? 'bg-white/[0.08] border-white/[0.12] text-text-primary'
+                : 'bg-white/[0.03] border-white/[0.06] text-text-dim hover:text-text-muted hover:bg-white/[0.05]'
+            }`}
+            title="Toggle Weekly Wrap"
+          >
+            <Calendar size={12} />
+            Wrap
+          </button>
+        </div>
+
+        <div className="absolute top-3 right-4 z-30">
+          <button
+            onClick={() => setNotepadOpen(!notepadOpen)}
+            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all border ${
+              notepadOpen
+                ? 'bg-white/[0.08] border-white/[0.12] text-text-primary'
+                : 'bg-white/[0.03] border-white/[0.06] text-text-dim hover:text-text-muted hover:bg-white/[0.05]'
+            }`}
+            title="Toggle Session Notes"
+          >
+            <PenLine size={12} />
+            Notes
+          </button>
+        </div>
 
         {/* Strategy pill tabs — only show when user has 2+ strategies */}
         {strategies.length > 1 && (
@@ -239,14 +284,12 @@ export default function DashboardPage() {
 
         {/* 2-3. Delta + Sparkline row — adjacent per spec */}
         <div className="mt-4 flex items-center gap-4">
-          {/* Delta indicator — cyan positive, orange negative */}
           <span className={`font-mono text-[14px] font-medium ${
             (data.bss_delta ?? 0) > 0 ? 'text-positive' : (data.bss_delta ?? 0) < 0 ? 'text-negative' : 'text-text-muted'
           }`}>
             {(data.bss_delta ?? 0) > 0 ? '+' : ''}{data.bss_delta ?? 0} since last session
           </span>
 
-          {/* 7-Day Sparkline — 40×16px, pure shape recognition */}
           {data.bss_sparkline && data.bss_sparkline.length >= 2 && (
             <Sparkline
               data={data.bss_sparkline}
@@ -267,18 +310,27 @@ export default function DashboardPage() {
             Using cached data. {error}
           </p>
         )}
+      </div>
 
-        {/* Weekly Wrap — Senti's behavioral reflection, trailing 7 days */}
-        <div className="mt-6 w-full max-w-md px-4">
-          <WeeklyWrap />
-        </div>
+      {/* ── RIGHT PANEL: Session Notepad (toggleable) ── */}
+      <div
+        className={`absolute top-0 right-0 h-full z-20 transition-all duration-300 ease-in-out ${
+          notepadOpen ? 'w-80 opacity-100 translate-x-0' : 'w-0 opacity-0 translate-x-4'
+        }`}
+      >
+        {notepadOpen && (
+          <div className="h-full w-80 p-4">
+            <div className="h-full rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-4 shadow-[0_4px_24px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.06)]">
+              <SessionNotepad />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── EVIDENCE SHEET: Opens from gauge tap (Layer 2) ── */}
       <EvidenceSheet
         isOpen={sheetOpen}
         onClose={() => {
-          // Don't close the sheet if onboarding is pointing at evidence elements
           if (onboardingActive && currentTooltipStep && EVIDENCE_STEP_IDS.has(currentTooltipStep)) return;
           setSheetOpen(false);
         }}
