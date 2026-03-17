@@ -10,8 +10,10 @@ import {
   Settings,
   Shield,
   Search,
+  Rocket,
 } from 'lucide-react';
 import { getTierStyle } from '@/lib/tokens';
+import { useOnboarding, ONBOARDING_STEPS } from '@/lib/onboarding-context';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -34,6 +36,9 @@ interface SidebarProps {
 export function Sidebar({ bssScore, bssTier, className = '' }: SidebarProps) {
   const pathname = usePathname();
   const tierStyle = getTierStyle(bssTier ?? 'DORMANT');
+  const { isActive: onboardingActive, completedSteps, startOnboarding, progress } = useOnboarding();
+  const allDone = completedSteps.size >= ONBOARDING_STEPS.length;
+  const showOnboardingToggle = !onboardingActive && !allDone;
 
   return (
     <aside
@@ -102,6 +107,20 @@ export function Sidebar({ bssScore, bssTier, className = '' }: SidebarProps) {
           );
         })}
       </nav>
+
+      {/* Resume onboarding */}
+      {showOnboardingToggle && (
+        <div className="px-3 pb-2">
+          <button
+            onClick={startOnboarding}
+            className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 font-mono text-[11px] text-text-muted hover:bg-positive/[0.06] hover:text-positive transition-colors"
+          >
+            <Rocket size={14} />
+            <span>Resume Setup</span>
+            <span className="ml-auto font-mono text-[9px] text-text-dim">{progress}%</span>
+          </button>
+        </div>
+      )}
 
       {/* Bottom: Mini BSS */}
       <div className="border-t border-border-dim px-5 py-4">
