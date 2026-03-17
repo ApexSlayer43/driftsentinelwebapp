@@ -90,25 +90,21 @@ export function BssGauge({
   // Pulse animation for drift states
   const shouldPulse = ['DRIFT_FORMING', 'COMPROMISED', 'BREAKDOWN'].includes(state);
 
-  // Tick marks at tier boundaries (6 segments)
-  const tickCount = 48;
-
   return (
     <div className="bss-orb relative flex flex-col items-center gap-2">
       <svg
         width={dimension}
         height={dimension}
         viewBox={`0 0 ${dimension} ${dimension}`}
-        className="drop-shadow-lg"
       >
         <defs>
           <linearGradient id={`gauge-grad-${tier}`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={tierStyle.color} stopOpacity="0.3" />
+            <stop offset="0%" stopColor={tierStyle.color} stopOpacity="0.4" />
             <stop offset="100%" stopColor={tierStyle.color} stopOpacity="1" />
           </linearGradient>
           <filter id="gauge-glow">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feFlood floodColor={tierStyle.color} floodOpacity="0.3" result="flood" />
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feFlood floodColor={tierStyle.color} floodOpacity="0.25" result="flood" />
             <feComposite in="flood" in2="blur" operator="in" result="colorBlur" />
             <feMerge>
               <feMergeNode in="colorBlur" />
@@ -117,38 +113,13 @@ export function BssGauge({
           </filter>
         </defs>
 
-        {/* Tick marks around the arc */}
-        {Array.from({ length: tickCount + 1 }).map((_, i) => {
-          const angle = startAngle + (sweepAngle / tickCount) * i;
-          const rad = (angle * Math.PI) / 180;
-          const isMajor = i % 6 === 0;
-          const innerR = radius - (isMajor ? 14 : 9);
-          const outerR = radius - 4;
-          const tickProgress = i / tickCount;
-          const isActive = tickProgress <= progressValue;
-
-          return (
-            <line
-              key={i}
-              x1={cx + innerR * Math.cos(rad)}
-              y1={cy + innerR * Math.sin(rad)}
-              x2={cx + outerR * Math.cos(rad)}
-              y2={cy + outerR * Math.sin(rad)}
-              stroke={isActive ? tierStyle.color : 'rgba(255,255,255,0.05)'}
-              strokeWidth={isMajor ? 1.5 : 0.75}
-              strokeLinecap="round"
-              opacity={isActive ? (isMajor ? 0.75 : 0.4) : 0.25}
-            />
-          );
-        })}
-
-        {/* Background arc — #242836 track */}
+        {/* Background arc — subtle dark track */}
         <circle
           cx={cx}
           cy={cy}
           r={radius}
           fill="none"
-          stroke="#242836"
+          stroke="rgba(255,255,255,0.06)"
           strokeWidth={strokeWidth}
           strokeDasharray={`${arcLength} ${circumference - arcLength}`}
           strokeDashoffset={0}
@@ -156,7 +127,7 @@ export function BssGauge({
           transform={`rotate(${startAngle + 90} ${cx} ${cy})`}
         />
 
-        {/* Score arc — tier-colored with glow */}
+        {/* Score arc — tier-colored, precision glow */}
         <circle
           cx={cx}
           cy={cy}
