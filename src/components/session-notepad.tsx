@@ -126,10 +126,10 @@ export function SessionNotepad() {
   }, [notes, saveNotes]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-text-muted">
+      <div className="flex items-center justify-between mb-2">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-text-muted">
           Session Notes
         </span>
         {lastSaved && (
@@ -139,13 +139,13 @@ export function SessionNotepad() {
         )}
       </div>
 
-      {/* Textarea */}
+      {/* Textarea — compact */}
       <textarea
         value={notes}
         onChange={(e) => handleChange(e.target.value)}
         onBlur={handleBlur}
-        placeholder="What are you noticing today..."
-        className="flex-1 w-full resize-none rounded-xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-md p-3 font-mono text-[12px] leading-relaxed text-text-secondary placeholder:text-text-dim outline-none focus:border-white/[0.12] transition-colors"
+        placeholder="What are you noticing..."
+        className="h-36 w-full resize-none rounded-lg bg-white/[0.03] border border-white/[0.06] p-2.5 font-mono text-[11px] leading-relaxed text-text-secondary placeholder:text-text-dim outline-none focus:border-cyan-400/30 transition-colors"
         spellCheck={false}
       />
     </div>

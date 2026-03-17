@@ -176,6 +176,37 @@ export default function DashboardPage() {
   return (
     <div className="relative flex h-full overflow-hidden">
 
+      {/* ── TOGGLE BUTTONS — top-level z so panels never cover them ── */}
+      <div className="absolute top-3 left-4 z-40">
+        <button
+          onClick={() => setWrapOpen(!wrapOpen)}
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all border backdrop-blur-md ${
+            wrapOpen
+              ? 'bg-white/[0.1] border-white/[0.15] text-text-primary'
+              : 'bg-white/[0.04] border-white/[0.08] text-text-dim hover:text-text-muted hover:bg-white/[0.06]'
+          }`}
+          title="Toggle Weekly Wrap"
+        >
+          <Calendar size={12} />
+          Wrap
+        </button>
+      </div>
+
+      <div className="absolute top-3 right-16 z-40">
+        <button
+          onClick={() => setNotepadOpen(!notepadOpen)}
+          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all border backdrop-blur-md ${
+            notepadOpen
+              ? 'bg-white/[0.1] border-white/[0.15] text-text-primary'
+              : 'bg-white/[0.04] border-white/[0.08] text-text-dim hover:text-text-muted hover:bg-white/[0.06]'
+          }`}
+          title="Toggle Session Notes"
+        >
+          <PenLine size={12} />
+          Notes
+        </button>
+      </div>
+
       {/* ── LEFT PANEL: Weekly Wrap (toggleable) ── */}
       <div
         className={`absolute top-0 left-0 h-full z-20 transition-all duration-300 ease-in-out ${
@@ -183,7 +214,7 @@ export default function DashboardPage() {
         }`}
       >
         {wrapOpen && (
-          <div className="h-full w-80 p-4 overflow-y-auto">
+          <div className="h-full w-80 p-4 pt-12 overflow-y-auto">
             <WeeklyWrap />
           </div>
         )}
@@ -191,37 +222,6 @@ export default function DashboardPage() {
 
       {/* ── CENTER: BSS Orb + Surface Layer ── */}
       <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-
-        {/* Toggle buttons — flanking the top */}
-        <div className="absolute top-3 left-4 z-30">
-          <button
-            onClick={() => setWrapOpen(!wrapOpen)}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all border ${
-              wrapOpen
-                ? 'bg-white/[0.08] border-white/[0.12] text-text-primary'
-                : 'bg-white/[0.03] border-white/[0.06] text-text-dim hover:text-text-muted hover:bg-white/[0.05]'
-            }`}
-            title="Toggle Weekly Wrap"
-          >
-            <Calendar size={12} />
-            Wrap
-          </button>
-        </div>
-
-        <div className="absolute top-3 right-4 z-30">
-          <button
-            onClick={() => setNotepadOpen(!notepadOpen)}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all border ${
-              notepadOpen
-                ? 'bg-white/[0.08] border-white/[0.12] text-text-primary'
-                : 'bg-white/[0.03] border-white/[0.06] text-text-dim hover:text-text-muted hover:bg-white/[0.05]'
-            }`}
-            title="Toggle Session Notes"
-          >
-            <PenLine size={12} />
-            Notes
-          </button>
-        </div>
 
         {/* Strategy pill tabs — only show when user has 2+ strategies */}
         {strategies.length > 1 && (
@@ -312,17 +312,15 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* ── RIGHT PANEL: Session Notepad (toggleable) ── */}
+      {/* ── RIGHT PANEL: Compact Session Notepad (toggleable) ── */}
       <div
-        className={`absolute top-0 right-0 h-full z-20 transition-all duration-300 ease-in-out ${
-          notepadOpen ? 'w-80 opacity-100 translate-x-0' : 'w-0 opacity-0 translate-x-4'
+        className={`absolute bottom-4 right-4 z-30 transition-all duration-300 ease-in-out ${
+          notepadOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
       >
         {notepadOpen && (
-          <div className="h-full w-80 p-4">
-            <div className="h-full rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-4 shadow-[0_4px_24px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.06)]">
-              <SessionNotepad />
-            </div>
+          <div className="w-64 rounded-2xl bg-white/[0.05] backdrop-blur-xl border border-white/[0.1] p-3 shadow-[0_8px_32px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.08)]">
+            <SessionNotepad />
           </div>
         )}
       </div>
