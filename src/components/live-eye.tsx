@@ -145,7 +145,7 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
       <ellipse
         cx={cx} cy={cy}
         rx={eyeW * 0.8} ry={eyeH * 2}
-        fill="#C0C8D8"
+        fill="#c8a96e"
         opacity={0.04}
         filter="url(#liveGlowAmbient)"
       />
@@ -154,7 +154,7 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
         cx={cx} cy={cy}
         r={size * 0.46}
         fill="none"
-        stroke="#C0C8D8"
+        stroke="#c8a96e"
         strokeWidth="0.5"
         strokeDasharray="2 8"
         opacity={0.12}
@@ -163,7 +163,7 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
         cx={cx} cy={cy}
         r={size * 0.42}
         fill="none"
-        stroke="#C0C8D8"
+        stroke="#c8a96e"
         strokeWidth="0.3"
         opacity={0.07}
       />
@@ -171,20 +171,20 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
       <path
         d={eyePath}
         fill="none"
-        stroke="#C0C8D8"
+        stroke="#c8a96e"
         strokeWidth={size * 0.025}
         filter="url(#liveGlow)"
       />
       {/* Eye interior — clipped to almond */}
       <g clipPath="url(#eyeShape)">
         {/* Subtle iris fill */}
-        <circle cx={cx} cy={cy} r={irisR * 1.4} fill="#C0C8D8" opacity={0.04} />
+        <circle cx={cx} cy={cy} r={irisR * 1.4} fill="#c8a96e" opacity={0.04} />
         {/* Iris ring — static */}
         <circle
           cx={cx} cy={cy}
           r={irisR}
           fill="none"
-          stroke="#C0C8D8"
+          stroke="#c8a96e"
           strokeWidth={size * 0.018}
           opacity={0.5}
           filter="url(#liveGlow)"
@@ -193,13 +193,13 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
         <line
           x1={cx} y1={cy - eyeH * 1.5}
           x2={cx} y2={cy - irisR * 1.15}
-          stroke="#C0C8D8" strokeWidth={size * 0.025}
+          stroke="#c8a96e" strokeWidth={size * 0.025}
           filter="url(#liveGlow)"
         />
         <line
           x1={cx} y1={cy + irisR * 1.15}
           x2={cx} y2={cy + eyeH * 1.5}
-          stroke="#C0C8D8" strokeWidth={size * 0.025}
+          stroke="#c8a96e" strokeWidth={size * 0.025}
           filter="url(#liveGlow)"
         />
         {/* Pupil group — cursor tracking + dilation */}
@@ -259,13 +259,13 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
       <line
         x1={cx - eyeW - size * 0.12} y1={cy}
         x2={cx - eyeW} y2={cy}
-        stroke="#C0C8D8" strokeWidth={size * 0.03}
+        stroke="#c8a96e" strokeWidth={size * 0.03}
         filter="url(#liveGlow)"
       />
       <line
         x1={cx + eyeW} y1={cy}
         x2={cx + eyeW + size * 0.12} y2={cy}
-        stroke="#C0C8D8" strokeWidth={size * 0.03}
+        stroke="#c8a96e" strokeWidth={size * 0.03}
         filter="url(#liveGlow)"
       />
       {/* Corner reticle marks */}
@@ -278,7 +278,7 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
         <line
           key={i}
           x1={x1} y1={y1} x2={x2} y2={y2}
-          stroke="#C0C8D8"
+          stroke="#c8a96e"
           strokeWidth={size * 0.016}
           opacity={0.5}
         />

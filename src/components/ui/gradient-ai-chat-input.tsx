@@ -58,25 +58,25 @@ export function GradientAIChatInput({
   dropdownOptions = [],
   selectedOption = null,
   onOptionSelect,
-  // Monochrome white/silver gradient defaults
+  // Gold editorial gradient defaults
   mainGradient = {
-    topLeft: "#3A3F4B",
-    topRight: "#2E3340",
-    bottomRight: "#252A35",
-    bottomLeft: "#3A3F4B",
+    topLeft: "#2a2520",
+    topRight: "#1e1c18",
+    bottomRight: "#181614",
+    bottomLeft: "#2a2520",
   },
   outerGradient = {
-    topLeft: "#2A2F3A",
-    topRight: "#222730",
-    bottomRight: "#1C2028",
-    bottomLeft: "#2A2F3A",
+    topLeft: "#221f1a",
+    topRight: "#1a1815",
+    bottomRight: "#141210",
+    bottomLeft: "#221f1a",
   },
   innerGradientOpacity = 0.04,
-  buttonBorderColor = "rgba(255,255,255,0.08)",
+  buttonBorderColor = "rgba(200,169,110,0.1)",
   // Shadow defaults
   enableShadows = true,
-  shadowOpacity = 0.8,
-  shadowColor = "rgb(255, 255, 255)", // white glow
+  shadowOpacity = 0.6,
+  shadowColor = "rgb(200, 169, 110)", // gold glow
 }: GradientAIChatInputProps) {
   const [message, setMessage] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -269,17 +269,17 @@ export function GradientAIChatInput({
               className={cn(
                 "flex items-center justify-center",
                 "w-8 h-8 mt-1 rounded-lg",
-                "text-text-muted hover:text-positive",
+                "text-text-muted hover:text-[#c8a96e]",
                 "transition-colors cursor-pointer",
                 (disabled || uploading || !message.trim()) && "opacity-30 cursor-not-allowed"
               )}
-              style={{ background: 'rgba(34, 211, 238, 0.08)' }}
+              style={{ background: 'rgba(200,169,110,0.08)' }}
               whileHover={shouldAnimate && message.trim() ? { scale: 1.1 } : {}}
               whileTap={shouldAnimate && message.trim() ? { scale: 0.9 } : {}}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
             >
               {uploading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-positive" />
+                <Loader2 className="w-4 h-4 animate-spin text-[#c8a96e]" />
               ) : (
                 <Send className="w-4 h-4" />
               )}
@@ -297,7 +297,7 @@ export function GradientAIChatInput({
                 "flex items-center gap-2 px-3 py-1.5",
                 "text-[11px] font-mono text-text-dim hover:text-text-muted",
                 "rounded-full transition-colors cursor-pointer",
-                "bg-white/[0.02] hover:bg-white/[0.04]",
+                "bg-[rgba(200,169,110,0.02)] hover:bg-[rgba(200,169,110,0.04)]",
                 (disabled || uploading) && "opacity-40 cursor-not-allowed"
               )}
               style={{ border: `1px solid ${buttonBorderColor}` }}
@@ -320,7 +320,7 @@ export function GradientAIChatInput({
                     "flex items-center gap-2 px-3 py-1.5",
                     "text-[11px] font-mono text-text-dim hover:text-text-muted",
                     "rounded-full transition-colors cursor-pointer",
-                    "bg-white/[0.02] hover:bg-white/[0.04]",
+                    "bg-[rgba(200,169,110,0.02)] hover:bg-[rgba(200,169,110,0.04)]",
                     disabled && "opacity-40 cursor-not-allowed"
                   )}
                   style={{ border: `1px solid ${buttonBorderColor}` }}
@@ -347,7 +347,7 @@ export function GradientAIChatInput({
                     className="absolute bottom-full mb-2 left-0 rounded-lg min-w-[160px] z-10 py-1"
                     style={{
                       background: 'rgba(13, 15, 21, 0.96)',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      border: '1px solid rgba(200,169,110,0.1)',
                       boxShadow: '0 12px 24px rgba(0,0,0,0.4)',
                     }}
                   >
@@ -361,13 +361,13 @@ export function GradientAIChatInput({
                         className={cn(
                           "w-full text-left px-3 py-1.5 font-mono text-[11px] transition-colors flex items-center gap-2",
                           selectedOption?.id === option.id
-                            ? "text-positive bg-white/[0.04]"
-                            : "text-text-muted hover:text-text-primary hover:bg-white/[0.02]"
+                            ? "text-[#c8a96e] bg-[rgba(200,169,110,0.06)]"
+                            : "text-text-muted hover:text-text-primary hover:bg-[rgba(200,169,110,0.03)]"
                         )}
                       >
                         <span className="flex-1">{option.label}</span>
                         {selectedOption?.id === option.id && (
-                          <Check className="w-3 h-3 text-positive" />
+                          <Check className="w-3 h-3 text-[#c8a96e]" />
                         )}
                       </button>
                     ))}
@@ -390,18 +390,18 @@ export function GradientAIChatInput({
                       className={cn(
                         "flex items-center gap-2 px-3 py-1",
                         "font-mono text-[10px] text-text-dim",
-                        "rounded-full bg-white/[0.02]"
+                        "rounded-full bg-[rgba(200,169,110,0.02)]"
                       )}
                       style={{ border: `1px solid ${buttonBorderColor}` }}
                     >
-                      <FileText className="w-3 h-3 text-positive" />
+                      <FileText className="w-3 h-3 text-[#c8a96e]" />
                       <span className="truncate max-w-[100px]">{af.name}</span>
                       {uploading ? (
-                        <Loader2 className="w-3 h-3 animate-spin text-positive" />
+                        <Loader2 className="w-3 h-3 animate-spin text-[#c8a96e]" />
                       ) : (
                         <button
                           onClick={() => removeFile(index)}
-                          className="flex-shrink-0 w-4 h-4 rounded-full bg-white/[0.04] hover:bg-negative/20 flex items-center justify-center"
+                          className="flex-shrink-0 w-4 h-4 rounded-full bg-[rgba(200,169,110,0.04)] hover:bg-negative/20 flex items-center justify-center"
                         >
                           <X className="w-2.5 h-2.5 text-text-dim hover:text-negative" />
                         </button>

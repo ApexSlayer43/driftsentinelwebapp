@@ -95,7 +95,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
 
   // Map BSS to fill color using tier system
   function getCellColor(bss: number | null): string {
-    if (bss === null) return 'rgba(255, 255, 255, 0.02)'; // no data
+    if (bss === null) return 'rgba(200,169,110,0.04)'; // no data
     if (bss >= 90) return getTierStyle('SOVEREIGN').color;
     if (bss >= 80) return getTierStyle('DISCIPLINED').color;
     if (bss >= 65) return getTierStyle('CONSISTENT').color;
@@ -119,7 +119,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
   if (loading) {
     return (
       <div className="flex justify-center py-4">
-        <div className="h-3 w-3 animate-spin rounded-full border-2 border-positive border-t-transparent" />
+        <div className="h-3 w-3 animate-spin rounded-full border-2 border-[#c8a96e] border-t-transparent" />
       </div>
     );
   }
@@ -190,7 +190,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
                       backgroundColor: color,
                       opacity,
                       boxShadow: isToday
-                        ? `0 0 0 1px rgba(255,255,255,0.2)`
+                        ? `0 0 0 1px rgba(200,169,110,0.3)`
                         : day && !day.isClean
                         ? `inset 0 0 0 1px rgba(245,166,35,0.3)`
                         : 'none',
@@ -223,7 +223,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
       <div className="flex items-center gap-4 font-mono text-[12px] text-text-muted">
         <span>{cleanDays}/{totalDays} clean days</span>
         {streak > 0 && (
-          <span className="text-positive">{streak}d streak</span>
+          <span className="text-[#c8a96e]">{streak}d streak</span>
         )}
         <div className="ml-auto flex items-center gap-1.5">
           <span className="text-text-dim">Less</span>
@@ -231,7 +231,7 @@ export function ProtocolGrid({ accountRef }: ProtocolGridProps) {
             <div
               key={i}
               className="h-[10px] w-[10px] rounded-[2px]"
-              style={{ backgroundColor: '#FFFFFF', opacity: op }}
+              style={{ backgroundColor: '#c8a96e', opacity: op }}
             />
           ))}
           <span className="text-text-dim">More</span>

@@ -275,17 +275,17 @@ export default function SentiPage() {
   return (
     <div className="flex h-full max-h-[calc(100vh-60px)]">
       {/* Left sidebar — Chat History */}
-      <div className="w-56 shrink-0 p-4 flex flex-col gap-3 overflow-hidden border-r border-white/[0.08]">
+      <div className="w-56 shrink-0 p-4 flex flex-col gap-3 overflow-hidden border-r border-[rgba(200,169,110,0.08)]">
         {/* Header */}
         <div data-onboard="senti-header" className="flex items-center gap-2 mb-1">
-          <Bot size={16} className="text-positive" />
-          <span className="font-mono text-[13px] font-bold uppercase tracking-[0.15em] text-text-muted">
+          <Bot size={16} className="text-[#c8a96e]" />
+          <span className="font-mono text-[13px] font-bold uppercase tracking-[0.15em] text-[#c8a96e]">
             Senti
           </span>
           <div className="ml-auto flex items-center gap-1.5">
             <div
               className={`h-1.5 w-1.5 rounded-full ${
-                isBusy ? 'bg-warning animate-pulse' : 'bg-stable'
+                isBusy ? 'bg-warning animate-pulse' : 'bg-[#c8a96e]'
               }`}
             />
             <span className="font-mono text-[10px] text-text-dim">
@@ -297,7 +297,7 @@ export default function SentiPage() {
         {/* New conversation button — top of sidebar */}
         <button
           onClick={resetConversation}
-          className="flex items-center gap-2 rounded-xl px-3 py-2.5 font-mono text-[11px] text-text-muted transition-all hover:text-positive bg-white/[0.04] backdrop-blur-xl border border-white/[0.08]"
+          className="flex items-center gap-2 rounded-xl px-3 py-2.5 font-mono text-[11px] text-text-muted transition-all hover:text-[#c8a96e] bg-[rgba(200,169,110,0.03)] backdrop-blur-xl border border-[rgba(200,169,110,0.08)]"
         >
           <RotateCcw size={12} />
           New conversation
@@ -330,8 +330,8 @@ export default function SentiPage() {
                   onClick={() => loadConversation(convo)}
                   className={`w-full text-left rounded-lg px-3 py-2 transition-all ${
                     activeConvoId === convo.id
-                      ? 'bg-white/[0.04] ring-1 ring-positive/20'
-                      : 'hover:bg-white/[0.02]'
+                      ? 'bg-[rgba(200,169,110,0.04)] ring-1 ring-[rgba(200,169,110,0.15)]'
+                      : 'hover:bg-[rgba(200,169,110,0.02)]'
                   }`}
                 >
                   <div className="font-mono text-[11px] text-text-muted truncate">
@@ -378,10 +378,11 @@ export default function SentiPage() {
                         className="flex h-7 w-7 items-center justify-center rounded-full"
                         style={{
                           background:
-                            'radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(200, 210, 225, 0.6))',
+                            'radial-gradient(circle at 30% 30%, rgba(200,169,110,0.35), rgba(200,169,110,0.15))',
+                          border: '1px solid rgba(200,169,110,0.2)',
                         }}
                       >
-                        <Bot size={14} className="text-void" />
+                        <Bot size={14} className="text-[#c8a96e]" />
                       </div>
                     </div>
                   )}
@@ -390,12 +391,12 @@ export default function SentiPage() {
                   {isAssistant && text === '' && isBusy ? (
                     <div
                       className="rounded-xl px-4 py-3"
-                      style={{ background: 'rgba(255,255,255,0.03)' }}
+                      style={{ background: 'rgba(200,169,110,0.03)' }}
                     >
                       <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-1.5 rounded-full bg-positive animate-pulse" style={{ animationDelay: '0ms' }} />
-                        <div className="h-1.5 w-1.5 rounded-full bg-positive animate-pulse" style={{ animationDelay: '200ms' }} />
-                        <div className="h-1.5 w-1.5 rounded-full bg-positive animate-pulse" style={{ animationDelay: '400ms' }} />
+                        <div className="h-1.5 w-1.5 rounded-full bg-[#c8a96e] animate-pulse" style={{ animationDelay: '0ms' }} />
+                        <div className="h-1.5 w-1.5 rounded-full bg-[#c8a96e] animate-pulse" style={{ animationDelay: '200ms' }} />
+                        <div className="h-1.5 w-1.5 rounded-full bg-[#c8a96e] animate-pulse" style={{ animationDelay: '400ms' }} />
                       </div>
                     </div>
                   ) : (
@@ -405,8 +406,8 @@ export default function SentiPage() {
                       }`}
                       style={{
                         background: isAssistant
-                          ? 'rgba(255,255,255,0.03)'
-                          : 'rgba(99, 102, 241, 0.12)',
+                          ? 'rgba(200,169,110,0.03)'
+                          : 'rgba(200,169,110,0.08)',
                       }}
                     >
                       {text}

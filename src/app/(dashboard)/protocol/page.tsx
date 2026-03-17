@@ -15,19 +15,19 @@ import {
   type RuleParam,
 } from '@/lib/canonicalizeProtocol';
 
-// ── Category icons & colors ─────────────────────────────────
+// ── Category icons & colors — gold editorial palette ────────
 const CATEGORY_META: Record<string, { icon: React.ElementType; color: string }> = {
-  'Risk':             { icon: Shield,  color: 'text-red-400' },
-  'Position Sizing':  { icon: Swords,  color: 'text-amber-400' },
-  'Session Rules':    { icon: Shield,  color: 'text-blue-400' },
-  'Capital':          { icon: Hammer,  color: 'text-emerald-400' },
-  'Constraints':      { icon: AlertCircle, color: 'text-purple-400' },
+  'Risk':             { icon: Shield,  color: 'text-[#c8a96e]' },
+  'Position Sizing':  { icon: Swords,  color: 'text-[#d4ba85]' },
+  'Session Rules':    { icon: Shield,  color: 'text-[#bdb8ae]' },
+  'Capital':          { icon: Hammer,  color: 'text-[#c8a96e]' },
+  'Constraints':      { icon: AlertCircle, color: 'text-[#8a7345]' },
 };
 
 const STATUS_BADGE: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  'COMPLIANT':  { label: 'Compliant',  color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20', icon: CheckCircle2 },
-  'VIOLATED':   { label: 'Violated',   color: 'text-red-400 bg-red-400/10 border-red-400/20',         icon: AlertCircle },
-  'UNCHECKED':  { label: 'Unchecked',  color: 'text-zinc-400 bg-zinc-400/10 border-zinc-400/20',       icon: HelpCircle },
+  'COMPLIANT':  { label: 'Compliant',  color: 'text-[#c8a96e] bg-[rgba(200,169,110,0.08)] border-[rgba(200,169,110,0.15)]', icon: CheckCircle2 },
+  'VIOLATED':   { label: 'Violated',   color: 'text-[#FB923C] bg-[rgba(251,146,60,0.08)] border-[rgba(251,146,60,0.15)]',   icon: AlertCircle },
+  'UNCHECKED':  { label: 'Unchecked',  color: 'text-[#7a766d] bg-[rgba(122,118,109,0.08)] border-[rgba(122,118,109,0.15)]', icon: HelpCircle },
 };
 
 export default function ProtocolPage() {
@@ -257,10 +257,10 @@ export default function ProtocolPage() {
       {/* ── Header ──────────────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight font-[family-name:var(--font-display)] text-stable">
+          <h1 className="text-3xl font-light tracking-tight font-[family-name:var(--font-display)] text-[#ede9e1]">
             Protocol
           </h1>
-          <p className="text-sm text-text-muted mt-1">
+          <p className="text-sm text-text-muted mt-1 font-[family-name:var(--font-sans)]">
             Upload your trading protocol. Rules are extracted, enforced, and scored automatically.
           </p>
         </div>
@@ -269,7 +269,7 @@ export default function ProtocolPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] text-stable hover:text-text-secondary transition-all text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(200,169,110,0.06)] backdrop-blur-xl border border-[rgba(200,169,110,0.15)] text-[#c8a96e] hover:bg-[rgba(200,169,110,0.1)] transition-all text-sm font-mono font-medium uppercase tracking-[0.1em]"
             >
               {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
               Save Protocol
@@ -280,7 +280,7 @@ export default function ProtocolPage() {
 
       {/* ── Save message ────────────────────────────────────── */}
       {saveMsg && (
-        <div className={`text-sm px-4 py-2 rounded-lg ${saveMsg.includes('failed') ? 'bg-red-400/10 text-red-400' : 'bg-emerald-400/10 text-emerald-400'}`}>
+        <div className={`text-sm font-mono px-4 py-2 rounded-lg ${saveMsg.includes('failed') ? 'bg-[rgba(251,146,60,0.08)] text-[#FB923C]' : 'bg-[rgba(200,169,110,0.08)] text-[#c8a96e]'}`}>
           {saveMsg}
         </div>
       )}
@@ -294,8 +294,8 @@ export default function ProtocolPage() {
           onClick={() => fileInputRef.current?.click()}
           className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-200 ${
             dragOver
-              ? 'border-stable bg-stable/5'
-              : 'border-white/[0.08] hover:border-text-muted'
+              ? 'border-[#c8a96e] bg-[rgba(200,169,110,0.04)]'
+              : 'border-[rgba(200,169,110,0.1)] hover:border-[rgba(200,169,110,0.2)]'
           }`}
         >
           <input
@@ -310,7 +310,7 @@ export default function ProtocolPage() {
           />
           {uploading ? (
             <div className="flex flex-col items-center gap-3">
-              <Loader2 size={32} className="animate-spin text-stable" />
+              <Loader2 size={32} className="animate-spin text-[#c8a96e]" />
               <p className="text-sm text-text-muted">Extracting rules from PDF...</p>
             </div>
           ) : (
@@ -332,11 +332,11 @@ export default function ProtocolPage() {
         <GlowPanel className="p-5">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-stable/10">
-                <FileText size={20} className="text-stable" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[rgba(200,169,110,0.08)]">
+                <FileText size={20} className="text-[#c8a96e]" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-stable font-[family-name:var(--font-display)]">
+                <h2 className="text-lg font-light text-[#c8a96e] font-[family-name:var(--font-display)]">
                   {protocol.name}
                 </h2>
                 <p className="text-xs text-text-muted mt-0.5">
@@ -384,7 +384,7 @@ export default function ProtocolPage() {
             {/* Category header */}
             <button
               onClick={() => toggleCategory(category)}
-              className="w-full flex items-center justify-between px-5 py-3 hover:bg-white/[0.02] transition-colors"
+              className="w-full flex items-center justify-between px-5 py-3 hover:bg-[rgba(200,169,110,0.02)] transition-colors"
             >
               <div className="flex items-center gap-2.5">
                 <CatIcon size={16} className={meta.color} />
@@ -398,7 +398,7 @@ export default function ProtocolPage() {
 
             {/* Rules */}
             {isExpanded && (
-              <div className="border-t border-white/[0.08]">
+              <div className="border-t border-[rgba(200,169,110,0.06)]">
                 {catRules.map((rule) => {
                   const status = (rule as ProtocolRule & { status?: string }).status;
                   const badge = status ? STATUS_BADGE[status] : null;
@@ -407,12 +407,12 @@ export default function ProtocolPage() {
                   return (
                     <div
                       key={rule.id}
-                      className={`px-5 py-4 border-b border-white/[0.08] last:border-b-0 transition-opacity ${!rule.enabled ? 'opacity-40' : ''}`}
+                      className={`px-5 py-4 border-b border-[rgba(200,169,110,0.06)] last:border-b-0 transition-opacity ${!rule.enabled ? 'opacity-40' : ''}`}
                     >
                       {/* Rule header row */}
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-stable">{rule.name}</span>
+                          <span className="text-sm font-medium text-[#c8a96e]">{rule.name}</span>
                           {badge && BadgeIcon && (
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${badge.color}`}>
                               <BadgeIcon size={10} />
@@ -422,8 +422,8 @@ export default function ProtocolPage() {
                         </div>
                         <button onClick={() => toggleRule(rule.id)} className="transition-colors">
                           {rule.enabled
-                            ? <ToggleRight size={22} className="text-emerald-400" />
-                            : <ToggleLeft size={22} className="text-zinc-600" />
+                            ? <ToggleRight size={22} className="text-[#c8a96e]" />
+                            : <ToggleLeft size={22} className="text-[#4a473f]" />
                           }
                         </button>
                       </div>
@@ -442,7 +442,7 @@ export default function ProtocolPage() {
                               {param.type === 'boolean' ? (
                                 <button
                                   onClick={() => updateParam(rule.id, param.key, !param.value)}
-                                  className={`text-[10px] px-2 py-0.5 rounded-md border ${param.value ? 'text-emerald-400 border-emerald-400/20 bg-emerald-400/5' : 'text-zinc-500 border-zinc-600 bg-zinc-800/50'}`}
+                                  className={`text-[10px] px-2 py-0.5 rounded-md border font-mono ${param.value ? 'text-[#c8a96e] border-[rgba(200,169,110,0.2)] bg-[rgba(200,169,110,0.06)]' : 'text-[#7a766d] border-[rgba(200,169,110,0.08)] bg-[rgba(200,169,110,0.02)]'}`}
                                 >
                                   {param.value ? 'ON' : 'OFF'}
                                 </button>
@@ -455,7 +455,7 @@ export default function ProtocolPage() {
                                     max={param.max}
                                     step={param.type === 'percent' ? 1 : param.key.includes('_r') ? 0.1 : 1}
                                     onChange={(e) => updateParam(rule.id, param.key, parseFloat(e.target.value) || 0)}
-                                    className="w-16 bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-md px-2 py-0.5 text-xs text-stable text-center focus:outline-none focus:border-stable/50"
+                                    className="w-16 bg-[rgba(200,169,110,0.03)] backdrop-blur-xl border border-[rgba(200,169,110,0.1)] rounded-md px-2 py-0.5 text-xs text-[#c8a96e] text-center font-mono focus:outline-none focus:border-[rgba(200,169,110,0.3)]"
                                   />
                                   {param.unit && <span className="text-[10px] text-text-muted">{param.unit}</span>}
                                 </div>
@@ -464,7 +464,7 @@ export default function ProtocolPage() {
                                   type="text"
                                   value={param.value as string}
                                   onChange={(e) => updateParam(rule.id, param.key, e.target.value)}
-                                  className="w-24 bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-md px-2 py-0.5 text-xs text-stable focus:outline-none focus:border-stable/50"
+                                  className="w-24 bg-[rgba(200,169,110,0.03)] backdrop-blur-xl border border-[rgba(200,169,110,0.1)] rounded-md px-2 py-0.5 text-xs text-[#c8a96e] font-mono focus:outline-none focus:border-[rgba(200,169,110,0.3)]"
                                 />
                               )}
                             </div>
