@@ -17,6 +17,7 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react';
+import { Particles } from '@/components/ui/particles';
 import { MenuContainer, MenuItem } from '@/components/ui/fluid-menu';
 import LiveEye from '@/components/live-eye';
 import { createClient } from '@/lib/supabase/client';
@@ -169,6 +170,16 @@ function DashboardShell({
     <div className="relative h-screen overflow-hidden bg-[#1a3a2a]">
       {/* Subtle depth gradient over the solid green base */}
       <div className="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(34,60,45,0.6)_0%,transparent_70%)]" />
+
+      {/* Silver particles floating over the green */}
+      <Particles
+        className="absolute inset-0 z-[1]"
+        quantity={100}
+        ease={80}
+        color="#c0c0c0"
+        size={0.4}
+        staticity={50}
+      />
 
       {/* Fluid nav — fixed top-right */}
       <div className="fixed top-5 right-5 z-50">
