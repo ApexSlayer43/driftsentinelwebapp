@@ -135,7 +135,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
           <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-1">
             Impact
           </div>
-          <div className="glass-inset rounded-xl px-3.5 py-2.5 font-mono text-[13px] text-text-secondary leading-relaxed">
+          <div className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-xl px-3.5 py-2.5 font-mono text-[13px] text-text-secondary leading-relaxed">
             {violation.points} raw pts × {modeWeight}x mode weight = <span className="font-bold text-warning">{weightedPoints} weighted points</span> deducted from DSI.
           </div>
         </div>
@@ -193,7 +193,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
       {/* ═══ FILL TIMELINE — trade-level evidence ═══ */}
       {loading ? (
         <div className="flex justify-center py-6">
-          <div className="h-4 w-4 animate-pulse rounded-full bg-raised" />
+          <div className="h-4 w-4 animate-pulse rounded-full bg-white/[0.06]" />
         </div>
       ) : fills.length > 0 ? (
         <div>
@@ -210,7 +210,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
               return (
                 <div
                   key={fill.event_id}
-                  className="flex items-center gap-3 glass-inset rounded-xl px-3 py-2"
+                  className="flex items-center gap-3 bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-xl px-3 py-2"
                 >
                   <span
                     className="rounded px-1.5 py-0.5 font-mono text-[11px] font-bold"
@@ -244,7 +244,7 @@ export function ViolationDetailPanel({ violation, onBack }: ViolationDetailProps
         </button>
         <button
           onClick={onBack}
-          className="rounded-xl glass-inset px-5 py-2.5 font-mono text-[12px] font-semibold text-text-secondary transition-colors hover:text-text-primary"
+          className="rounded-xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] px-5 py-2.5 font-mono text-[12px] font-semibold text-text-secondary transition-colors hover:text-text-primary"
         >
           Dismiss
         </button>

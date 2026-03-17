@@ -366,7 +366,7 @@ export default function SettingsPage() {
         <GlowPanel className="">
           <Link
             href="/protocol"
-            className="group flex items-center justify-between rounded-xl p-6 transition-colors hover:bg-raised/30"
+            className="group flex items-center justify-between rounded-xl p-6 transition-colors hover:bg-white/[0.06]"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-primary/10">
@@ -397,7 +397,7 @@ export default function SettingsPage() {
             <select
               value={timezone}
               onChange={(e) => setTimezone(e.target.value)}
-              className="flex-1 rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary bg-transparent"
+              className="flex-1 rounded-lg border border-border-subtle bg-white/[0.04] backdrop-blur-xl px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary bg-transparent"
             >
               <option value="">Select timezone...</option>
               {COMMON_TIMEZONES.map(tz => (
@@ -434,7 +434,7 @@ export default function SettingsPage() {
             onChange={(e) => setProfileGoal(e.target.value)}
             placeholder="e.g., Build a funded account to replace my disability income"
             rows={2}
-            className="mt-4 w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary bg-transparent resize-none placeholder:text-text-dim"
+            className="mt-4 w-full rounded-lg border border-border-subtle bg-white/[0.04] backdrop-blur-xl px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary bg-transparent resize-none placeholder:text-text-dim"
           />
           {profileGoal && (
             <div className="mt-2 font-mono text-[10px] text-text-dim uppercase tracking-widest">
@@ -458,7 +458,7 @@ export default function SettingsPage() {
                 min={1}
                 value={maxContracts}
                 onChange={(e) => setMaxContracts(parseInt(e.target.value) || 1)}
-                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
+                className="w-full rounded-lg border border-border-subtle bg-white/[0.04] backdrop-blur-xl px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
               />
             </div>
             <div>
@@ -470,7 +470,7 @@ export default function SettingsPage() {
                 min={1}
                 value={maxFillsPerDay}
                 onChange={(e) => setMaxFillsPerDay(parseInt(e.target.value) || 20)}
-                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
+                className="w-full rounded-lg border border-border-subtle bg-white/[0.04] backdrop-blur-xl px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
               />
             </div>
           </div>
@@ -511,7 +511,7 @@ export default function SettingsPage() {
                   className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition-colors ${
                     alreadyAdded
                       ? 'bg-accent-primary/10 text-positive/50 cursor-default'
-                      : 'bg-elevated text-text-secondary hover:bg-accent-primary/15 hover:text-positive'
+                      : 'bg-white/[0.04] text-text-secondary hover:bg-accent-primary/15 hover:text-positive'
                   }`}
                 >
                   {preset.name}
@@ -525,7 +525,7 @@ export default function SettingsPage() {
               <p className="font-mono text-xs text-text-muted">No sessions configured. Add a preset or create a custom session.</p>
             ) : (
               sessions.map((session, i) => (
-                <div key={i} className="rounded-lg glass-raised p-3 space-y-2">
+                <div key={i} className="rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3 space-y-2">
                   {/* Row 1: Name + Market Timezone + Delete */}
                   <div className="flex items-center gap-3">
                     <input
@@ -533,12 +533,12 @@ export default function SettingsPage() {
                       placeholder="Session name"
                       value={session.name}
                       onChange={(e) => updateSession(i, 'name', e.target.value)}
-                      className="w-36 rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
+                      className="w-36 rounded border border-border-subtle bg-white/[0.04] backdrop-blur-xl px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
                     />
                     <select
                       value={session.market_tz || ''}
                       onChange={(e) => updateSession(i, 'market_tz', e.target.value)}
-                      className="flex-1 rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[11px] text-text-primary outline-none focus:border-accent-primary bg-transparent"
+                      className="flex-1 rounded border border-border-subtle bg-white/[0.04] backdrop-blur-xl px-2 py-1 font-mono text-[11px] text-text-primary outline-none focus:border-accent-primary bg-transparent"
                     >
                       <option value="">Market timezone...</option>
                       {MARKET_TIMEZONES.map(mtz => (
@@ -557,14 +557,14 @@ export default function SettingsPage() {
                         type="time"
                         value={session.start_utc}
                         onChange={(e) => updateSession(i, 'start_utc', e.target.value)}
-                        className="rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
+                        className="rounded border border-border-subtle bg-white/[0.04] backdrop-blur-xl px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
                       />
                       <span className="font-mono text-[12px] text-text-muted">to</span>
                       <input
                         type="time"
                         value={session.end_utc}
                         onChange={(e) => updateSession(i, 'end_utc', e.target.value)}
-                        className="rounded border border-border-subtle glass-input px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
+                        className="rounded border border-border-subtle bg-white/[0.04] backdrop-blur-xl px-2 py-1 font-mono text-[12px] text-text-primary outline-none focus:border-accent-primary"
                       />
                     </div>
                     <div className="flex-1 flex gap-1">
@@ -580,7 +580,7 @@ export default function SettingsPage() {
                           className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-bold transition-colors ${
                             session.days.includes(day)
                               ? 'bg-accent-primary/20 text-positive'
-                              : 'bg-elevated text-text-dim'
+                              : 'bg-white/[0.06] text-text-dim'
                           }`}
                         >
                           {day}
@@ -609,7 +609,7 @@ export default function SettingsPage() {
                 min={10}
                 value={baselineWindowFills}
                 onChange={(e) => setBaselineWindowFills(parseInt(e.target.value) || 50)}
-                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
+                className="w-full rounded-lg border border-border-subtle bg-white/[0.04] backdrop-blur-xl px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
               />
             </div>
             <div>
@@ -621,7 +621,7 @@ export default function SettingsPage() {
                 min={5}
                 value={scoringWindowFills}
                 onChange={(e) => setScoringWindowFills(parseInt(e.target.value) || 20)}
-                className="w-full rounded-lg border border-border-subtle glass-input px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
+                className="w-full rounded-lg border border-border-subtle bg-white/[0.04] backdrop-blur-xl px-3 py-2 font-mono text-sm text-text-primary outline-none focus:border-accent-primary"
               />
             </div>
           </div>
@@ -636,14 +636,14 @@ export default function SettingsPage() {
 
           <div className="mt-4 space-y-2">
             {extStatus === 'loading' && (
-              <div className="flex items-center gap-2 rounded-lg glass-raised p-3">
+              <div className="flex items-center gap-2 rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3">
                 <Loader2 size={14} className="animate-spin text-text-muted" />
                 <span className="font-mono text-[12px] text-text-muted">Detecting extension...</span>
               </div>
             )}
 
             {extStatus === 'not_installed' && (
-              <div className="flex items-center justify-between rounded-lg glass-raised p-3">
+              <div className="flex items-center justify-between rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-text-dim/10">
                     <Puzzle size={16} className="text-text-dim" />
@@ -657,7 +657,7 @@ export default function SettingsPage() {
                   href="https://github.com/ApexSlayer43/drift-sentinel-extension"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 rounded-lg bg-elevated px-3 py-1.5 font-mono text-[12px] font-semibold text-text-secondary hover:text-positive transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] px-3 py-1.5 font-mono text-[12px] font-semibold text-text-secondary hover:text-positive transition-colors"
                 >
                   <ExternalLink size={10} /> Install Extension
                 </a>
@@ -665,7 +665,7 @@ export default function SettingsPage() {
             )}
 
             {(extStatus === 'detected' || extStatus === 'connecting') && (
-              <div className="flex items-center justify-between rounded-lg glass-raised p-3">
+              <div className="flex items-center justify-between rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10">
                     <Unplug size={16} className="text-amber-400" />
@@ -690,7 +690,7 @@ export default function SettingsPage() {
             )}
 
             {extStatus === 'connected' && (
-              <div className="flex items-center justify-between rounded-lg glass-raised p-3">
+              <div className="flex items-center justify-between rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-primary/10">
                     <Plug size={16} className="text-positive" />

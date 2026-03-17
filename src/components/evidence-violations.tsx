@@ -129,7 +129,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
             </button>
 
             {isExpanded && (
-              <div className="mt-2 rounded-xl bg-white/[0.02] border border-white/[0.04] p-3 space-y-2">
+              <div className="mt-2 rounded-xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3 space-y-2">
                 <div className="font-mono text-[11px]">
                   <span className="text-text-muted">Window: </span>
                   <span className="text-text-secondary">{windowStart} – {windowEnd}</span>

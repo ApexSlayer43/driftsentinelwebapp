@@ -185,7 +185,7 @@ export function SessionDrillDown({ session, onClose }: SessionDrillDownProps) {
 
         {/* ── RIGHT PANEL: Event Timeline ── */}
         <div className="p-6 overflow-auto max-h-[600px] lg:max-h-none">
-          <h4 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-4 sticky top-0 bg-[rgba(13,15,21,0.95)] py-1 -mt-1 z-10">
+          <h4 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-muted mb-4 sticky top-0 bg-white/[0.06] backdrop-blur-2xl py-1 -mt-1 z-10">
             Event Timeline
           </h4>
 

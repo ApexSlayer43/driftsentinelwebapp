@@ -167,14 +167,24 @@ function DashboardShell({
   const { isActive, promptSequence, activationId, deactivate } = useCooldown();
 
   return (
-    <div className="relative h-screen overflow-hidden">
+    <div className="relative h-screen overflow-hidden bg-[#070a0f]">
+      {/* Ambient teal/green atmospheric glow — the glassmorphism backdrop */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Primary teal glow — top center, large and diffuse */}
+        <div className="absolute -top-[30%] left-1/2 -translate-x-1/2 w-[140%] h-[70%] rounded-full bg-[radial-gradient(ellipse,rgba(34,211,238,0.08)_0%,rgba(16,185,129,0.04)_40%,transparent_70%)]" />
+        {/* Secondary green glow — bottom-left accent */}
+        <div className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-[radial-gradient(ellipse,rgba(16,185,129,0.06)_0%,transparent_60%)]" />
+        {/* Tertiary warm accent — subtle bottom-right for depth */}
+        <div className="absolute -bottom-[15%] -right-[5%] w-[40%] h-[40%] rounded-full bg-[radial-gradient(ellipse,rgba(34,211,238,0.03)_0%,transparent_60%)]" />
+      </div>
+
       <Particles
-        className="absolute inset-0 z-0"
-        quantity={120}
+        className="absolute inset-0 z-[1]"
+        quantity={80}
         ease={80}
         color="#ffffff"
-        size={0.4}
-        staticity={50}
+        size={0.3}
+        staticity={60}
       />
 
       {/* Fluid nav — fixed top-right */}
@@ -217,7 +227,7 @@ function DashboardShell({
       </div>
 
       {/* Main content area */}
-      <div className="flex flex-col h-full overflow-hidden relative z-10">
+      <div className="flex flex-col h-full overflow-hidden relative z-10 bg-transparent">
         {/* Top brand bar with live eye + cooldown trigger */}
         <div className="flex items-center justify-center py-2 gap-4">
           <LiveEye size={40} />

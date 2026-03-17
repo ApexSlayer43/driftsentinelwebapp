@@ -75,7 +75,7 @@ export function SessionHeatmap({ sessions, selectedId, onSelect, month, onMonthC
   }
 
   return (
-    <div className="rounded-xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] p-4">
+    <div className="rounded-xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-4">
       {/* Month navigation — compact */}
       <div className="flex items-center justify-between mb-3">
         <button

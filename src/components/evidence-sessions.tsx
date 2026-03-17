@@ -66,7 +66,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
   if (loading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="h-4 w-4 animate-pulse rounded-full bg-raised" />
+        <div className="h-4 w-4 animate-pulse rounded-full bg-white/[0.06]" />
       </div>
     );
   }

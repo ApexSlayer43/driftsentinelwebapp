@@ -42,7 +42,7 @@ export function Sidebar({ bssScore, bssTier, className = '' }: SidebarProps) {
 
   return (
     <aside
-      className={`flex h-screen w-[210px] shrink-0 flex-col border-r border-border-dim bg-surface ${className}`}
+      className={`flex h-screen w-[210px] shrink-0 flex-col border-r border-white/[0.08] bg-white/[0.04] backdrop-blur-xl ${className}`}
     >
       {/* Logo */}
       <div className="px-5 pt-5 pb-6">
@@ -123,7 +123,7 @@ export function Sidebar({ bssScore, bssTier, className = '' }: SidebarProps) {
       )}
 
       {/* Bottom: Mini BSS */}
-      <div className="border-t border-border-dim px-5 py-4">
+      <div className="border-t border-white/[0.08] px-5 py-4">
         <div className="flex items-center gap-3">
           <div
             className="flex h-9 w-9 items-center justify-center rounded-full border font-mono text-sm font-bold"

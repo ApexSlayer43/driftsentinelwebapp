@@ -153,7 +153,7 @@ export default function HistoricalPage() {
       {/* ═══ DATA TABLE (left) ═══ */}
       <div className={`flex flex-col overflow-hidden ${selectedViolation ? 'w-[60%]' : 'w-full'} transition-all`}>
         {/* Header */}
-        <div className="px-5 pt-6 pb-4 border-b border-border-subtle flex items-end justify-between">
+        <div className="px-5 pt-6 pb-4 border-b border-white/[0.08] flex items-end justify-between">
           <div>
             <h1 className="font-mono text-[13px] font-semibold uppercase tracking-[0.15em] text-text-secondary">
               Historical
@@ -167,7 +167,7 @@ export default function HistoricalPage() {
             <button
               onClick={() => setFilterSide(filterSide === 'BUY' ? null : 'BUY')}
               className={`rounded-lg px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors ${
-                filterSide === 'BUY' ? 'bg-positive/10 text-positive' : 'glass-inset text-text-muted hover:text-text-secondary'
+                filterSide === 'BUY' ? 'bg-positive/10 text-positive' : 'bg-white/[0.04] border border-white/[0.08] text-text-muted hover:text-text-secondary'
               }`}
             >
               Buy
@@ -175,7 +175,7 @@ export default function HistoricalPage() {
             <button
               onClick={() => setFilterSide(filterSide === 'SELL' ? null : 'SELL')}
               className={`rounded-lg px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors ${
-                filterSide === 'SELL' ? 'bg-negative/10 text-negative' : 'glass-inset text-text-muted hover:text-text-secondary'
+                filterSide === 'SELL' ? 'bg-negative/10 text-negative' : 'bg-white/[0.04] border border-white/[0.08] text-text-muted hover:text-text-secondary'
               }`}
             >
               Sell
@@ -183,7 +183,7 @@ export default function HistoricalPage() {
             <button
               onClick={() => { setFilterViolations(!filterViolations); setPage(0); }}
               className={`flex items-center gap-1 rounded-lg px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors ${
-                filterViolations ? 'bg-warning/10 text-warning' : 'glass-inset text-text-muted hover:text-text-secondary'
+                filterViolations ? 'bg-warning/10 text-warning' : 'bg-white/[0.04] border border-white/[0.08] text-text-muted hover:text-text-secondary'
               }`}
             >
               <Zap size={10} />
@@ -196,7 +196,7 @@ export default function HistoricalPage() {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="h-5 w-5 animate-pulse rounded-full bg-raised" />
+              <div className="h-5 w-5 animate-pulse rounded-full bg-white/[0.06]" />
             </div>
           ) : fills.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20">
@@ -207,7 +207,7 @@ export default function HistoricalPage() {
             </div>
           ) : (
             <table className="w-full">
-              <thead className="sticky top-0 bg-surface z-10 border-b border-border-subtle">
+              <thead className="sticky top-0 bg-white/[0.04] backdrop-blur-xl z-10 border-b border-white/[0.08]">
                 <tr>
                   <th className="px-3 py-2.5 text-left"><SortHeader label="Time" sortKeyName="timestamp_utc" /></th>
                   <th className="px-3 py-2.5 text-left"><SortHeader label="Instrument" sortKeyName="contract" /></th>
@@ -234,7 +234,7 @@ export default function HistoricalPage() {
                   return (
                     <tr
                       key={fill.event_id}
-                      className={`border-b border-border-dim transition-colors hover:bg-raised/50 ${
+                      className={`border-b border-white/[0.08] transition-colors hover:bg-white/[0.04] ${
                         violation ? 'cursor-pointer' : ''
                       } ${isSelected ? 'bg-accent-muted/20' : ''}`}
                       onClick={() => violation && setSelectedViolation(violation)}
@@ -289,7 +289,7 @@ export default function HistoricalPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-border-subtle px-5 py-3">
+            <div className="flex items-center justify-between border-t border-white/[0.08] px-5 py-3">
               <span className="font-mono text-[11px] text-text-muted">
                 Page {page + 1} of {totalPages} · {sorted.length} fills
               </span>
@@ -297,14 +297,14 @@ export default function HistoricalPage() {
                 <button
                   onClick={() => setPage(p => Math.max(0, p - 1))}
                   disabled={page === 0}
-                  className="rounded-lg glass-inset px-3 py-1 font-mono text-[11px] text-text-secondary disabled:opacity-30"
+                  className="rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-1 font-mono text-[11px] text-text-secondary disabled:opacity-30"
                 >
                   Prev
                 </button>
                 <button
                   onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                   disabled={page >= totalPages - 1}
-                  className="rounded-lg glass-inset px-3 py-1 font-mono text-[11px] text-text-secondary disabled:opacity-30"
+                  className="rounded-lg bg-white/[0.04] border border-white/[0.08] px-3 py-1 font-mono text-[11px] text-text-secondary disabled:opacity-30"
                 >
                   Next
                 </button>
@@ -316,7 +316,7 @@ export default function HistoricalPage() {
 
       {/* ═══ DETAIL PANEL (right) — shows when a flagged fill is selected ═══ */}
       {selectedViolation && (
-        <div className="w-[40%] border-l border-border-subtle overflow-y-auto p-6">
+        <div className="w-[40%] border-l border-white/[0.08] overflow-y-auto p-6">
           <ViolationDetailPanel violation={selectedViolation} onBack={() => setSelectedViolation(null)} />
         </div>
       )}

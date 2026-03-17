@@ -196,7 +196,7 @@ export function WeeklyWrap() {
 
         {/* Intention list — shown when expanded */}
         {expanded && data.intentions.entries.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-white/[0.06]">
+          <div className="mt-4 pt-4 border-t border-white/[0.1]">
             <span className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-text-dim mb-2 block">
               This week&apos;s intentions
             </span>

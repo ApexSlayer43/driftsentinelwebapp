@@ -121,7 +121,7 @@ export default function SessionsPage() {
             Your behavioral black box — every session, every event, every pattern
           </p>
         </div>
-        <div className="flex gap-1 rounded-full bg-white/[0.03] p-1 border border-white/[0.04]">
+        <div className="flex gap-1 rounded-full bg-white/[0.04] p-1 border border-white/[0.08] backdrop-blur-xl">
           {RANGES.map((r) => (
             <button
               key={r}
@@ -190,7 +190,7 @@ export default function SessionsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4">
           {/* Heatmap */}
           <div data-onboard="session-heatmap" className="relative">
-            <div className="relative rounded-[1.25rem] border-[0.75px] border-border-subtle p-2 md:rounded-[1.5rem] md:p-3">
+            <div className="relative rounded-[1.25rem] border-[0.75px] border-white/[0.08] p-2 md:rounded-[1.5rem] md:p-3">
               <GlowingEffect
                 spread={40}
                 glow={true}
@@ -199,7 +199,7 @@ export default function SessionsPage() {
                 inactiveZone={0.01}
                 borderWidth={3}
               />
-              <div className="relative overflow-hidden rounded-xl border-[0.75px] border-border-dim">
+              <div className="relative overflow-hidden rounded-xl border-[0.75px] border-white/[0.08]">
                 <SessionHeatmap
                   sessions={sessions}
                   selectedId={selectedSession?.session_id ?? null}
@@ -213,7 +213,7 @@ export default function SessionsPage() {
 
           {/* Upload Cadence */}
           <div className="relative">
-            <div className="relative rounded-[1.25rem] border-[0.75px] border-border-subtle p-2 md:rounded-[1.5rem] md:p-3">
+            <div className="relative rounded-[1.25rem] border-[0.75px] border-white/[0.08] p-2 md:rounded-[1.5rem] md:p-3">
               <GlowingEffect
                 spread={40}
                 glow={true}
@@ -222,7 +222,7 @@ export default function SessionsPage() {
                 inactiveZone={0.01}
                 borderWidth={3}
               />
-              <div className="relative overflow-hidden rounded-xl border-[0.75px] border-border-dim">
+              <div className="relative overflow-hidden rounded-xl border-[0.75px] border-white/[0.08]">
                 <UploadCadenceBar uploads={uploads} />
               </div>
             </div>
@@ -262,7 +262,7 @@ function StatCard({
         inactiveZone={0.01}
         borderWidth={2}
       />
-      <div className="relative flex flex-col items-center gap-1.5 rounded-xl border-[0.75px] border-white/[0.04] bg-[rgba(13,15,21,0.85)] px-4 py-3.5">
+      <div className="relative flex flex-col items-center gap-1.5 rounded-2xl border-[0.75px] border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 py-3.5">
         <div className="flex items-center gap-1.5">
           <Icon size={10} className="text-white/40" />
           <span className="font-mono text-[7px] font-semibold uppercase tracking-[0.18em] text-text-muted">

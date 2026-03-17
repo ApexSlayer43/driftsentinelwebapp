@@ -27,7 +27,7 @@ export function ViolationRow({ violation }: ViolationRowProps) {
     <div className="group">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-3 rounded-lg glass p-3 transition-colors hover:border-border-active"
+        className="flex w-full items-center gap-3 rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3 transition-colors hover:border-white/[0.12]"
       >
         <DynamicIcon name={modeIcon} size={14} className="shrink-0 text-text-muted" />
         <div className="flex-1 text-left">
@@ -55,7 +55,7 @@ export function ViolationRow({ violation }: ViolationRowProps) {
         )}
       </button>
       {expanded && (
-        <div className="ml-6 mt-1 rounded-lg glass-raised p-3">
+        <div className="ml-6 mt-1 rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3">
           <div className="grid grid-cols-2 gap-2 font-mono text-[12px]">
             <div>
               <span className="text-text-muted">Rule: </span>

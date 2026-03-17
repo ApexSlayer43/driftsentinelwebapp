@@ -275,7 +275,7 @@ export default function SentiPage() {
   return (
     <div className="flex h-full max-h-[calc(100vh-60px)]">
       {/* Left sidebar — Chat History */}
-      <div className="w-56 shrink-0 p-4 flex flex-col gap-3 overflow-hidden border-r border-white/[0.04]">
+      <div className="w-56 shrink-0 p-4 flex flex-col gap-3 overflow-hidden border-r border-white/[0.08]">
         {/* Header */}
         <div data-onboard="senti-header" className="flex items-center gap-2 mb-1">
           <Bot size={16} className="text-positive" />
@@ -297,7 +297,7 @@ export default function SentiPage() {
         {/* New conversation button — top of sidebar */}
         <button
           onClick={resetConversation}
-          className="flex items-center gap-2 rounded-xl px-3 py-2.5 font-mono text-[11px] text-text-muted transition-all hover:text-positive bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04]"
+          className="flex items-center gap-2 rounded-xl px-3 py-2.5 font-mono text-[11px] text-text-muted transition-all hover:text-positive bg-white/[0.04] backdrop-blur-xl border border-white/[0.08]"
         >
           <RotateCcw size={12} />
           New conversation

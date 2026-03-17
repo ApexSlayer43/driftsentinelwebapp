@@ -129,7 +129,7 @@ export default function IngestPage() {
           </div>
           <button
             onClick={() => setShowStrategyDropdown(!showStrategyDropdown)}
-            className="flex items-center gap-2 rounded-lg border border-border-subtle bg-void px-3 py-2 font-mono text-[12px] text-text-secondary hover:border-border-active transition-colors min-w-[200px]"
+            className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-3 py-2 font-mono text-[12px] text-text-secondary hover:border-white/[0.12] transition-colors min-w-[200px]"
           >
             <span className="flex-1 text-left">
               {strategies.find((s) => s.strategy_id === selectedStrategyId)?.tag ?? 'Default'}
@@ -138,7 +138,7 @@ export default function IngestPage() {
           </button>
 
           {showStrategyDropdown && (
-            <div className="absolute top-full left-0 mt-1 z-50 min-w-[220px] rounded-lg border border-border-subtle bg-[rgba(13,15,21,0.95)] backdrop-blur-xl shadow-xl">
+            <div className="absolute top-full left-0 mt-1 z-50 min-w-[220px] rounded-lg border border-white/[0.1] bg-white/[0.06] backdrop-blur-2xl shadow-xl">
               {strategies.map((s) => (
                 <button
                   key={s.strategy_id}
@@ -156,7 +156,7 @@ export default function IngestPage() {
                   )}
                 </button>
               ))}
-              <div className="border-t border-border-dim px-3 py-2">
+              <div className="border-t border-white/[0.08] px-3 py-2">
                 {creatingStrategy ? (
                   <div className="flex gap-1.5">
                     <input
@@ -265,7 +265,7 @@ export default function IngestPage() {
             <StatCell label="Contracts" value={csvResult.summary.contracts.join(', ')} />
           </div>
 
-          <div className="border-t border-border-dim pt-3 mt-3">
+          <div className="border-t border-white/[0.08] pt-3 mt-3">
             <p className="font-mono text-[10px] uppercase tracking-wider text-text-muted mb-2">Pipeline Result</p>
             <div className="grid grid-cols-3 gap-4">
               <div>
@@ -298,7 +298,7 @@ export default function IngestPage() {
           Recent Uploads
         </h3>
         {recentRuns.length === 0 ? (
-          <div className="mt-3 rounded-xl glass p-6 text-center">
+          <div className="mt-3 rounded-xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-6 text-center">
             <Copy size={20} className="mx-auto text-text-dim" />
             <p className="mt-2 font-mono text-xs text-text-muted">No uploads yet</p>
           </div>
@@ -306,7 +306,7 @@ export default function IngestPage() {
           <GlowPanel className="mt-3 overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-border-dim glass-raised">
+                <tr className="border-b border-white/[0.08] bg-white/[0.04] backdrop-blur-xl">
                   <th className="px-4 py-2 text-left font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-dim">File</th>
                   <th className="px-4 py-2 text-left font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-dim">Date</th>
                   <th className="px-4 py-2 text-right font-mono text-[12px] font-semibold uppercase tracking-[0.15em] text-text-dim">Accepted</th>
@@ -316,7 +316,7 @@ export default function IngestPage() {
               </thead>
               <tbody>
                 {recentRuns.map((run) => (
-                  <tr key={run.ingest_run_id} className="border-b border-border-dim hover:bg-raised">
+                  <tr key={run.ingest_run_id} className="border-b border-white/[0.08] hover:bg-white/[0.06]">
                     <td className="px-4 py-2.5 font-mono text-[12px] text-text-secondary">{run.file_name}</td>
                     <td className="px-4 py-2.5 font-mono text-[12px] text-text-muted">
                       {new Date(run.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -337,7 +337,7 @@ export default function IngestPage() {
 
 function StatCell({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="rounded-lg border border-border-dim px-3 py-2">
+    <div className="rounded-lg border border-white/[0.08] px-3 py-2">
       <div className="font-mono text-[8px] uppercase tracking-wider text-text-muted">{label}</div>
       <div className="font-mono text-sm font-bold mt-0.5" style={{ color: color ?? '#E8EDF5' }}>{value}</div>
     </div>

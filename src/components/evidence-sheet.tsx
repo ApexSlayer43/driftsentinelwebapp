@@ -41,7 +41,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
 
       {/* Sheet */}
       <div
-        className="absolute bottom-0 left-0 right-0 bg-[rgba(13,15,21,0.95)] backdrop-blur-xl border border-white/[0.06] rounded-t-3xl flex flex-col"
+        className="absolute bottom-0 left-0 right-0 bg-white/[0.06] backdrop-blur-2xl border border-white/[0.1] rounded-t-3xl flex flex-col"
         style={{
           height: '70vh',
           animation: 'sheetSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -69,7 +69,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
         {/* 3-column grid filling the panel */}
         <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-0 overflow-hidden">
           {/* Sessions column */}
-          <div data-onboard="evidence-sessions" className="flex flex-col min-h-0 border-r border-white/[0.04]">
+          <div data-onboard="evidence-sessions" className="flex flex-col min-h-0 border-r border-white/[0.08]">
             <div className="px-4 py-2.5 shrink-0">
               <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
                 Sessions
@@ -81,7 +81,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
           </div>
 
           {/* Violations column */}
-          <div data-onboard="evidence-violations" className="flex flex-col min-h-0 border-r border-white/[0.04]">
+          <div data-onboard="evidence-violations" className="flex flex-col min-h-0 border-r border-white/[0.08]">
             <div className="px-4 py-2.5 shrink-0">
               <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
                 Violations

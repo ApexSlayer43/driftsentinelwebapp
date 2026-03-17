@@ -106,7 +106,7 @@ export function IntentionModal() {
       />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-[rgba(13,15,21,0.95)] backdrop-blur-xl border border-white/[0.06] p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <div className="relative z-10 w-full max-w-md mx-4 rounded-2xl bg-white/[0.06] backdrop-blur-2xl border border-white/[0.1] p-8 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-300">
         {/* Close */}
         <button
           onClick={handleDismiss}
@@ -127,7 +127,7 @@ export function IntentionModal() {
           onChange={(e) => setGoal(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           placeholder="e.g., Only A+ setups. Max 3 trades."
-          className="mt-5 w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 font-mono text-sm text-text-primary outline-none focus:border-positive/40 placeholder:text-text-dim transition-colors"
+          className="mt-5 w-full rounded-xl border border-white/[0.1] bg-white/[0.04] backdrop-blur-xl px-4 py-3 font-mono text-sm text-text-primary outline-none focus:border-positive/40 placeholder:text-text-dim transition-colors"
           autoFocus
         />
 

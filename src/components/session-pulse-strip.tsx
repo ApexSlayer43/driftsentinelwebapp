@@ -115,7 +115,7 @@ export function SessionPulseStrip({ sessions, selectedId, onSelect }: SessionPul
       {/* Fixed-position tooltip portal — never clipped by overflow */}
       {hoveredSession && tooltipPos && typeof document !== 'undefined' && createPortal(
         <div
-          className="fixed z-[9999] whitespace-nowrap rounded-lg bg-[rgba(13,15,21,0.95)] backdrop-blur-xl border border-white/[0.06] px-3 py-2 pointer-events-none"
+          className="fixed z-[9999] whitespace-nowrap rounded-lg bg-white/[0.06] backdrop-blur-2xl border border-white/[0.1] px-3 py-2 pointer-events-none"
           style={{
             left: Math.max(8, tooltipPos.x),
             top: tooltipPos.y - 8,

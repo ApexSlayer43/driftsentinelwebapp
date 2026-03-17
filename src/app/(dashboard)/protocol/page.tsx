@@ -269,7 +269,7 @@ export default function ProtocolPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] text-stable hover:text-text-secondary transition-all text-sm font-medium"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] text-stable hover:text-text-secondary transition-all text-sm font-medium"
             >
               {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
               Save Protocol
@@ -295,7 +295,7 @@ export default function ProtocolPage() {
           className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-all duration-200 ${
             dragOver
               ? 'border-stable bg-stable/5'
-              : 'border-border-subtle hover:border-text-muted'
+              : 'border-white/[0.08] hover:border-text-muted'
           }`}
         >
           <input
@@ -398,7 +398,7 @@ export default function ProtocolPage() {
 
             {/* Rules */}
             {isExpanded && (
-              <div className="border-t border-border-subtle">
+              <div className="border-t border-white/[0.08]">
                 {catRules.map((rule) => {
                   const status = (rule as ProtocolRule & { status?: string }).status;
                   const badge = status ? STATUS_BADGE[status] : null;
@@ -407,7 +407,7 @@ export default function ProtocolPage() {
                   return (
                     <div
                       key={rule.id}
-                      className={`px-5 py-4 border-b border-border-subtle last:border-b-0 transition-opacity ${!rule.enabled ? 'opacity-40' : ''}`}
+                      className={`px-5 py-4 border-b border-white/[0.08] last:border-b-0 transition-opacity ${!rule.enabled ? 'opacity-40' : ''}`}
                     >
                       {/* Rule header row */}
                       <div className="flex items-center justify-between mb-1">
@@ -455,7 +455,7 @@ export default function ProtocolPage() {
                                     max={param.max}
                                     step={param.type === 'percent' ? 1 : param.key.includes('_r') ? 0.1 : 1}
                                     onChange={(e) => updateParam(rule.id, param.key, parseFloat(e.target.value) || 0)}
-                                    className="w-16 bg-surface border border-border-subtle rounded-md px-2 py-0.5 text-xs text-stable text-center focus:outline-none focus:border-stable/50"
+                                    className="w-16 bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-md px-2 py-0.5 text-xs text-stable text-center focus:outline-none focus:border-stable/50"
                                   />
                                   {param.unit && <span className="text-[10px] text-text-muted">{param.unit}</span>}
                                 </div>
@@ -464,7 +464,7 @@ export default function ProtocolPage() {
                                   type="text"
                                   value={param.value as string}
                                   onChange={(e) => updateParam(rule.id, param.key, e.target.value)}
-                                  className="w-24 bg-surface border border-border-subtle rounded-md px-2 py-0.5 text-xs text-stable focus:outline-none focus:border-stable/50"
+                                  className="w-24 bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-md px-2 py-0.5 text-xs text-stable focus:outline-none focus:border-stable/50"
                                 />
                               )}
                             </div>

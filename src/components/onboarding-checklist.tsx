@@ -79,9 +79,9 @@ export default function OnboardingChecklist() {
 
   return (
     <div className="fixed bottom-5 left-5 z-40 w-[300px] animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="rounded-2xl border border-white/[0.08] bg-[rgba(15,17,23,0.92)] backdrop-blur-xl shadow-2xl overflow-hidden">
+      <div className="rounded-2xl border border-white/[0.1] bg-white/[0.06] backdrop-blur-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
           <div className="flex items-center gap-2">
             <Rocket size={16} className="text-positive" />
             <span className="font-display text-xs font-bold uppercase tracking-wider text-text-primary">
@@ -109,14 +109,14 @@ export default function OnboardingChecklist() {
         </div>
 
         {/* Progress bar */}
-        <div className="px-4 py-2 border-b border-white/[0.04]">
+        <div className="px-4 py-2 border-b border-white/[0.08]">
           <div className="flex items-center justify-between mb-1.5">
             <span className="font-mono text-[10px] text-text-muted">
               {Math.min(completedSteps.size, ONBOARDING_STEPS.length)} of {ONBOARDING_STEPS.length} complete
             </span>
             <span className="font-mono text-[10px] font-bold text-positive">{progress}%</span>
           </div>
-          <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
+          <div className="h-1 rounded-full bg-white/[0.08] overflow-hidden">
             <div
               className="h-full rounded-full bg-positive transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
@@ -149,7 +149,7 @@ export default function OnboardingChecklist() {
                 const GroupIcon = meta.icon;
 
                 return (
-                  <div key={groupKey} className="border-b border-white/[0.03] last:border-0">
+                  <div key={groupKey} className="border-b border-white/[0.06] last:border-0">
                     {/* Group header */}
                     <div className="flex items-center gap-2 px-4 py-2">
                       <GroupIcon size={12} className={groupDone ? 'text-positive' : 'text-text-dim'} />
@@ -210,7 +210,7 @@ export default function OnboardingChecklist() {
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-3 border-t border-white/[0.04]">
+            <div className="px-4 py-3 border-t border-white/[0.08]">
               {allDone ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">

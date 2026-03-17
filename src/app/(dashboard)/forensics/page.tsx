@@ -127,7 +127,7 @@ export default function ForensicsPage() {
       <div className="flex h-full items-center justify-center">
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 w-72 animate-pulse rounded-xl bg-raised" />
+            <div key={i} className="h-20 w-72 animate-pulse rounded-xl bg-white/[0.06]" />
           ))}
         </div>
       </div>
@@ -153,7 +153,7 @@ export default function ForensicsPage() {
   return (
     <div className="flex h-full gap-0 overflow-hidden">
       {/* ═══ LEFT PANEL — Pattern Cards ═══ */}
-      <div className="w-[320px] shrink-0 border-r border-border-dim overflow-y-auto">
+      <div className="w-[320px] shrink-0 border-r border-white/[0.08] overflow-y-auto">
         <div className="px-5 pt-5 pb-3">
           <h1 className="font-mono text-[15px] font-bold uppercase tracking-[0.15em] text-text-primary">
             Forensics
@@ -187,8 +187,8 @@ export default function ForensicsPage() {
                   onClick={() => setSelectedId(v.violation_id)}
                   className={`w-full text-left rounded-xl px-4 py-3 transition-all ${
                     isActive
-                      ? 'ring-1 ring-white/30 bg-raised/60'
-                      : 'hover:bg-raised/30'
+                      ? 'ring-1 ring-white/30 bg-white/[0.08]'
+                      : 'hover:bg-white/[0.06]'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -466,7 +466,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
           </div>
 
           {/* Explainer */}
-          <div className="mt-4 pt-3 border-t border-border-dim font-mono text-[11px] text-text-dim leading-relaxed">
+          <div className="mt-4 pt-3 border-t border-white/[0.08] font-mono text-[11px] text-text-dim leading-relaxed">
             The {violation.points}-pt penalty is a <span className="text-text-muted">DSI deduction</span>, not a direct BSS subtraction.
             Your daily DSI score{dsiScore !== null ? ` (${dsiScore}/100)` : ''} feeds into BSS via EWMA smoothing
             {alpha !== null && ` (alpha: ${alpha})`}, which is why the dashboard shows{' '}
@@ -484,7 +484,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
           Session Context
         </div>
         <GlowPanel className="overflow-hidden">
-          <div className="grid grid-cols-5 gap-px bg-border-dim">
+          <div className="grid grid-cols-5 gap-px bg-white/[0.06]">
             {[
               { label: 'Duration', value: `${windowMinutes} min`, color: 'text-white' },
               { label: 'Entries', value: `${entries}`, color: 'text-white' },
@@ -492,7 +492,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
               { label: 'Max Lot', value: `${maxLot || '—'}`, color: 'text-white' },
               { label: 'Fills', value: `${violation.evidence_event_ids.length}`, color: 'text-white' },
             ].map((item) => (
-              <div key={item.label} className="bg-surface px-4 py-3">
+              <div key={item.label} className="bg-white/[0.04] px-4 py-3">
                 <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mb-1">
                   {item.label}
                 </div>
@@ -540,7 +540,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
       {/* ═══ EVIDENCE FILLS ═══ */}
       {fillsLoading ? (
         <div className="flex justify-center py-6">
-          <div className="h-4 w-4 animate-pulse rounded-full bg-raised" />
+          <div className="h-4 w-4 animate-pulse rounded-full bg-white/[0.06]" />
         </div>
       ) : fills.length > 0 ? (
         <div>
@@ -555,7 +555,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
               const sideColor = fill.side === 'BUY' ? '#FFFFFF' : '#C0C8D8';
 
               return (
-                <div key={fill.event_id} className="flex items-center gap-3 glass-inset rounded-xl px-3 py-2">
+                <div key={fill.event_id} className="flex items-center gap-3 bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-xl px-3 py-2">
                   <span
                     className="rounded px-1.5 py-0.5 font-mono text-[11px] font-bold"
                     style={{

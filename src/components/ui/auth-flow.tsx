@@ -311,7 +311,7 @@ export function AuthFlow() {
               type="button"
               onClick={handleGoogleAuth}
               disabled={loading}
-              className="bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] flex w-full items-center justify-center gap-2.5 rounded-full px-5 py-3 font-mono text-sm text-text-primary transition-all hover:border-white/[0.12] disabled:opacity-50"
+              className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] flex w-full items-center justify-center gap-2.5 rounded-full px-5 py-3 font-mono text-sm text-text-primary transition-all hover:border-white/[0.12] disabled:opacity-50"
             >
               <GoogleIcon className="h-4 w-4" />
               Google
@@ -334,7 +334,7 @@ export function AuthFlow() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoFocus
-                  className="bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] w-full rounded-full px-5 py-3 pl-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
+                  className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] w-full rounded-full px-5 py-3 pl-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
                   placeholder="Email"
                 />
                 <svg
@@ -405,7 +405,7 @@ export function AuthFlow() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoFocus
-                  className="bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
+                  className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
                   placeholder="Password"
                 />
                 <button
@@ -486,7 +486,7 @@ export function AuthFlow() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoFocus
-                  className="bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
+                  className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
                   placeholder="Password (min 6 chars)"
                 />
                 <button
@@ -504,7 +504,7 @@ export function AuthFlow() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
+                  className="bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] w-full rounded-full px-5 py-3 pr-12 font-mono text-sm text-text-primary placeholder-text-dim outline-none transition-all focus:border-white/[0.12]"
                   placeholder="Confirm password"
                 />
                 <button

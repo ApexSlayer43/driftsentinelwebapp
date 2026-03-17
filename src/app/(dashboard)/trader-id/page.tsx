@@ -96,7 +96,7 @@ export default function TraderIdPage() {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="h-5 w-5 animate-pulse rounded-full bg-raised" />
+        <div className="h-5 w-5 animate-pulse rounded-full bg-white/[0.06]" />
       </div>
     );
   }
@@ -262,7 +262,7 @@ export default function TraderIdPage() {
 
         {/* SHARE LINK */}
         <GlowPanel className="p-4 flex items-center gap-3" data-onboard="trader-id-share">
-          <div className="flex-1 bg-white/[0.03] rounded-lg px-3.5 py-2.5 font-mono text-[12px] text-white/40 truncate border border-white/[0.04]">{shareUrl}</div>
+          <div className="flex-1 bg-white/[0.04] backdrop-blur-xl rounded-lg px-3.5 py-2.5 font-mono text-[12px] text-white/40 truncate border border-white/[0.08]">{shareUrl}</div>
           <button onClick={handleCopy} className="bg-white text-[#0D0F15] rounded-lg px-5 py-2.5 font-mono text-[12px] font-semibold tracking-[0.1em] uppercase transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] shrink-0 flex items-center gap-2">
             {copied ? <Check size={14} /> : <Copy size={14} />}
             {copied ? 'Copied' : 'Copy Link'}

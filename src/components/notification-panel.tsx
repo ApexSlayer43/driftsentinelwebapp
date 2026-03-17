@@ -186,7 +186,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: -320, opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="fixed left-24 top-4 bottom-4 z-50 w-[340px] overflow-hidden rounded-2xl bg-[rgba(13,15,21,0.85)] backdrop-blur-xl border border-white/[0.04]"
+            className="fixed left-24 top-4 bottom-4 z-50 w-[340px] overflow-hidden rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08]"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-white/[0.04] px-5 py-4">
