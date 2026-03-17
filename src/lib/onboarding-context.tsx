@@ -79,7 +79,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     description: 'Each row is a trading day. You\'ll see the date, how many fills landed, the DSI (Daily Session Integrity) score, and how that session moved your BSS. Green rows are clean. Darker rows had violations. This is where you see how each day contributed to your overall discipline score.',
     href: '/',
     targetSelector: '[data-onboard="evidence-sessions"]',
-    tooltipPosition: 'right',
+    tooltipPosition: 'top',
   },
   {
     id: 'evidence-violations',
@@ -88,7 +88,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     description: 'Every rule breach gets logged here with its severity — CRITICAL, HIGH, or AMBER. Each violation card shows the pattern detected, the behavior window (what you did and when), and the DSI penalty it cost you. This isn\'t punishment — it\'s a mirror. The engine holds you to your own plan.',
     href: '/',
     targetSelector: '[data-onboard="evidence-violations"]',
-    tooltipPosition: 'bottom',
+    tooltipPosition: 'top',
   },
   {
     id: 'evidence-trends',
@@ -97,7 +97,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     description: 'The dual-line chart tracks your BSS and DSI over the last 7 days. Below the chart you\'ll see range (high/low) and average stats. The trend line tells the real story — are you building discipline or losing it? Consistency here is what separates tiers.',
     href: '/',
     targetSelector: '[data-onboard="evidence-trends"]',
-    tooltipPosition: 'left',
+    tooltipPosition: 'top',
   },
   // ── Sessions & Evidence ───────────────────────────────────────
   {
