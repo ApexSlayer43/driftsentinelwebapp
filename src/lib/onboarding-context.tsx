@@ -6,7 +6,7 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 
 export interface OnboardingStep {
   id: string;
-  group: 'upload' | 'dashboard' | 'sessions' | 'protocol';
+  group: 'upload' | 'dashboard' | 'sessions' | 'protocol' | 'senti' | 'traderId';
   title: string;
   description: string;
   href: string;            // page to navigate to
@@ -90,6 +90,44 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     href: '/settings',
     targetSelector: '[data-onboard="protocol-settings"]',
     tooltipPosition: 'bottom',
+  },
+  // Senti AI
+  {
+    id: 'meet-senti',
+    group: 'senti',
+    title: 'Meet Senti — your AI companion',
+    description: 'Senti is your behavioral co-pilot. It speaks from your data — morning briefings, post-session after-action reviews, or ambient session companion mode. Ask it anything about your trading patterns.',
+    href: '/senti',
+    targetSelector: '[data-onboard="senti-chat"]',
+    tooltipPosition: 'bottom',
+  },
+  {
+    id: 'senti-modes',
+    group: 'senti',
+    title: 'Explore Senti modes',
+    description: 'Switch between Session Companion (ambient, speaks when spoken to), Morning Briefing (proactive daily patterns), After Action Review (deep post-session analysis), and Onboarding (get oriented fast).',
+    href: '/senti',
+    targetSelector: '[data-onboard="senti-input"]',
+    tooltipPosition: 'top',
+  },
+  // DS Trader ID
+  {
+    id: 'view-trader-id',
+    group: 'traderId',
+    title: 'View your DS Trader ID',
+    description: 'Your behavioral profile card — BSS score, tier, streak, delta, and 90-day trajectory all in one place. This is your discipline identity. Share it or keep it private.',
+    href: '/trader-id',
+    targetSelector: '[data-onboard="trader-id-hero"]',
+    tooltipPosition: 'bottom',
+  },
+  {
+    id: 'share-profile',
+    group: 'traderId',
+    title: 'Share your profile link',
+    description: 'Copy your unique DS Trader ID link to share your behavioral track record. It shows your BSS score, tier, and performance — proof of discipline, not just P/L.',
+    href: '/trader-id',
+    targetSelector: '[data-onboard="trader-id-share"]',
+    tooltipPosition: 'top',
   },
 ];
 

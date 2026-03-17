@@ -157,7 +157,7 @@ export default function TraderIdPage() {
         {/* Top row: Profile Hero + Stats 2×2 side by side on larger screens */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-5 mb-5">
           {/* PROFILE HERO */}
-          <GlowPanel className="p-10 text-center relative overflow-hidden">
+          <GlowPanel className="p-10 text-center relative overflow-hidden" data-onboard="trader-id-hero">
             <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 80%, rgba(255,255,255,0.04) 0%, transparent 50%)' }} />
             <div className="relative z-10">
               <div
@@ -261,7 +261,7 @@ export default function TraderIdPage() {
         </GlowPanel>
 
         {/* SHARE LINK */}
-        <GlowPanel className="p-4 flex items-center gap-3">
+        <GlowPanel className="p-4 flex items-center gap-3" data-onboard="trader-id-share">
           <div className="flex-1 bg-white/[0.03] rounded-lg px-3.5 py-2.5 font-mono text-[12px] text-white/40 truncate border border-white/[0.04]">{shareUrl}</div>
           <button onClick={handleCopy} className="bg-white text-[#0D0F15] rounded-lg px-5 py-2.5 font-mono text-[12px] font-semibold tracking-[0.1em] uppercase transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] shrink-0 flex items-center gap-2">
             {copied ? <Check size={14} /> : <Copy size={14} />}

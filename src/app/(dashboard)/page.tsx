@@ -8,6 +8,8 @@ import { VerdictLine } from '@/components/verdict-line';
 import { Sparkline } from '@/components/sparkline';
 import { Upload } from 'lucide-react';
 import { EvidenceSheet } from '@/components/evidence-sheet';
+import { useStrategies } from '@/hooks/use-strategies';
+import { STRATEGY_ALL, type StrategyFilter } from '@/lib/strategies';
 import type { StatePayload } from '@/lib/types';
 
 /**
@@ -68,6 +70,8 @@ export default function DashboardPage() {
   const [data, setData] = useState<StatePayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { strategies } = useStrategies();
+  const [activeStrategy, setActiveStrategy] = useState<StrategyFilter>(STRATEGY_ALL);
 
   const fetchData = useCallback(async () => {
     try {
@@ -159,6 +163,35 @@ export default function DashboardPage() {
     <div className="relative flex min-h-full flex-col">
       {/* ── SURFACE LAYER: Exactly 5 Elements (spec Section 2) ── */}
       <div className="flex flex-1 flex-col items-center justify-center">
+
+        {/* Strategy pill tabs — only show when user has 2+ strategies */}
+        {strategies.length > 1 && (
+          <div className="mb-4 flex items-center gap-1 rounded-full bg-white/[0.03] p-1 border border-white/[0.04]">
+            <button
+              onClick={() => setActiveStrategy(STRATEGY_ALL)}
+              className={`rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all ${
+                activeStrategy === STRATEGY_ALL
+                  ? 'bg-white/[0.08] text-text-primary shadow-sm'
+                  : 'text-text-dim hover:text-text-muted'
+              }`}
+            >
+              All
+            </button>
+            {strategies.map((s) => (
+              <button
+                key={s.strategy_id}
+                onClick={() => setActiveStrategy(s.strategy_id)}
+                className={`rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.1em] transition-all ${
+                  activeStrategy === s.strategy_id
+                    ? 'bg-white/[0.08] text-text-primary shadow-sm'
+                    : 'text-text-dim hover:text-text-muted'
+                }`}
+              >
+                {s.tag}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* BSS label + freshness indicator */}
         <div className="mb-6 flex flex-col items-center gap-1.5">

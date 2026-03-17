@@ -354,7 +354,7 @@ export default function SentiPage() {
       </div>
 
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0" data-onboard="senti-chat">
         {/* Messages */}
         <div
           ref={scrollRef}
@@ -419,7 +419,7 @@ export default function SentiPage() {
         </div>
 
         {/* Input area — Gradient AI Chat Input */}
-        <div className="px-6 pb-4 pt-2">
+        <div className="px-6 pb-4 pt-2" data-onboard="senti-input">
           <div className="max-w-2xl mx-auto">
             <GradientAIChatInput
               placeholder="Ask about your behavioral data..."

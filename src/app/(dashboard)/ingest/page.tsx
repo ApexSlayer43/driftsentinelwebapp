@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Upload, CheckCircle, XCircle, Copy, FileText, FileSpreadsheet } from 'lucide-react';
+import { Upload, CheckCircle, XCircle, Copy, FileText, FileSpreadsheet, Plus, ChevronDown } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { GlowPanel } from '@/components/ui/glow-panel';
+import { useStrategies } from '@/hooks/use-strategies';
 import type { IngestRun } from '@/lib/types';
 
 type UploadMode = 'csv' | 'pdf';
@@ -51,6 +52,18 @@ export default function IngestPage() {
   const [pdfResult, setPdfResult] = useState<PdfResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [recentRuns, setRecentRuns] = useState<IngestRun[]>([]);
+  const { strategies, defaultStrategy, createStrategy } = useStrategies();
+  const [selectedStrategyId, setSelectedStrategyId] = useState<string>('');
+  const [showStrategyDropdown, setShowStrategyDropdown] = useState(false);
+  const [newStrategyName, setNewStrategyName] = useState('');
+  const [creatingStrategy, setCreatingStrategy] = useState(false);
+
+  // Auto-select default strategy when loaded
+  useEffect(() => {
+    if (!selectedStrategyId && defaultStrategy) {
+      setSelectedStrategyId(defaultStrategy.strategy_id);
+    }
+  }, [defaultStrategy, selectedStrategyId]);
 
   useEffect(() => {
     async function loadRuns() {
@@ -108,7 +121,11 @@ export default function IngestPage() {
         const res = await fetch('/api/ingest/csv', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ csv_text: csvText, source_file: file.name }),
+          body: JSON.stringify({
+            csv_text: csvText,
+            source_file: file.name,
+            strategy_id: selectedStrategyId || undefined,
+          }),
         });
 
         if (!res.ok) {
@@ -173,6 +190,82 @@ export default function IngestPage() {
           Performance CSV
         </button>
       </div>
+
+      {/* Strategy picker */}
+      {strategies.length > 0 && (
+        <div className="mt-4 relative" data-onboard="strategy-picker">
+          <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-text-dim mb-1.5">
+            Strategy
+          </div>
+          <button
+            onClick={() => setShowStrategyDropdown(!showStrategyDropdown)}
+            className="flex items-center gap-2 rounded-lg border border-border-subtle bg-void px-3 py-2 font-mono text-[12px] text-text-secondary hover:border-border-active transition-colors min-w-[200px]"
+          >
+            <span className="flex-1 text-left">
+              {strategies.find((s) => s.strategy_id === selectedStrategyId)?.tag ?? 'Default'}
+            </span>
+            <ChevronDown size={12} className="text-text-dim" />
+          </button>
+
+          {showStrategyDropdown && (
+            <div className="absolute top-full left-0 mt-1 z-50 min-w-[220px] rounded-lg border border-border-subtle bg-[rgba(13,15,21,0.95)] backdrop-blur-xl shadow-xl">
+              {strategies.map((s) => (
+                <button
+                  key={s.strategy_id}
+                  onClick={() => {
+                    setSelectedStrategyId(s.strategy_id);
+                    setShowStrategyDropdown(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 font-mono text-[12px] transition-colors hover:bg-white/[0.04] ${
+                    s.strategy_id === selectedStrategyId ? 'text-text-primary' : 'text-text-muted'
+                  }`}
+                >
+                  {s.tag}
+                  {s.is_default && (
+                    <span className="ml-2 text-[9px] text-text-dim uppercase">(default)</span>
+                  )}
+                </button>
+              ))}
+              <div className="border-t border-border-dim px-3 py-2">
+                {creatingStrategy ? (
+                  <div className="flex gap-1.5">
+                    <input
+                      value={newStrategyName}
+                      onChange={(e) => setNewStrategyName(e.target.value)}
+                      placeholder="Strategy name..."
+                      autoFocus
+                      className="flex-1 rounded bg-white/[0.04] px-2 py-1 font-mono text-[11px] text-text-primary border border-border-subtle focus:border-border-active outline-none"
+                      onKeyDown={async (e) => {
+                        if (e.key === 'Enter' && newStrategyName.trim()) {
+                          try {
+                            const created = await createStrategy(newStrategyName.trim());
+                            setSelectedStrategyId(created.strategy_id);
+                            setNewStrategyName('');
+                            setCreatingStrategy(false);
+                            setShowStrategyDropdown(false);
+                          } catch { /* error handled in hook */ }
+                        }
+                        if (e.key === 'Escape') {
+                          setCreatingStrategy(false);
+                          setNewStrategyName('');
+                        }
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setCreatingStrategy(true)}
+                    className="flex items-center gap-1.5 font-mono text-[11px] text-text-muted hover:text-positive transition-colors"
+                  >
+                    <Plus size={12} />
+                    New Strategy
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Upload zone — accepts both formats regardless of mode toggle */}
       <div

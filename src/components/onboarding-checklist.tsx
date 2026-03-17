@@ -12,6 +12,8 @@ import {
   BarChart3,
   Radar,
   Shield,
+  Bot,
+  UserCircle,
   CheckCircle2,
   Circle,
   Sparkles,
@@ -24,6 +26,8 @@ const GROUP_META: Record<string, { label: string; icon: LucideIcon }> = {
   dashboard: { label: 'Dashboard', icon: BarChart3 },
   sessions: { label: 'Sessions', icon: Radar },
   protocol: { label: 'Protocol', icon: Shield },
+  senti: { label: 'Senti AI', icon: Bot },
+  traderId: { label: 'Trader ID', icon: UserCircle },
 };
 
 export default function OnboardingChecklist() {
@@ -69,7 +73,7 @@ export default function OnboardingChecklist() {
   }
 
   // Group steps
-  const groups = ['upload', 'dashboard', 'sessions', 'protocol'];
+  const groups = ['upload', 'dashboard', 'sessions', 'protocol', 'senti', 'traderId'];
 
   return (
     <div className="fixed bottom-5 left-5 z-40 w-[300px] animate-in fade-in slide-in-from-bottom-4 duration-500">

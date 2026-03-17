@@ -128,6 +128,7 @@ export async function POST(req: Request) {
   const body = await req.json();
   const csvText: string = body.csv_text;
   const fileName: string = body.source_file ?? 'performance.csv';
+  const strategyId: string | undefined = body.strategy_id;
 
   if (!csvText) {
     return Response.json({ error: 'Missing csv_text field' }, { status: 400 });
@@ -187,6 +188,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         source_file: fileName,
         fills: jsonFills,
+        ...(strategyId ? { strategy_id: strategyId } : {}),
       }),
     });
 
