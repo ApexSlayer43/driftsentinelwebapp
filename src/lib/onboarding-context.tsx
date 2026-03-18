@@ -126,7 +126,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     description: 'Forensics is where you go when you want the full story on a behavioral pattern. Select any pattern from the left panel to see what happened, the score impact (before/after BSS), recurrence history, and flagged trades. Acknowledge patterns once you\'ve reviewed them — they move to the Reviewed panel on the right.',
     href: '/forensics',
     targetSelector: '[data-onboard="forensics-page"]',
-    tooltipPosition: 'bottom',
+    tooltipPosition: 'top',
   },
   // ── Cooldown ───────────────────────────────────────────────
   {
