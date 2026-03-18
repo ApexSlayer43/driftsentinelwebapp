@@ -1,7 +1,7 @@
 'use client';
 
 import { GlowPanel } from '@/components/ui/glow-panel';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface PerformanceSummary {
   grossPnl: number;
@@ -33,8 +33,7 @@ interface PerformanceCardProps {
 }
 
 function formatMoney(val: number): string {
-  const prefix = val >= 0 ? '$' : '$';
-  return `${prefix}${Math.abs(val).toFixed(2)}`;
+  return `$${Math.abs(val).toFixed(2)}`;
 }
 
 export function PerformanceCard({ summary, sessions, dateRange, title = 'Lifetime Performance' }: PerformanceCardProps) {
@@ -44,18 +43,18 @@ export function PerformanceCard({ summary, sessions, dateRange, title = 'Lifetim
     <GlowPanel className="p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
-        <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+        <h3 className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-[#7a766d]">
           {title}
         </h3>
         {pnlPositive ? (
-          <TrendingUp size={14} className="text-white/50" />
+          <TrendingUp size={14} className="text-[rgba(200,169,110,0.5)]" />
         ) : (
-          <TrendingDown size={14} className="text-white/30" />
+          <TrendingDown size={14} className="text-[rgba(200,169,110,0.3)]" />
         )}
       </div>
 
       {dateRange && (
-        <p className="font-mono text-[10px] text-white/25 mb-4">
+        <p className="font-mono text-[10px] text-[#4a473f] mb-4">
           {dateRange.start} → {dateRange.end}
         </p>
       )}
@@ -101,8 +100,8 @@ export function PerformanceCard({ summary, sessions, dateRange, title = 'Lifetim
       </div>
 
       {/* Session stats */}
-      <div className="border-t border-white/[0.04] pt-4">
-        <h4 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-white/30 mb-3">
+      <div className="border-t border-[rgba(200,169,110,0.06)] pt-4">
+        <h4 className="font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-[#7a766d] mb-3">
           Session Overview
         </h4>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
@@ -139,15 +138,14 @@ function PerfStat({
   emphasis?: boolean;
   small?: boolean;
 }) {
-  // emphasis = true → full white, false → dimmed silver, undefined → neutral white
   const valueColor =
-    emphasis === true ? 'text-white' :
-    emphasis === false ? 'text-white/50' :
-    'text-white/80';
+    emphasis === true ? 'text-[#ede9e1]' :
+    emphasis === false ? 'text-[#7a766d]' :
+    'text-[#bdb8ae]';
 
   return (
-    <div className="rounded-lg border border-white/[0.04] bg-white/[0.02] px-3 py-2">
-      <div className="font-mono text-[7px] uppercase tracking-[0.15em] text-white/30">
+    <div className="rounded-lg border border-[rgba(200,169,110,0.06)] bg-[rgba(200,169,110,0.02)] px-3 py-2">
+      <div className="font-mono text-[7px] uppercase tracking-[0.15em] text-[#7a766d]">
         {label}
       </div>
       <div className={`font-mono ${small ? 'text-sm' : 'text-[15px]'} font-bold mt-0.5 ${valueColor}`} style={{ fontVariantNumeric: 'tabular-nums' }}>

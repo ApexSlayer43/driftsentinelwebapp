@@ -43,9 +43,9 @@ export function GlowPanel({
         outerClassName
       )}
     >
-      {/* Subtle teal ambient inner glow — top-right corner */}
+      {/* Subtle gold ambient inner glow — top-right corner */}
       {(variant === "default" || variant === "raised" || variant === "elevated") && (
-        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-[#22D3EE]/[0.04] blur-3xl pointer-events-none" />
+        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-[#c8a96e]/[0.04] blur-3xl pointer-events-none" />
       )}
 
       <div
