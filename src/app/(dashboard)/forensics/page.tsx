@@ -7,7 +7,7 @@ import { getModeLabel, getModeIcon, getModeWeight, getModeDescription } from '@/
 import { DynamicIcon } from '@/components/dynamic-icon';
 import { GlowPanel } from '@/components/ui/glow-panel';
 import type { ViolationDetail, FillCanonical, DailyScore } from '@/lib/types';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle2, RotateCcw } from 'lucide-react';
 
 /**
  * Forensics — Pattern analysis deep-dive
@@ -25,6 +25,7 @@ export default function ForensicsPage() {
   const [loading, setLoading] = useState(true);
   const [detailFills, setDetailFills] = useState<FillCanonical[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [showResolved, setShowResolved] = useState(false);
 
   // Load violations
   useEffect(() => {
@@ -121,7 +122,23 @@ export default function ForensicsPage() {
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [violations, selected]);
 
-  const patternCount = violations.length;
+  // Filter by status
+  const filteredViolations = useMemo(
+    () => showResolved ? violations : violations.filter(v => v.status === 'active'),
+    [violations, showResolved]
+  );
+  const activeCount = violations.filter(v => v.status === 'active').length;
+  const resolvedCount = violations.length - activeCount;
+  const patternCount = filteredViolations.length;
+
+  // Handler for status changes from detail panel
+  function handleStatusChange(violationId: string, newStatus: string) {
+    setViolations(prev => prev.map(v =>
+      v.violation_id === violationId
+        ? { ...v, status: newStatus as ViolationDetail['status'], acknowledged_at: newStatus !== 'active' ? new Date().toISOString() : null }
+        : v
+    ));
+  }
 
   if (loading) {
     return (
@@ -160,12 +177,21 @@ export default function ForensicsPage() {
             Forensics
           </h1>
           <div className="mt-1 font-mono text-[11px] text-text-muted">
-            {patternCount} patterns detected · 30 days
+            {activeCount} active{resolvedCount > 0 ? ` · ${resolvedCount} reviewed` : ''} · 30 days
           </div>
+
+          {resolvedCount > 0 && (
+            <button
+              onClick={() => setShowResolved(!showResolved)}
+              className="mt-2 font-mono text-[10px] text-[#7a766d] hover:text-[#c8a96e] transition-colors"
+            >
+              {showResolved ? 'Hide reviewed' : `Show ${resolvedCount} reviewed`}
+            </button>
+          )}
         </div>
 
         <div className="px-3 pb-4 space-y-2">
-          {violations.map((v) => {
+          {filteredViolations.map((v) => {
             const isActive = v.violation_id === selectedId;
             const modeLabel = getModeLabel(v.mode);
             const modeIcon = getModeIcon(v.mode);
@@ -215,6 +241,12 @@ export default function ForensicsPage() {
                   <div className="mt-1 font-mono text-[11px] text-text-dim leading-relaxed line-clamp-2">
                     {v.evidence_event_ids.length} trades flagged · {getModeDescription(v.mode).split('—')[0].trim()}
                   </div>
+                  {v.status !== 'active' && (
+                    <div className="mt-1.5 flex items-center gap-1 font-mono text-[9px] text-[#c8a96e]">
+                      <CheckCircle2 size={9} />
+                      Reviewed
+                    </div>
+                  )}
                 </button>
               </GlowPanel>
             );
@@ -229,6 +261,7 @@ export default function ForensicsPage() {
             violation={selected}
             fills={detailFills}
             fillsLoading={detailLoading}
+            onStatusChange={handleStatusChange}
             recurrence={recurrence}
             dailyScores={dailyScores}
           />
@@ -252,10 +285,14 @@ interface ForensicDetailProps {
   fillsLoading: boolean;
   recurrence: { id: string; date: Date; points: number; isCurrent: boolean }[];
   dailyScores: DailyScore[];
+  onStatusChange: (violationId: string, status: string) => void;
 }
 
-function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScores }: ForensicDetailProps) {
+function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScores, onStatusChange }: ForensicDetailProps) {
   const [mathExpanded, setMathExpanded] = useState(false);
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [note, setNote] = useState(violation.resolution_note ?? '');
+  const [saving, setSaving] = useState(false);
   const modeLabel = getModeLabel(violation.mode);
   const modeIcon = getModeIcon(violation.mode);
   const modeWeight = getModeWeight(violation.mode);
@@ -543,6 +580,132 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
           </GlowPanel>
         )}
       </div>
+
+      {/* ═══ ACKNOWLEDGE / RESOLVE ═══ */}
+      <GlowPanel className="p-5">
+        {violation.status === 'active' ? (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+                Review This Pattern
+              </div>
+              <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-[#FB923C] bg-[rgba(251,146,60,0.1)] px-2 py-0.5 rounded-full">
+                Unreviewed
+              </span>
+            </div>
+
+            {!noteOpen ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setSaving(true);
+                    fetch('/api/violations', {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ violation_id: violation.violation_id, status: 'acknowledged' }),
+                    }).then(() => {
+                      onStatusChange(violation.violation_id, 'acknowledged');
+                      setSaving(false);
+                    }).catch(() => setSaving(false));
+                  }}
+                  disabled={saving}
+                  className="flex items-center gap-2 rounded-xl bg-[rgba(200,169,110,0.08)] border border-[rgba(200,169,110,0.15)] px-4 py-2.5 font-mono text-[11px] font-semibold text-[#c8a96e] transition-all hover:bg-[rgba(200,169,110,0.12)] disabled:opacity-50"
+                >
+                  <CheckCircle2 size={14} />
+                  {saving ? 'Saving...' : 'Acknowledge'}
+                </button>
+                <button
+                  onClick={() => setNoteOpen(true)}
+                  className="flex items-center gap-2 rounded-xl bg-[rgba(200,169,110,0.04)] border border-[rgba(200,169,110,0.08)] px-4 py-2.5 font-mono text-[11px] text-[#7a766d] transition-all hover:text-[#bdb8ae] hover:bg-[rgba(200,169,110,0.06)]"
+                >
+                  Acknowledge with Note
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="What did you learn? What will you change? (optional)"
+                  className="w-full rounded-xl bg-[rgba(200,169,110,0.03)] border border-[rgba(200,169,110,0.1)] px-3.5 py-2.5 font-mono text-[12px] text-[#ede9e1] placeholder-[#4a473f] resize-none focus:outline-none focus:border-[rgba(200,169,110,0.25)] transition-colors"
+                  rows={3}
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSaving(true);
+                      fetch('/api/violations', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          violation_id: violation.violation_id,
+                          status: 'acknowledged',
+                          resolution_note: note || undefined,
+                        }),
+                      }).then(() => {
+                        onStatusChange(violation.violation_id, 'acknowledged');
+                        setSaving(false);
+                      }).catch(() => setSaving(false));
+                    }}
+                    disabled={saving}
+                    className="flex items-center gap-2 rounded-xl bg-[rgba(200,169,110,0.08)] border border-[rgba(200,169,110,0.15)] px-4 py-2.5 font-mono text-[11px] font-semibold text-[#c8a96e] transition-all hover:bg-[rgba(200,169,110,0.12)] disabled:opacity-50"
+                  >
+                    <CheckCircle2 size={14} />
+                    {saving ? 'Saving...' : 'Save & Acknowledge'}
+                  </button>
+                  <button
+                    onClick={() => setNoteOpen(false)}
+                    className="rounded-xl px-4 py-2.5 font-mono text-[11px] text-[#4a473f] hover:text-[#7a766d] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={14} className="text-[#c8a96e]" />
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-[#c8a96e]">
+                  {violation.status === 'acknowledged' ? 'Acknowledged' : 'Resolved'}
+                </span>
+              </div>
+              {violation.acknowledged_at && (
+                <span className="font-mono text-[9px] text-[#4a473f]">
+                  {new Date(violation.acknowledged_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </span>
+              )}
+            </div>
+
+            {violation.resolution_note && (
+              <div className="font-mono text-[12px] text-[#7a766d] italic leading-relaxed bg-[rgba(200,169,110,0.03)] rounded-lg px-3 py-2">
+                &ldquo;{violation.resolution_note}&rdquo;
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                setSaving(true);
+                fetch('/api/violations', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ violation_id: violation.violation_id, status: 'active' }),
+                }).then(() => {
+                  onStatusChange(violation.violation_id, 'active');
+                  setSaving(false);
+                }).catch(() => setSaving(false));
+              }}
+              disabled={saving}
+              className="flex items-center gap-1.5 font-mono text-[10px] text-[#4a473f] hover:text-[#7a766d] transition-colors"
+            >
+              <RotateCcw size={10} />
+              {saving ? 'Saving...' : 'Reopen'}
+            </button>
+          </div>
+        )}
+      </GlowPanel>
 
       {/* ═══ FLAGGED TRADES ═══ */}
       {fillsLoading ? (

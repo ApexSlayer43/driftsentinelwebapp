@@ -97,6 +97,9 @@ export interface ViolationDetail {
   window_end_utc: string;
   evidence_event_ids: string[];
   created_at: string;
+  status: 'active' | 'acknowledged' | 'resolved';
+  acknowledged_at: string | null;
+  resolution_note: string | null;
 }
 
 // Fill from fills_canonical
