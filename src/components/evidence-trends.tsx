@@ -99,11 +99,11 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
       <div className="mb-4 flex items-center gap-4 font-mono text-[12px]">
         <div className="flex items-center gap-1.5">
           <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#c8a96e' }} />
-          <span className="text-text-muted">Score</span>
+          <span className="text-text-muted">BSS</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#8a7345' }} />
-          <span className="text-text-muted">Session Score</span>
+          <span className="text-text-muted">DSI</span>
         </div>
       </div>
 
@@ -144,7 +144,7 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
             strokeWidth={2}
             dot={{ fill: '#c8a96e', r: 3, strokeWidth: 0 }}
             activeDot={{ r: 5, stroke: '#c8a96e', strokeWidth: 2, fill: '#1A1D27' }}
-            name="Score"
+            name="BSS"
           />
           <Line
             type="monotone"
@@ -153,7 +153,7 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
             strokeWidth={2}
             dot={{ fill: '#8a7345', r: 3, strokeWidth: 0 }}
             activeDot={{ r: 5, stroke: '#8a7345', strokeWidth: 2, fill: '#1A1D27' }}
-            name="Session Score"
+            name="DSI"
           />
         </LineChart>
       </ResponsiveContainer>
@@ -161,15 +161,15 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
       {/* Summary stats */}
       <div className="mt-4 grid grid-cols-3 gap-3">
         <TrendStat
-          label="Score Range"
+          label="BSS Range"
           value={`${Math.min(...data.map(d => d.bss))} – ${Math.max(...data.map(d => d.bss))}`}
         />
         <TrendStat
-          label="Avg Score"
+          label="Avg BSS"
           value={String(Math.round(data.reduce((s, d) => s + d.bss, 0) / data.length))}
         />
         <TrendStat
-          label="Avg Session"
+          label="Avg DSI"
           value={String(Math.round(data.reduce((s, d) => s + d.dsi, 0) / data.length))}
         />
       </div>

@@ -550,14 +550,14 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
 
             <p className="font-mono text-[12px] text-text-muted leading-relaxed text-center">
               {impactLabel} on your Behavioral Stability Score.
-              {dsiScore !== null && ` This day's session score was ${dsiScore}/100`}
+              {dsiScore !== null && ` This day's DSI was ${dsiScore}/100`}
               {dayScore && dayScore.violation_count > 1 && ` (${dayScore.violation_count} patterns combined)`}
               {dsiScore !== null && '.'}
             </p>
           </>
         ) : (
           <p className="font-mono text-[13px] text-text-muted leading-relaxed">
-            This pattern reduced your session score for the day. The exact impact on your overall score depends on how many sessions you&apos;ve completed — newer accounts see larger swings.
+            This pattern reduced your Daily Scoring Index (DSI) for the day. The exact impact on your BSS depends on how many sessions you&apos;ve completed — newer accounts see larger swings.
           </p>
         )}
       </GlowPanel>
@@ -672,7 +672,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
             {dsiScore !== null && (
               <div className="mb-4 pt-3 border-t border-white/[0.06]">
                 <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-dim mb-2">
-                  Step 2 · Day&apos;s Session Score
+                  Step 2 · Day&apos;s DSI (Daily Scoring Index)
                 </div>
                 <div className="flex items-baseline gap-3">
                   <span className="font-mono text-[22px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
@@ -687,12 +687,12 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                 </div>
                 {dayScore && dayScore.violation_count > 1 && (
                   <div className="mt-1.5 font-mono text-[10px] text-[#7a766d] leading-relaxed">
-                    This day had {dayScore.violation_count} patterns detected. The session score reflects all of them combined, not just this one.
+                    This day had {dayScore.violation_count} patterns detected. The DSI reflects all of them combined, not just this one.
                   </div>
                 )}
                 {dayScore && dayScore.violation_count <= 1 && dsiScore > 80 && violation.points > 20 && (
                   <div className="mt-1.5 font-mono text-[10px] text-[#7a766d] leading-relaxed">
-                    The session score factors in your full trading activity for the day — compliant trades offset pattern penalties.
+                    The DSI factors in your full trading activity for the day — compliant trades offset pattern penalties.
                   </div>
                 )}
               </div>
@@ -702,7 +702,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
             {actualBssDelta !== null && bssBefore !== null && bssAfter !== null && (
               <div className="pt-3 border-t border-white/[0.06]">
                 <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-dim mb-2">
-                  Step 3 · Smoothed Into Your Score
+                  Step 3 · Smoothed Into BSS
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-baseline gap-2">
@@ -715,11 +715,11 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                   </span>
                 </div>
                 <div className="mt-1.5 font-mono text-[10px] text-[#7a766d] leading-relaxed">
-                  Your session score is blended into your overall Behavioral Stability Score
-                  {alpha !== null && ` (smoothing factor: ${alpha})`}.
-                  {actualBssDelta > 0 && ' Your score went up because the session score was higher than your previous average.'}
-                  {actualBssDelta < 0 && ' Your score decreased because the session score pulled your average down.'}
-                  {actualBssDelta === 0 && ' No net change — the session score matched your existing average.'}
+                  Your DSI is blended into your Behavioral Stability Score (BSS)
+                  {alpha !== null && ` using smoothing factor ${alpha}`}.
+                  {actualBssDelta > 0 && ' BSS went up because your DSI was higher than your previous average.'}
+                  {actualBssDelta < 0 && ' BSS decreased because your DSI pulled the average down.'}
+                  {actualBssDelta === 0 && ' No net change — your DSI matched your existing BSS average.'}
                 </div>
               </div>
             )}

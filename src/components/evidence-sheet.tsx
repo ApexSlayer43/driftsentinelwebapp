@@ -52,7 +52,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
           <div className="flex items-center gap-3">
             <div className="h-1 w-10 rounded-full bg-text-dim" />
             <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">
-              Score Breakdown
+              BSS Breakdown
             </span>
           </div>
           <button

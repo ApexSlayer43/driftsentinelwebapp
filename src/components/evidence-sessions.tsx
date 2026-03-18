@@ -107,7 +107,7 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
                 </div>
                 <div className="mt-1 flex items-center gap-3 font-mono text-[11px] text-text-muted">
                   <span>{day.fills_count} trades</span>
-                  <span>Session {day.dsi_score}/100</span>
+                  <span>DSI {day.dsi_score}/100</span>
                   {day.streak_count > 0 && (
                     <span className="text-positive">{day.streak_count}d streak</span>
                   )}
