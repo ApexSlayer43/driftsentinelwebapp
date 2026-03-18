@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useId } from "react";
 interface LiveEyeProps {
   size?: number;
 }
 export default function LiveEye({ size = 80 }: LiveEyeProps) {
+  const uid = useId().replace(/:/g, '');
   const eyeRef = useRef<SVGSVGElement>(null);
   const [pupilOffset, setPupilOffset] = useState({ x: 0, y: 0 });
   const [blinkProgress, setBlinkProgress] = useState(0); // 0 = open, 1 = closed
@@ -104,28 +105,28 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
       style={{ overflow: "visible", cursor: "none" }}
     >
       <defs>
-        <filter id="liveGlow" x="-40%" y="-40%" width="180%" height="180%">
+        <filter id={`glow-${uid}`} x="-40%" y="-40%" width="180%" height="180%">
           <feGaussianBlur stdDeviation="1.8" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
-        <filter id="liveGlowStrong" x="-60%" y="-60%" width="220%" height="220%">
+        <filter id={`glowStrong-${uid}`} x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation="3" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
-        <filter id="liveGlowAmbient" x="-80%" y="-80%" width="260%" height="260%">
+        <filter id={`glowAmbient-${uid}`} x="-80%" y="-80%" width="260%" height="260%">
           <feGaussianBlur stdDeviation="6" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
-        <filter id="liveGlowGold" x="-60%" y="-60%" width="220%" height="220%">
+        <filter id={`glowGold-${uid}`} x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation="2.5" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
@@ -133,11 +134,11 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
           </feMerge>
         </filter>
         {/* Clip to eye shape for eyelids */}
-        <clipPath id="eyeShape">
+        <clipPath id={`eyeShape-${uid}`}>
           <path d={eyePath} />
         </clipPath>
         {/* Clip pupil inside iris */}
-        <clipPath id="irisShape">
+        <clipPath id={`irisShape-${uid}`}>
           <circle cx={cx} cy={cy} r={irisR * 1.15} />
         </clipPath>
       </defs>
@@ -147,7 +148,7 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
         rx={eyeW * 0.8} ry={eyeH * 2}
         fill="#c8a96e"
         opacity={0.04}
-        filter="url(#liveGlowAmbient)"
+        filter={`url(#glowAmbient-${uid})`}
       />
       {/* Outer orbit ring */}
       <circle
@@ -167,16 +168,16 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
         strokeWidth="0.3"
         opacity={0.07}
       />
-      {/* Eye almond outline */}
+      {/* Eye almond outline — white */}
       <path
         d={eyePath}
         fill="none"
-        stroke="#c8a96e"
+        stroke="#ede9e1"
         strokeWidth={size * 0.025}
-        filter="url(#liveGlow)"
+        filter={`url(#glow-${uid})`}
       />
       {/* Eye interior — clipped to almond */}
-      <g clipPath="url(#eyeShape)">
+      <g clipPath={`url(#eyeShape-${uid})`}>
         {/* Subtle iris fill */}
         <circle cx={cx} cy={cy} r={irisR * 1.4} fill="#c8a96e" opacity={0.04} />
         {/* Iris ring — static */}
@@ -187,24 +188,24 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
           stroke="#c8a96e"
           strokeWidth={size * 0.018}
           opacity={0.5}
-          filter="url(#liveGlow)"
+          filter={`url(#glow-${uid})`}
         />
         {/* Vertical axis ticks — inside eye, from almond edge to iris */}
         <line
           x1={cx} y1={cy - eyeH * 1.5}
           x2={cx} y2={cy - irisR * 1.15}
           stroke="#c8a96e" strokeWidth={size * 0.025}
-          filter="url(#liveGlow)"
+          filter={`url(#glow-${uid})`}
         />
         <line
           x1={cx} y1={cy + irisR * 1.15}
           x2={cx} y2={cy + eyeH * 1.5}
           stroke="#c8a96e" strokeWidth={size * 0.025}
-          filter="url(#liveGlow)"
+          filter={`url(#glow-${uid})`}
         />
         {/* Pupil group — cursor tracking + dilation */}
         <g
-          clipPath="url(#irisShape)"
+          clipPath={`url(#irisShape-${uid})`}
           style={{
             transform: `translate(${pupilOffset.x}px, ${pupilOffset.y}px)`,
             transition: "transform 0.1s ease-out",
@@ -223,7 +224,7 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
             fill="none"
             stroke="#FFD700"
             strokeWidth={size * 0.022}
-            filter="url(#liveGlowGold)"
+            filter={`url(#glowGold-${uid})`}
             style={{ transition: "r 0.3s ease-out" }}
           />
           {/* Center dot — gold */}
@@ -231,7 +232,7 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
             cx={cx} cy={cy}
             r={dotR}
             fill="#FFD700"
-            filter="url(#liveGlowGold)"
+            filter={`url(#glowGold-${uid})`}
           />
           {/* Tiny specular highlight */}
           <circle
@@ -260,13 +261,13 @@ export default function LiveEye({ size = 80 }: LiveEyeProps) {
         x1={cx - eyeW - size * 0.12} y1={cy}
         x2={cx - eyeW} y2={cy}
         stroke="#c8a96e" strokeWidth={size * 0.03}
-        filter="url(#liveGlow)"
+        filter={`url(#glow-${uid})`}
       />
       <line
         x1={cx + eyeW} y1={cy}
         x2={cx + eyeW + size * 0.12} y2={cy}
         stroke="#c8a96e" strokeWidth={size * 0.03}
-        filter="url(#liveGlow)"
+        filter={`url(#glow-${uid})`}
       />
       {/* Corner reticle marks */}
       {([
