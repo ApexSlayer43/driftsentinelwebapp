@@ -6,7 +6,7 @@ import { createContext, useContext, useState, useEffect, useCallback, type React
 
 export interface OnboardingStep {
   id: string;
-  group: 'setup' | 'upload' | 'dashboard' | 'sessions' | 'protocol' | 'senti' | 'traderId';
+  group: 'setup' | 'upload' | 'dashboard' | 'forensics' | 'sessions' | 'cooldown' | 'protocol' | 'senti' | 'traderId';
   title: string;
   description: string;
   href: string;            // page to navigate to
@@ -99,6 +99,15 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     targetSelector: '[data-onboard="evidence-trends"]',
     tooltipPosition: 'top',
   },
+  {
+    id: 'weekly-wrap',
+    group: 'dashboard',
+    title: 'Your Weekly Wrap',
+    description: 'The Wrap button opens your weekly behavioral reflection — a Senti-generated summary of your last 7 days. It tracks intentions set, cooldowns used, BSS movement, and recurring themes. Think of it as your weekly after-action review, auto-generated from real data.',
+    href: '/',
+    targetSelector: '[data-onboard="weekly-wrap"]',
+    tooltipPosition: 'right',
+  },
   // ── Sessions & Evidence ───────────────────────────────────────
   {
     id: 'session-heatmap',
@@ -107,6 +116,26 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     description: 'Each cell is a trading day. Color intensity shows your DSI score — bright cyan for clean sessions, darker for violations. Click any day to drill into the session detail.',
     href: '/sessions',
     targetSelector: '[data-onboard="session-heatmap"]',
+    tooltipPosition: 'bottom',
+  },
+  // ── Forensics ───────────────────────────────────────────────
+  {
+    id: 'explore-forensics',
+    group: 'forensics',
+    title: 'Forensics — deep pattern analysis',
+    description: 'Forensics is where you go when you want the full story on a behavioral pattern. Select any pattern from the left panel to see what happened, the score impact (before/after BSS), recurrence history, and flagged trades. Acknowledge patterns once you\'ve reviewed them — they move to the Reviewed panel on the right.',
+    href: '/forensics',
+    targetSelector: '[data-onboard="forensics-page"]',
+    tooltipPosition: 'bottom',
+  },
+  // ── Cooldown ───────────────────────────────────────────────
+  {
+    id: 'cooldown-mode',
+    group: 'cooldown',
+    title: 'Cooldown Mode — the pause button',
+    description: 'When emotions are running hot, hit this button. Cooldown mode opens a full-screen breathing space with personalized prompts drawn from your daily intention, profile goal, and behavioral data. It\'s not punishment — it\'s a tactical pause. Keyboard shortcut: Cmd+Shift+K.',
+    href: '/',
+    targetSelector: '[data-onboard="cooldown-trigger"]',
     tooltipPosition: 'bottom',
   },
   // ── Protocol ──────────────────────────────────────────────────

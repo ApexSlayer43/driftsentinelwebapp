@@ -171,7 +171,7 @@ export default function ForensicsPage() {
   }
 
   return (
-    <div className="flex h-full gap-0 overflow-hidden">
+    <div data-onboard="forensics-page" className="flex h-full gap-0 overflow-hidden">
       {/* ═══ LEFT PANEL — Active Pattern Cards ═══ */}
       <div className="w-[320px] shrink-0 border-r border-white/[0.08] overflow-y-auto">
         <div className="px-5 pt-5 pb-3">

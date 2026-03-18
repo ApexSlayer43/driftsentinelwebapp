@@ -30,6 +30,7 @@ export function CooldownTrigger() {
       onClick={activate}
       disabled={loading || isActive}
       className="group flex items-center gap-2.5 rounded-xl px-3 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted transition-all hover:bg-white/[0.04] hover:text-positive disabled:opacity-40 disabled:cursor-not-allowed"
+      data-onboard="cooldown-trigger"
       title="Cooldown Mode (⌘⇧K)"
     >
       <Pause

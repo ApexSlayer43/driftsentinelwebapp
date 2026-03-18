@@ -185,6 +185,7 @@ export default function DashboardPage() {
               ? 'bg-[rgba(200,169,110,0.1)] border-[rgba(200,169,110,0.2)] text-gold'
               : 'bg-[rgba(200,169,110,0.03)] border-[rgba(200,169,110,0.08)] text-text-dim hover:text-warm-muted hover:bg-[rgba(200,169,110,0.06)]'
           }`}
+          data-onboard="weekly-wrap"
           title="Toggle Weekly Wrap"
         >
           <Calendar size={12} />
