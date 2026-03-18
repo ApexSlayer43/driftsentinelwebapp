@@ -74,17 +74,43 @@ export function profileReflectionPrompt(profileGoal: string): string {
 /**
  * Behavioral Insight — uses cooldown history to show the data.
  * Returns null if insufficient data.
+ *
+ * Adapts the message based on whether cooldowns are actually helping:
+ * - If cooldown BSS > non-cooldown BSS → reinforce the behavior
+ * - If roughly equal → neutral encouragement
+ * - If cooldown BSS < non-cooldown BSS → reframe around building the habit
  */
 export function behavioralInsightPrompt(
   data: BehavioralInsightData
 ): string | null {
   if (data.totalCooldownsUsed < 3) return null;
 
+  const delta = data.avgBssAfterCooldown - data.avgBssWithoutCooldown;
+
+  // Cooldowns are clearly helping
+  if (delta > 2) {
+    return (
+      `The last ${data.totalCooldownsUsed} times you paused here, ` +
+      `your next session averaged BSS ${data.avgBssAfterCooldown}. ` +
+      `Sessions without a pause averaged ${data.avgBssWithoutCooldown}.\n\n` +
+      `The data already answered the question.`
+    );
+  }
+
+  // Roughly equal — neutral framing
+  if (delta >= -2) {
+    return (
+      `You've paused ${data.totalCooldownsUsed} times now. ` +
+      `That's ${data.totalCooldownsUsed} moments where you chose awareness over impulse.\n\n` +
+      `Consistency compounds. Keep building the habit.`
+    );
+  }
+
+  // Cooldowns not yet showing results — reframe around awareness
   return (
-    `The last ${data.totalCooldownsUsed} times you stopped here, ` +
-    `your next session averaged BSS ${data.avgBssAfterCooldown}. ` +
-    `Sessions where you didn't stop averaged ${data.avgBssWithoutCooldown}.\n\n` +
-    `The data already answered the question.`
+    `You've stopped to think ${data.totalCooldownsUsed} times. ` +
+    `The pattern you're building isn't about one session — it's about who you're becoming.\n\n` +
+    `The trader who pauses is already different from the one who doesn't.`
   );
 }
 
