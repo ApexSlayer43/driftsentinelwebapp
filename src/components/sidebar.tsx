@@ -4,7 +4,6 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   LayoutDashboard,
-  AlertTriangle,
   BarChart3,
   Upload,
   Settings,
@@ -17,7 +16,6 @@ import { useOnboarding, ONBOARDING_STEPS } from '@/lib/onboarding-context';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { label: 'Historical', href: '/violations', icon: AlertTriangle },
   { label: 'Forensics', href: '/forensics', icon: Search },
   { label: 'History', href: '/history', icon: BarChart3 },
   { label: 'Ingest', href: '/ingest', icon: Upload },

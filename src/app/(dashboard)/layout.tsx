@@ -9,7 +9,6 @@ import {
   LogOut,
   Shield,
   UserCircle,
-  Clock,
   Crosshair,
   Bot,
   Radar,
@@ -32,7 +31,6 @@ import { CooldownTrigger } from '@/components/cooldown-trigger';
 const NAV_ITEMS: { title: string; icon: LucideIcon; href: string }[] = [
   { title: 'Dashboard', icon: LayoutDashboard, href: '/' },
   { title: 'Upload', icon: Upload, href: '/ingest' },
-  { title: 'Historical', icon: Clock, href: '/violations' },
   { title: 'Sessions', icon: Radar, href: '/sessions' },
   { title: 'Forensics', icon: Crosshair, href: '/forensics' },
   { title: 'Signal Config', icon: Shield, href: '/protocol' },

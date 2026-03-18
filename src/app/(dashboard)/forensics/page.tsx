@@ -33,7 +33,7 @@ export default function ForensicsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
 
-      // Get account_ref from accounts table — same pattern as Historical page
+      // Get account_ref from accounts table
       const { data: accounts } = await supabase
         .from('accounts')
         .select('account_ref')
