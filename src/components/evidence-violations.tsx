@@ -19,6 +19,7 @@ interface EvidenceViolationsProps {
  */
 export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
   const [violations, setViolations] = useState<ViolationDetail[]>([]);
+  const [reviewedCount, setReviewedCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -45,6 +46,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
       const since = new Date();
       since.setDate(since.getDate() - 7);
 
+      // Fetch active violations (unreviewed)
       const { data, error } = await supabase
         .from('violations')
         .select('*')
@@ -54,9 +56,18 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
         .order('created_at', { ascending: false })
         .limit(50);
 
+      // Also count reviewed violations in the same window
+      const { count } = await supabase
+        .from('violations')
+        .select('*', { count: 'exact', head: true })
+        .eq('account_ref', ref)
+        .neq('status', 'active')
+        .gte('created_at', since.toISOString());
+
       if (!error && data) {
         setViolations(data as ViolationDetail[]);
       }
+      setReviewedCount(count ?? 0);
       setLoading(false);
     }
 
@@ -74,8 +85,25 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
   if (violations.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="font-mono text-[14px] text-text-muted">No patterns detected in the last 7 days</p>
-        <p className="mt-1 font-mono text-[12px] text-positive">Clean record</p>
+        {reviewedCount > 0 ? (
+          <>
+            <p className="font-mono text-[14px] text-text-muted">
+              {reviewedCount} pattern{reviewedCount !== 1 ? 's' : ''} reviewed this week
+            </p>
+            <p className="mt-1 font-mono text-[12px] text-[#c8a96e]">All acknowledged</p>
+            <Link
+              href="/forensics"
+              className="mt-2 inline-block font-mono text-[11px] uppercase tracking-[0.12em] text-accent-primary transition-colors hover:text-accent-hover"
+            >
+              View in Forensics →
+            </Link>
+          </>
+        ) : (
+          <>
+            <p className="font-mono text-[14px] text-text-muted">No patterns detected in the last 7 days</p>
+            <p className="mt-1 font-mono text-[12px] text-positive">Clean record</p>
+          </>
+        )}
       </div>
     );
   }
