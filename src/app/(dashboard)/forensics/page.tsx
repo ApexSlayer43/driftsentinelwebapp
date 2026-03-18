@@ -122,14 +122,17 @@ export default function ForensicsPage() {
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [violations, selected]);
 
-  // Filter by status
-  const filteredViolations = useMemo(
-    () => showResolved ? violations : violations.filter(v => v.status === 'active'),
-    [violations, showResolved]
+  // Split by status
+  const activeViolations = useMemo(
+    () => violations.filter(v => v.status === 'active'),
+    [violations]
   );
-  const activeCount = violations.filter(v => v.status === 'active').length;
-  const resolvedCount = violations.length - activeCount;
-  const patternCount = filteredViolations.length;
+  const resolvedViolations = useMemo(
+    () => violations.filter(v => v.status !== 'active'),
+    [violations]
+  );
+  const activeCount = activeViolations.length;
+  const resolvedCount = resolvedViolations.length;
 
   // Handler for status changes from detail panel
   function handleStatusChange(violationId: string, newStatus: string) {
@@ -179,79 +182,53 @@ export default function ForensicsPage() {
           <div className="mt-1 font-mono text-[11px] text-text-muted">
             {activeCount} active{resolvedCount > 0 ? ` · ${resolvedCount} reviewed` : ''} · 30 days
           </div>
-
-          {resolvedCount > 0 && (
-            <button
-              onClick={() => setShowResolved(!showResolved)}
-              className="mt-2 font-mono text-[10px] text-[#7a766d] hover:text-[#c8a96e] transition-colors"
-            >
-              {showResolved ? 'Hide reviewed' : `Show ${resolvedCount} reviewed`}
-            </button>
-          )}
         </div>
 
-        <div className="px-3 pb-4 space-y-2">
-          {filteredViolations.map((v) => {
-            const isActive = v.violation_id === selectedId;
-            const modeLabel = getModeLabel(v.mode);
-            const modeIcon = getModeIcon(v.mode);
-            const dateStr = new Date(v.first_seen_utc).toLocaleDateString('en-US', {
-              month: 'short', day: 'numeric',
-            });
-            const timeStr = new Date(v.first_seen_utc).toLocaleTimeString('en-US', {
-              hour: '2-digit', minute: '2-digit', hour12: false,
-            });
-
-            // Find instrument from evidence fills
-            const evidenceFill = v.evidence_event_ids
-              .map((eid) => fillMap.get(eid))
-              .find(Boolean);
-            const instrument = evidenceFill?.instrument_root ?? evidenceFill?.contract ?? '—';
-
-            return (
-              <GlowPanel key={v.violation_id} className="">
-                <button
-                  onClick={() => setSelectedId(v.violation_id)}
-                  className={`w-full text-left rounded-xl px-4 py-3 transition-all ${
-                    isActive
-                      ? 'ring-1 ring-white/30 bg-white/[0.08]'
-                      : 'hover:bg-white/[0.06]'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <DynamicIcon name={modeIcon} size={14} className="text-text-muted shrink-0 mt-0.5" />
-                      <span className="font-mono text-[13px] font-semibold text-text-primary">
-                        {modeLabel}
-                      </span>
-                    </div>
-                    <span
-                      className="shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold"
-                      style={{
-                        color: v.severity === 'CRITICAL' ? '#FFFFFF' : v.severity === 'HIGH' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.6)',
-                        backgroundColor: v.severity === 'CRITICAL' ? 'rgba(255,255,255,0.12)' : v.severity === 'HIGH' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)',
-                      }}
-                    >
-                      {v.severity}
-                    </span>
-                  </div>
-                  <div className="mt-1.5 font-mono text-[11px] text-text-muted">
-                    {instrument} · {dateStr} · {timeStr} EST
-                  </div>
-                  <div className="mt-1 font-mono text-[11px] text-text-dim leading-relaxed line-clamp-2">
-                    {v.evidence_event_ids.length} trades flagged · {getModeDescription(v.mode).split('—')[0].trim()}
-                  </div>
-                  {v.status !== 'active' && (
-                    <div className="mt-1.5 flex items-center gap-1 font-mono text-[9px] text-[#c8a96e]">
-                      <CheckCircle2 size={9} />
-                      Reviewed
-                    </div>
-                  )}
-                </button>
-              </GlowPanel>
-            );
-          })}
+        {/* Active patterns */}
+        <div className="px-3 pb-2 space-y-2">
+          {activeViolations.map((v) => (
+            <PatternCard
+              key={v.violation_id}
+              violation={v}
+              isActive={v.violation_id === selectedId}
+              fillMap={fillMap}
+              onSelect={setSelectedId}
+            />
+          ))}
         </div>
+
+        {/* ═══ REVIEWED HISTORY — fills left panel empty space ═══ */}
+        {resolvedViolations.length > 0 && (
+          <div className="px-3 pb-4 mt-2">
+            <div className="mx-1 mb-2 flex items-center gap-2">
+              <div className="h-px flex-1 bg-white/[0.06]" />
+              <button
+                onClick={() => setShowResolved(!showResolved)}
+                className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[#7a766d] hover:text-[#c8a96e] transition-colors"
+              >
+                <CheckCircle2 size={10} />
+                {resolvedViolations.length} reviewed
+                {showResolved ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
+              </button>
+              <div className="h-px flex-1 bg-white/[0.06]" />
+            </div>
+
+            {showResolved && (
+              <div className="space-y-1.5">
+                {resolvedViolations.map((v) => (
+                  <PatternCard
+                    key={v.violation_id}
+                    violation={v}
+                    isActive={v.violation_id === selectedId}
+                    fillMap={fillMap}
+                    onSelect={setSelectedId}
+                    dimmed
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ═══ RIGHT PANEL — Detail View ═══ */}
@@ -272,6 +249,83 @@ export default function ForensicsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ * PATTERN CARD — reusable left-panel card for active + reviewed lists
+ * ════════════════════════════════════════════════════════════════════ */
+
+interface PatternCardProps {
+  violation: ViolationDetail;
+  isActive: boolean;
+  fillMap: Map<string, FillCanonical>;
+  onSelect: (id: string) => void;
+  dimmed?: boolean;
+}
+
+function PatternCard({ violation: v, isActive, fillMap, onSelect, dimmed }: PatternCardProps) {
+  const modeLabel = getModeLabel(v.mode);
+  const modeIcon = getModeIcon(v.mode);
+  const dateStr = new Date(v.first_seen_utc).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric',
+  });
+  const timeStr = new Date(v.first_seen_utc).toLocaleTimeString('en-US', {
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+
+  const evidenceFill = v.evidence_event_ids
+    .map((eid) => fillMap.get(eid))
+    .find(Boolean);
+  const instrument = evidenceFill?.instrument_root ?? evidenceFill?.contract ?? '—';
+
+  return (
+    <GlowPanel className="">
+      <button
+        onClick={() => onSelect(v.violation_id)}
+        className={`w-full text-left rounded-xl px-4 py-3 transition-all ${
+          isActive
+            ? 'ring-1 ring-white/30 bg-white/[0.08]'
+            : 'hover:bg-white/[0.06]'
+        } ${dimmed ? 'opacity-60' : ''}`}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <DynamicIcon name={modeIcon} size={14} className="text-text-muted shrink-0 mt-0.5" />
+            <span className="font-mono text-[13px] font-semibold text-text-primary">
+              {modeLabel}
+            </span>
+          </div>
+          {v.status === 'active' ? (
+            <span
+              className="shrink-0 rounded-full px-2 py-0.5 font-mono text-[11px] font-bold"
+              style={{
+                color: v.severity === 'CRITICAL' ? '#FFFFFF' : v.severity === 'HIGH' ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.6)',
+                backgroundColor: v.severity === 'CRITICAL' ? 'rgba(255,255,255,0.12)' : v.severity === 'HIGH' ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.05)',
+              }}
+            >
+              {v.severity}
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 shrink-0 font-mono text-[9px] text-[#c8a96e]">
+              <CheckCircle2 size={9} />
+              {v.status === 'acknowledged' ? 'Reviewed' : 'Resolved'}
+            </span>
+          )}
+        </div>
+        <div className="mt-1.5 font-mono text-[11px] text-text-muted">
+          {instrument} · {dateStr} · {timeStr} EST
+        </div>
+        <div className="mt-1 font-mono text-[11px] text-text-dim leading-relaxed line-clamp-2">
+          {v.evidence_event_ids.length} trades flagged · {getModeDescription(v.mode).split('—')[0].trim()}
+        </div>
+        {v.resolution_note && v.status !== 'active' && (
+          <div className="mt-1.5 font-mono text-[9px] text-[#7a766d] italic line-clamp-1">
+            &ldquo;{v.resolution_note}&rdquo;
+          </div>
+        )}
+      </button>
+    </GlowPanel>
   );
 }
 
@@ -298,11 +352,15 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
   const modeWeight = getModeWeight(violation.mode);
   const modeDescription = getModeDescription(violation.mode);
 
-  // Find the daily score — try violation date first, then +1 day (scoring may run next day)
-  const violationDate = new Date(violation.first_seen_utc).toISOString().split('T')[0];
-  const nextDate = new Date(new Date(violation.first_seen_utc).getTime() + 86400000).toISOString().split('T')[0];
-  const dayScore = dailyScores.find((ds) => ds.trading_date === violationDate)
-    ?? dailyScores.find((ds) => ds.trading_date === nextDate);
+  // Find the daily score — use window_end_utc (the scoring window that produced this violation),
+  // NOT first_seen_utc (which is the onset date and can be days/weeks old for persistent patterns).
+  // Fallback: try window_start_utc date, then first_seen_utc date.
+  const windowEndDate = new Date(violation.window_end_utc).toISOString().split('T')[0];
+  const windowStartDate = new Date(violation.window_start_utc).toISOString().split('T')[0];
+  const onsetDate = new Date(violation.first_seen_utc).toISOString().split('T')[0];
+  const dayScore = dailyScores.find((ds) => ds.trading_date === windowEndDate)
+    ?? dailyScores.find((ds) => ds.trading_date === windowStartDate)
+    ?? dailyScores.find((ds) => ds.trading_date === onsetDate);
 
   // Real numbers from the scoring engine
   const bssBefore = dayScore?.bss_previous ?? null;
@@ -312,6 +370,9 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
     : null;
   const dsiScore = dayScore?.dsi_score ?? null;
   const alpha = dayScore?.alpha_effective ? Number(dayScore.alpha_effective) : null;
+
+  // Weighted penalty = raw points × mode weight (what DSI actually deducts)
+  const weightedPenalty = Math.round(violation.points * modeWeight);
 
   const dateStr = new Date(violation.first_seen_utc).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
@@ -431,14 +492,17 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
               </div>
               <div className="text-center">
                 <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-dim mb-1">Change</div>
-                <div className={`font-mono text-[28px] font-bold ${actualBssDelta < 0 ? 'text-[#FB923C]' : actualBssDelta > 0 ? 'text-[#22D3EE]' : 'text-text-muted'}`} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                <div className={`font-mono text-[28px] font-bold ${actualBssDelta < 0 ? 'text-[#FB923C]' : actualBssDelta > 0 ? 'text-[#c8a96e]' : 'text-text-muted'}`} style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {actualBssDelta > 0 ? '+' : ''}{actualBssDelta}
                 </div>
               </div>
             </div>
 
             <p className="font-mono text-[12px] text-text-muted leading-relaxed text-center">
-              {impactLabel} on your Behavioral Stability Score. Session score for this day was {dsiScore}/100.
+              {impactLabel} on your Behavioral Stability Score.
+              {dsiScore !== null && ` This day's session score was ${dsiScore}/100`}
+              {dayScore && dayScore.violation_count > 1 && ` (${dayScore.violation_count} patterns combined)`}
+              {dsiScore !== null && '.'}
             </p>
           </>
         ) : (
@@ -534,49 +598,81 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
 
         {mathExpanded && (
           <GlowPanel className="p-5 mt-3">
-            <div className="grid grid-cols-4 gap-3 items-center mb-4">
-              <div className="text-center">
-                <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  -{violation.points}
-                </div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
-                  Session Penalty
-                </div>
-                <div className="font-mono text-[9px] text-text-dim mt-0.5">
-                  ×{modeWeight} weight
-                </div>
+            {/* Step 1: This pattern's penalty */}
+            <div className="mb-4">
+              <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-dim mb-2">
+                Step 1 · Pattern Penalty
               </div>
-              <div className="text-center font-mono text-[14px] text-text-dim">→</div>
-              <div className="text-center">
-                <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {dsiScore !== null ? `${dsiScore}/100` : '—'}
-                </div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
-                  Session Score
-                </div>
+              <div className="flex items-baseline gap-3">
+                <span className="font-mono text-[22px] font-bold text-[#FB923C]" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  -{weightedPenalty}
+                </span>
+                <span className="font-mono text-[11px] text-text-muted">
+                  weighted points deducted from session
+                </span>
               </div>
-              <div className="text-center">
-                <div className="font-mono text-[11px] text-text-dim mb-1">Smoothed →</div>
-                <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {actualBssDelta !== null ? (actualBssDelta > 0 ? `+${actualBssDelta}` : actualBssDelta) : '—'}
+              {modeWeight !== 1.0 && (
+                <div className="mt-1 font-mono text-[10px] text-[#7a766d]">
+                  {violation.points} base × {modeWeight} ({getModeLabel(violation.mode)} weight) = {weightedPenalty}
                 </div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
-                  Score Change
+              )}
+            </div>
+
+            {/* Step 2: Day's final session score */}
+            {dsiScore !== null && (
+              <div className="mb-4 pt-3 border-t border-white/[0.06]">
+                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-dim mb-2">
+                  Step 2 · Day&apos;s Session Score
                 </div>
-                {bssBefore !== null && bssAfter !== null && (
-                  <div className="font-mono text-[9px] text-text-dim mt-0.5">
-                    {bssBefore} → {bssAfter}
+                <div className="flex items-baseline gap-3">
+                  <span className="font-mono text-[22px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {dsiScore}/100
+                  </span>
+                  <span className="font-mono text-[11px] text-text-muted">
+                    {dayScore && dayScore.violation_count > 1
+                      ? `final score for the day (${dayScore.violation_count} patterns total)`
+                      : 'final score for this trading day'
+                    }
+                  </span>
+                </div>
+                {dayScore && dayScore.violation_count > 1 && (
+                  <div className="mt-1.5 font-mono text-[10px] text-[#7a766d] leading-relaxed">
+                    This day had {dayScore.violation_count} patterns detected. The session score reflects all of them combined, not just this one.
+                  </div>
+                )}
+                {dayScore && dayScore.violation_count <= 1 && dsiScore > 80 && violation.points > 20 && (
+                  <div className="mt-1.5 font-mono text-[10px] text-[#7a766d] leading-relaxed">
+                    The session score factors in your full trading activity for the day — compliant trades offset pattern penalties.
                   </div>
                 )}
               </div>
-            </div>
+            )}
 
-            <div className="pt-3 border-t border-white/[0.08] font-mono text-[11px] text-text-dim leading-relaxed">
-              The {violation.points}-pt penalty is deducted from your session score (not directly from BSS).
-              Your session score{dsiScore !== null ? ` (${dsiScore}/100)` : ''} is then smoothed into your overall BSS
-              {alpha !== null && ` using exponential smoothing (alpha: ${alpha})`}. This is why the score change
-              ({actualBssDelta !== null ? actualBssDelta : '—'}) differs from the raw penalty (-{violation.points}).
-            </div>
+            {/* Step 3: Smoothed into BSS */}
+            {actualBssDelta !== null && bssBefore !== null && bssAfter !== null && (
+              <div className="pt-3 border-t border-white/[0.06]">
+                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-dim mb-2">
+                  Step 3 · Smoothed Into Your Score
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-mono text-[16px] text-text-muted" style={{ fontVariantNumeric: 'tabular-nums' }}>{bssBefore}</span>
+                    <span className="font-mono text-[12px] text-text-dim">→</span>
+                    <span className="font-mono text-[16px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>{bssAfter}</span>
+                  </div>
+                  <span className={`font-mono text-[16px] font-bold ${actualBssDelta < 0 ? 'text-[#FB923C]' : actualBssDelta > 0 ? 'text-[#c8a96e]' : 'text-text-muted'}`} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    ({actualBssDelta > 0 ? '+' : ''}{actualBssDelta})
+                  </span>
+                </div>
+                <div className="mt-1.5 font-mono text-[10px] text-[#7a766d] leading-relaxed">
+                  Your session score is blended into your overall Behavioral Stability Score
+                  {alpha !== null && ` (smoothing factor: ${alpha})`}.
+                  {actualBssDelta > 0 && ' Your score went up because the session score was higher than your previous average.'}
+                  {actualBssDelta < 0 && ' Your score decreased because the session score pulled your average down.'}
+                  {actualBssDelta === 0 && ' No net change — the session score matched your existing average.'}
+                </div>
+              </div>
+            )}
           </GlowPanel>
         )}
       </div>
