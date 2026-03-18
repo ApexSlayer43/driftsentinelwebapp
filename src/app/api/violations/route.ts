@@ -62,14 +62,20 @@ export async function PATCH(req: Request) {
     update.resolution_note = resolution_note;
   }
 
-  const { error: updateErr } = await supabase
+  const { data: updated, error: updateErr } = await supabase
     .from('violations')
     .update(update)
     .eq('violation_id', violation_id)
-    .eq('account_ref', ref);
+    .eq('account_ref', ref)
+    .select('violation_id')
+    .maybeSingle();
 
   if (updateErr) {
     return NextResponse.json({ error: updateErr.message }, { status: 500 });
+  }
+
+  if (!updated) {
+    return NextResponse.json({ error: 'Violation not found or update blocked' }, { status: 404 });
   }
 
   return NextResponse.json({ ok: true, violation_id, status });

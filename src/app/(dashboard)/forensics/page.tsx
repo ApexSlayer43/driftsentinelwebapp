@@ -368,6 +368,35 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
   const [noteOpen, setNoteOpen] = useState(false);
   const [note, setNote] = useState(violation.resolution_note ?? '');
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Shared save handler — checks response, reverts on failure
+  async function saveStatus(newStatus: string, resolutionNote?: string) {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const res = await fetch('/api/violations', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          violation_id: violation.violation_id,
+          status: newStatus,
+          ...(resolutionNote !== undefined ? { resolution_note: resolutionNote } : {}),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setSaveError(data.error || 'Failed to save. Try again.');
+        setSaving(false);
+        return;
+      }
+      onStatusChange(violation.violation_id, newStatus);
+      setSaving(false);
+    } catch {
+      setSaveError('Network error. Check your connection.');
+      setSaving(false);
+    }
+  }
   const modeLabel = getModeLabel(violation.mode);
   const modeIcon = getModeIcon(violation.mode);
   const modeWeight = getModeWeight(violation.mode);
@@ -711,20 +740,16 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
               </span>
             </div>
 
+            {saveError && (
+              <div className="rounded-lg bg-[rgba(239,68,68,0.08)] border border-[rgba(239,68,68,0.15)] px-3 py-2 font-mono text-[11px] text-[#EF4444]">
+                {saveError}
+              </div>
+            )}
+
             {!noteOpen ? (
               <div className="flex gap-2">
                 <button
-                  onClick={() => {
-                    setSaving(true);
-                    fetch('/api/violations', {
-                      method: 'PATCH',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ violation_id: violation.violation_id, status: 'acknowledged' }),
-                    }).then(() => {
-                      onStatusChange(violation.violation_id, 'acknowledged');
-                      setSaving(false);
-                    }).catch(() => setSaving(false));
-                  }}
+                  onClick={() => saveStatus('acknowledged')}
                   disabled={saving}
                   className="flex items-center gap-2 rounded-xl bg-[rgba(200,169,110,0.08)] border border-[rgba(200,169,110,0.15)] px-4 py-2.5 font-mono text-[11px] font-semibold text-[#c8a96e] transition-all hover:bg-[rgba(200,169,110,0.12)] disabled:opacity-50"
                 >
@@ -749,21 +774,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                 />
                 <div className="flex gap-2">
                   <button
-                    onClick={() => {
-                      setSaving(true);
-                      fetch('/api/violations', {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          violation_id: violation.violation_id,
-                          status: 'acknowledged',
-                          resolution_note: note || undefined,
-                        }),
-                      }).then(() => {
-                        onStatusChange(violation.violation_id, 'acknowledged');
-                        setSaving(false);
-                      }).catch(() => setSaving(false));
-                    }}
+                    onClick={() => saveStatus('acknowledged', note || undefined)}
                     disabled={saving}
                     className="flex items-center gap-2 rounded-xl bg-[rgba(200,169,110,0.08)] border border-[rgba(200,169,110,0.15)] px-4 py-2.5 font-mono text-[11px] font-semibold text-[#c8a96e] transition-all hover:bg-[rgba(200,169,110,0.12)] disabled:opacity-50"
                   >
@@ -802,18 +813,14 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
               </div>
             )}
 
+            {saveError && (
+              <div className="rounded-lg bg-[rgba(239,68,68,0.08)] border border-[rgba(239,68,68,0.15)] px-3 py-2 font-mono text-[11px] text-[#EF4444]">
+                {saveError}
+              </div>
+            )}
+
             <button
-              onClick={() => {
-                setSaving(true);
-                fetch('/api/violations', {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ violation_id: violation.violation_id, status: 'active' }),
-                }).then(() => {
-                  onStatusChange(violation.violation_id, 'active');
-                  setSaving(false);
-                }).catch(() => setSaving(false));
-              }}
+              onClick={() => saveStatus('active')}
               disabled={saving}
               className="flex items-center gap-1.5 font-mono text-[10px] text-[#4a473f] hover:text-[#7a766d] transition-colors"
             >
