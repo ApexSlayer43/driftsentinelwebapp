@@ -211,14 +211,28 @@ export default function TraderIdPage() {
     );
   }
 
-  const tierStyle = getTierStyle(data.bss_tier);
+  // Compute tier from BSS score — don't blindly trust backend tier value
+  // Walk the TIERS array backwards to find the highest tier the score qualifies for
+  const computedTierIndex = (() => {
+    for (let i = TIERS.length - 1; i >= 0; i--) {
+      if (data.bss_score >= TIERS[i].min) return i;
+    }
+    return 0;
+  })();
+  const computedTier = TIERS[computedTierIndex].key;
+
+  // Use backend tier if it matches a known tier, otherwise use computed
+  const backendTierIndex = TIERS.findIndex(t => t.key === data.bss_tier);
+  const currentTierIndex = backendTierIndex >= 0 ? backendTierIndex : computedTierIndex;
+  const effectiveTier = TIERS[currentTierIndex].key;
+
+  const tierStyle = getTierStyle(effectiveTier);
   const delta = data.bss_delta;
   const profileId = `ds://${userName.toLowerCase().replace(/\s+/g, '-')}-${data.account_ref.slice(0, 4)}`;
   const shareUrl = `driftsentinel.com/id/${userName.toLowerCase().replace(/\s+/g, '-')}-${data.account_ref.slice(0, 4)}`;
   const verdict = computeVerdict(data);
   const trend = computeTrend(sparkline);
-  const nextTierEst = estimateSessionsToNextTier(data.bss_score, data.bss_tier, sparkline);
-  const currentTierIndex = TIERS.findIndex(t => t.key === data.bss_tier);
+  const nextTierEst = estimateSessionsToNextTier(data.bss_score, effectiveTier, sparkline);
   const currentTierMin = TIERS[currentTierIndex]?.min ?? 0;
   const nextTierMin = currentTierIndex < TIERS.length - 1 ? TIERS[currentTierIndex + 1].min : 100;
   const tierProgress = nextTierMin > currentTierMin
@@ -302,7 +316,7 @@ export default function TraderIdPage() {
                 }}
               >
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: tierStyle.color }} />
-                {data.bss_tier}
+                {effectiveTier}
               </div>
 
               {/* Behavioral Verdict */}
@@ -489,7 +503,7 @@ export default function TraderIdPage() {
               <span
                 key={tier.key}
                 className={`font-mono text-[8px] uppercase tracking-[0.1em] ${
-                  tier.key === data.bss_tier
+                  tier.key === effectiveTier
                     ? 'font-semibold text-[#c8a96e]'
                     : 'text-[#4a473f]'
                 }`}
