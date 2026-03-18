@@ -3,7 +3,7 @@
 import { useState, useEffect, useId } from 'react';
 import { UserCircle, Copy, Check, Shield, Flame, TrendingUp, TrendingDown, ChevronDown, ChevronRight, Target } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { getTierStyle } from '@/lib/tokens';
+import { getTierStyle, resolveTier, TIER_THRESHOLDS } from '@/lib/tokens';
 import type { StatePayload } from '@/lib/types';
 import { GlowPanel } from '@/components/ui/glow-panel';
 import { PerformanceCard } from '@/components/performance-card';
@@ -211,20 +211,9 @@ export default function TraderIdPage() {
     );
   }
 
-  // Compute tier from BSS score — don't blindly trust backend tier value
-  // Walk the TIERS array backwards to find the highest tier the score qualifies for
-  const computedTierIndex = (() => {
-    for (let i = TIERS.length - 1; i >= 0; i--) {
-      if (data.bss_score >= TIERS[i].min) return i;
-    }
-    return 0;
-  })();
-  const computedTier = TIERS[computedTierIndex].key;
-
-  // Use backend tier if it matches a known tier, otherwise use computed
-  const backendTierIndex = TIERS.findIndex(t => t.key === data.bss_tier);
-  const currentTierIndex = backendTierIndex >= 0 ? backendTierIndex : computedTierIndex;
-  const effectiveTier = TIERS[currentTierIndex].key;
+  // Resolve tier — uses shared utility (falls back to score-based computation)
+  const effectiveTier = resolveTier(data.bss_score, data.bss_tier);
+  const currentTierIndex = TIER_THRESHOLDS.findIndex(t => t.key === effectiveTier);
 
   const tierStyle = getTierStyle(effectiveTier);
   const delta = data.bss_delta;
@@ -233,8 +222,8 @@ export default function TraderIdPage() {
   const verdict = computeVerdict(data);
   const trend = computeTrend(sparkline);
   const nextTierEst = estimateSessionsToNextTier(data.bss_score, effectiveTier, sparkline);
-  const currentTierMin = TIERS[currentTierIndex]?.min ?? 0;
-  const nextTierMin = currentTierIndex < TIERS.length - 1 ? TIERS[currentTierIndex + 1].min : 100;
+  const currentTierMin = TIER_THRESHOLDS[currentTierIndex]?.min ?? 0;
+  const nextTierMin = currentTierIndex < TIER_THRESHOLDS.length - 1 ? TIER_THRESHOLDS[currentTierIndex + 1].min : 100;
   const tierProgress = nextTierMin > currentTierMin
     ? Math.min(100, Math.round(((data.bss_score - currentTierMin) / (nextTierMin - currentTierMin)) * 100))
     : 100;

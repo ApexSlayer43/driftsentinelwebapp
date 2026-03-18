@@ -14,6 +14,7 @@ import { useOnboarding } from '@/lib/onboarding-context';
 import { IntentionModal } from '@/components/intention-modal';
 import { WeeklyWrap } from '@/components/weekly-wrap';
 import { SessionNotepad } from '@/components/session-notepad';
+import { resolveTier } from '@/lib/tokens';
 import type { StatePayload } from '@/lib/types';
 
 /** Step IDs that require the evidence sheet to be open */
@@ -122,7 +123,7 @@ export default function DashboardPage() {
     const state = data.onboarding.is_building ? 'BUILDING' : data.drift.state;
     window.dispatchEvent(
       new CustomEvent('drift-state-update', {
-        detail: { state, bssScore: data.bss_score, bssTier: data.bss_tier },
+        detail: { state, bssScore: data.bss_score, bssTier: resolveTier(data.bss_score, data.bss_tier) },
       })
     );
   }, [data]);
@@ -273,7 +274,7 @@ export default function DashboardPage() {
         >
           <BssGauge
             score={data.bss_score}
-            tier={data.bss_tier}
+            tier={resolveTier(data.bss_score, data.bss_tier)}
             state={effectiveState}
             delta={data.bss_delta ?? 0}
             yesterdayScore={data.bss_yesterday ?? 50}
@@ -294,7 +295,7 @@ export default function DashboardPage() {
           {data.bss_sparkline && data.bss_sparkline.length >= 2 && (
             <Sparkline
               data={data.bss_sparkline}
-              tier={data.bss_tier}
+              tier={resolveTier(data.bss_score, data.bss_tier)}
               width={40}
               height={16}
             />

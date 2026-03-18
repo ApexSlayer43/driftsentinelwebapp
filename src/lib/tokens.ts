@@ -153,6 +153,33 @@ export function getTierStyle(tier: string) {
   return TIER_STYLES[tier as keyof typeof TIER_STYLES] ?? TIER_STYLES.DORMANT;
 }
 
+/**
+ * Tier thresholds — single source of truth.
+ * Used by trader-id, dashboard, BssGauge to resolve tier from score
+ * when the backend returns an unrecognized tier key.
+ */
+export const TIER_THRESHOLDS: { key: BssTier; min: number }[] = [
+  { key: 'DORMANT', min: 0 },
+  { key: 'FORMING', min: 20 },
+  { key: 'DEVELOPING', min: 40 },
+  { key: 'CONSISTENT', min: 60 },
+  { key: 'DISCIPLINED', min: 75 },
+  { key: 'SOVEREIGN', min: 90 },
+];
+
+/** Resolve tier from BSS score — fallback when backend tier is unrecognized */
+export function resolveTier(bssScore: number, backendTier?: string): BssTier {
+  // If backend tier is a known key, trust it
+  if (backendTier && backendTier in TIER_STYLES) {
+    return backendTier as BssTier;
+  }
+  // Otherwise compute from score
+  for (let i = TIER_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (bssScore >= TIER_THRESHOLDS[i].min) return TIER_THRESHOLDS[i].key;
+  }
+  return 'DORMANT';
+}
+
 export function getSeverityColor(severity: string) {
   return SEVERITY_COLORS[severity as keyof typeof SEVERITY_COLORS] ?? SEVERITY_COLORS.LOW;
 }
