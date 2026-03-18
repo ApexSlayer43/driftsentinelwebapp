@@ -49,6 +49,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
         .from('violations')
         .select('*')
         .eq('account_ref', ref)
+        .eq('status', 'active')
         .gte('created_at', since.toISOString())
         .order('created_at', { ascending: false })
         .limit(50);
