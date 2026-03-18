@@ -115,6 +115,14 @@ export async function GET(req: Request) {
   const dsiScores = sessions.filter(s => s.dsi_score != null).map(s => s.dsi_score as number);
   const avgDsi = dsiScores.length > 0 ? Math.round(dsiScores.reduce((a, b) => a + b, 0) / dsiScores.length) : null;
 
+  // Quality distribution counts
+  const qualityCounts: Record<string, number> = { CLEAN: 0, MINOR: 0, DEGRADED: 0, COMPROMISED: 0, BREAKDOWN: 0 };
+  for (const s of sessions) {
+    if (s.session_quality && s.session_quality in qualityCounts) {
+      qualityCounts[s.session_quality]++;
+    }
+  }
+
   // Date range
   const firstDate = sessions.length > 0 ? sessions[0].trading_date : null;
   const lastDate = sessions.length > 0 ? sessions[sessions.length - 1].trading_date : null;
@@ -139,6 +147,7 @@ export async function GET(req: Request) {
       cleanSessions,
       cleanRate,
       avgDsi,
+      qualityCounts,
     },
     dateRange: firstDate && lastDate ? { start: firstDate, end: lastDate } : null,
   });
