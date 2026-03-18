@@ -52,7 +52,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
           <div className="flex items-center gap-3">
             <div className="h-1 w-10 rounded-full bg-text-dim" />
             <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">
-              Evidence Breakdown
+              Score Breakdown
             </span>
           </div>
           <button
@@ -84,7 +84,7 @@ export function EvidenceSheet({ isOpen, onClose, accountRef }: EvidenceSheetProp
           <div data-onboard="evidence-violations" className="flex flex-col min-h-0 border-r border-white/[0.08]">
             <div className="px-4 py-2.5 shrink-0">
               <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">
-                Violations
+                Patterns
               </h3>
             </div>
             <div className="flex-1 overflow-y-auto px-4 pb-4">

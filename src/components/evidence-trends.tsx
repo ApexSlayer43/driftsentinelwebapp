@@ -80,7 +80,7 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
   if (loading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-positive border-t-transparent" />
+        <div className="h-4 w-4 animate-pulse rounded-full bg-[rgba(200,169,110,0.06)]" />
       </div>
     );
   }
@@ -98,12 +98,12 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
       {/* Legend */}
       <div className="mb-4 flex items-center gap-4 font-mono text-[12px]">
         <div className="flex items-center gap-1.5">
-          <div className="h-2 w-2 rounded-full bg-positive" />
-          <span className="text-text-muted">BSS</span>
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#c8a96e' }} />
+          <span className="text-text-muted">Score</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#94A3B8' }} />
-          <span className="text-text-muted">DSI</span>
+          <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#8a7345' }} />
+          <span className="text-text-muted">Session Score</span>
         </div>
       </div>
 
@@ -128,32 +128,32 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1A1D27',
-              border: '1px solid rgba(255,255,255,0.08)',
+              backgroundColor: 'rgba(8,10,14,0.95)',
+              border: '1px solid rgba(200,169,110,0.15)',
               borderRadius: '8px',
               fontFamily: 'var(--font-mono)',
               fontSize: '10px',
             }}
-            labelStyle={{ color: '#E2E8F0' }}
-            itemStyle={{ color: '#94A3B8' }}
+            labelStyle={{ color: '#ede9e1' }}
+            itemStyle={{ color: '#bdb8ae' }}
           />
           <Line
             type="monotone"
             dataKey="bss"
-            stroke="#22D3EE"
+            stroke="#c8a96e"
             strokeWidth={2}
-            dot={{ fill: '#22D3EE', r: 3, strokeWidth: 0 }}
-            activeDot={{ r: 5, stroke: '#22D3EE', strokeWidth: 2, fill: '#1A1D27' }}
-            name="BSS"
+            dot={{ fill: '#c8a96e', r: 3, strokeWidth: 0 }}
+            activeDot={{ r: 5, stroke: '#c8a96e', strokeWidth: 2, fill: '#1A1D27' }}
+            name="Score"
           />
           <Line
             type="monotone"
             dataKey="dsi"
-            stroke="#94A3B8"
+            stroke="#8a7345"
             strokeWidth={2}
-            dot={{ fill: '#94A3B8', r: 3, strokeWidth: 0 }}
-            activeDot={{ r: 5, stroke: '#94A3B8', strokeWidth: 2, fill: '#1A1D27' }}
-            name="DSI"
+            dot={{ fill: '#8a7345', r: 3, strokeWidth: 0 }}
+            activeDot={{ r: 5, stroke: '#8a7345', strokeWidth: 2, fill: '#1A1D27' }}
+            name="Session Score"
           />
         </LineChart>
       </ResponsiveContainer>
@@ -161,15 +161,15 @@ export function EvidenceTrends({ accountRef }: EvidenceTrendsProps) {
       {/* Summary stats */}
       <div className="mt-4 grid grid-cols-3 gap-3">
         <TrendStat
-          label="BSS Range"
+          label="Score Range"
           value={`${Math.min(...data.map(d => d.bss))} – ${Math.max(...data.map(d => d.bss))}`}
         />
         <TrendStat
-          label="Avg BSS"
+          label="Avg Score"
           value={String(Math.round(data.reduce((s, d) => s + d.bss, 0) / data.length))}
         />
         <TrendStat
-          label="Avg DSI"
+          label="Avg Session"
           value={String(Math.round(data.reduce((s, d) => s + d.dsi, 0) / data.length))}
         />
       </div>

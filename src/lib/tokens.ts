@@ -62,6 +62,21 @@ export const MODE_LABELS: Record<string, string> = {
   SIZE_ESCALATION: 'Size Escalation',
 };
 
+/** Human-readable descriptions of what each pattern means — no jargon */
+export const MODE_DESCRIPTIONS: Record<string, string> = {
+  OVERSIZE: 'Position size exceeded your protocol limit — too many contracts in a single trade.',
+  OFF_SESSION: 'Trades were placed outside your defined session window.',
+  FREQUENCY: 'Too many trades executed in a short time window — rapid-fire entries.',
+  BASELINE_SHIFT: 'Your trading behavior shifted significantly from your established baseline.',
+  HESITATION: 'Delayed entries or exits suggest hesitation in execution.',
+  REVENGE_ENTRY: 'Rapid re-entry after a loss suggests emotional re-engagement.',
+  SIZE_ESCALATION: 'Position sizes increased progressively through the session.',
+};
+
+export function getModeDescription(mode: string) {
+  return MODE_DESCRIPTIONS[mode] ?? 'A behavioral pattern was detected in your trading session.';
+}
+
 export const MODE_ICONS: Record<string, string> = {
   OVERSIZE: 'Scale',
   OFF_SESSION: 'Clock',

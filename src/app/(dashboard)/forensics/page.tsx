@@ -3,10 +3,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Clock, Layers, Search } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { getModeLabel, getModeIcon, getModeWeight } from '@/lib/tokens';
+import { getModeLabel, getModeIcon, getModeWeight, getModeDescription } from '@/lib/tokens';
 import { DynamicIcon } from '@/components/dynamic-icon';
 import { GlowPanel } from '@/components/ui/glow-panel';
 import type { ViolationDetail, FillCanonical, DailyScore } from '@/lib/types';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 /**
  * Forensics — Pattern analysis deep-dive
@@ -212,7 +213,7 @@ export default function ForensicsPage() {
                     {instrument} · {dateStr} · {timeStr} EST
                   </div>
                   <div className="mt-1 font-mono text-[11px] text-text-dim leading-relaxed line-clamp-2">
-                    {v.evidence_event_ids.length} fills flagged under rule {v.rule_id}. Severity: {v.severity}.
+                    {v.evidence_event_ids.length} trades flagged · {getModeDescription(v.mode).split('—')[0].trim()}
                   </div>
                 </button>
               </GlowPanel>
@@ -254,9 +255,11 @@ interface ForensicDetailProps {
 }
 
 function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScores }: ForensicDetailProps) {
+  const [mathExpanded, setMathExpanded] = useState(false);
   const modeLabel = getModeLabel(violation.mode);
   const modeIcon = getModeIcon(violation.mode);
   const modeWeight = getModeWeight(violation.mode);
+  const modeDescription = getModeDescription(violation.mode);
 
   // Find the daily score — try violation date first, then +1 day (scoring may run next day)
   const violationDate = new Date(violation.first_seen_utc).toISOString().split('T')[0];
@@ -290,9 +293,9 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
   const windowMinutes = Math.round(windowMs / 60000);
 
   // Session context from fills
-  const entries = fills.length;
+  const tradeCount = fills.length;
   const buys = fills.filter((f) => f.side === 'BUY').length;
-  const winRate = entries > 0 ? Math.round((buys / entries) * 100) : 0;
+  const winRate = tradeCount > 0 ? Math.round((buys / tradeCount) * 100) : 0;
   const maxLot = fills.reduce((max, f) => Math.max(max, f.qty), 0);
   const instruments = [...new Set(fills.map((f) => f.instrument_root || f.contract))];
   const instrument = instruments[0] ?? '—';
@@ -315,6 +318,13 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
         const daysAgo = Math.round((now - last.date.getTime()) / 86400000);
         return daysAgo === 0 ? 'today' : `${daysAgo}d ago`;
       })()
+    : null;
+
+  // Plain-language impact severity
+  const impactLabel = actualBssDelta !== null
+    ? Math.abs(actualBssDelta) >= 10 ? 'Significant impact'
+      : Math.abs(actualBssDelta) >= 5 ? 'Moderate impact'
+      : 'Minor impact'
     : null;
 
   return (
@@ -342,141 +352,81 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
         </div>
       </div>
 
-      {/* ═══ SBI ANALYSIS ═══ */}
-      <div>
+      {/* ═══ WHAT HAPPENED — plain narrative, no S/B/I badges ═══ */}
+      <GlowPanel className="p-5">
         <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-3">
-          SBI Analysis
+          What Happened
         </div>
-        <div className="space-y-4">
-          {/* Situation */}
-          <GlowPanel className="p-4 flex gap-3.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/15 font-mono text-[12px] font-bold text-white">
-              S
-            </div>
-            <div>
-              <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted mb-1">
-                Situation (Window)
-              </div>
-              <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
-                {instrument} session. {entries} entries executed over {windowMinutes} minutes between {windowStart}–{windowEnd} EST.
-              </div>
-            </div>
-          </GlowPanel>
-
-          {/* Behavior */}
-          <GlowPanel className="p-4 flex gap-3.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 font-mono text-[12px] font-bold text-white">
-              B
-            </div>
-            <div>
-              <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted mb-1">
-                Behavior
-              </div>
-              <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
-                {modeLabel} pattern detected. {violation.evidence_event_ids.length} fills flagged under rule {violation.rule_id} with severity {violation.severity}.
-                {maxLot > 1 && ` Max lot size reached ${maxLot} contracts.`}
-              </div>
-            </div>
-          </GlowPanel>
-
-          {/* Impact */}
-          <GlowPanel className="p-4 flex gap-3.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/12 font-mono text-[12px] font-bold text-white">
-              I
-            </div>
-            <div>
-              <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted mb-1">
-                Impact
-              </div>
-              <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
-                {actualBssDelta !== null ? (
-                  <>
-                    This pattern caused a {violation.points}-pt DSI penalty, driving the Daily Stability Index to{' '}
-                    <span className="font-bold text-text-primary">{dsiScore}/100</span>.
-                    BSS moved from {bssBefore} to {bssAfter}{' '}
-                    (<span className="font-bold text-white">{actualBssDelta}</span>)
-                    {alpha !== null && ` at ${alpha} EWMA alpha`}.
-                  </>
-                ) : (
-                  <>
-                    This pattern applied a {violation.points}-pt DSI penalty (not subtracted directly from BSS).
-                    The DSI score feeds into BSS via EWMA smoothing — the {'\u2013'}19 you see on the dashboard
-                    is the smoothed result, not the raw penalty.
-                  </>
-                )}
-              </div>
-            </div>
-          </GlowPanel>
+        <div className="font-mono text-[13px] text-text-secondary leading-relaxed space-y-3">
+          <p>
+            On {dateStr}, you executed {violation.evidence_event_ids.length} trades on {instrument} in {windowMinutes} minutes
+            ({windowStart}–{windowEnd} EST).
+          </p>
+          <p>
+            {modeDescription}
+            {maxLot > 1 && ` Your largest position was ${maxLot} contracts.`}
+          </p>
         </div>
-      </div>
+      </GlowPanel>
 
-      {/* ═══ SCORING FLOW — DSI Penalty → DSI Score → BSS Delta ═══ */}
-      <div>
-        <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-3">
-          Scoring Flow
+      {/* ═══ SCORE IMPACT — simple before/after, no math ═══ */}
+      <GlowPanel className="p-5">
+        <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-4">
+          Score Impact
         </div>
 
-        {/* Visual pipeline: penalty → DSI → BSS */}
-        <GlowPanel className="p-5">
-          <div className="grid grid-cols-4 gap-3 items-center">
-            {/* Step 1: DSI Penalty */}
-            <div className="text-center">
-              <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                -{violation.points}
-              </div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
-                DSI Penalty
-              </div>
-              <div className="font-mono text-[9px] text-text-dim mt-0.5">
-                ×{modeWeight} weight
-              </div>
-            </div>
-
-            {/* Arrow */}
-            <div className="text-center font-mono text-[14px] text-text-dim">→</div>
-
-            {/* Step 2: DSI Score for the day */}
-            <div className="text-center">
-              <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {dsiScore !== null ? `${dsiScore}/100` : '—'}
-              </div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
-                DSI Score
-              </div>
-              <div className="font-mono text-[9px] text-text-dim mt-0.5">
-                Daily stability
-              </div>
-            </div>
-
-            {/* Arrow */}
-            <div className="text-center">
-              <div className="font-mono text-[11px] text-text-dim mb-1">EWMA →</div>
-              <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {actualBssDelta !== null ? actualBssDelta : '—'}
-              </div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
-                BSS Delta
-              </div>
-              {bssBefore !== null && bssAfter !== null && (
-                <div className="font-mono text-[9px] text-text-dim mt-0.5">
-                  {bssBefore} → {bssAfter}
+        {actualBssDelta !== null && bssBefore !== null && bssAfter !== null ? (
+          <>
+            {/* Before → After card */}
+            <div className="flex items-center justify-center gap-6 mb-4">
+              <div className="text-center">
+                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-dim mb-1">Before</div>
+                <div className="font-mono text-[28px] font-bold text-text-muted" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {bssBefore}
                 </div>
-              )}
+              </div>
+              <div className="font-mono text-[18px] text-text-dim">→</div>
+              <div className="text-center">
+                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-dim mb-1">After</div>
+                <div className="font-mono text-[28px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {bssAfter}
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-dim mb-1">Change</div>
+                <div className={`font-mono text-[28px] font-bold ${actualBssDelta < 0 ? 'text-[#FB923C]' : actualBssDelta > 0 ? 'text-[#22D3EE]' : 'text-text-muted'}`} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {actualBssDelta > 0 ? '+' : ''}{actualBssDelta}
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Explainer */}
-          <div className="mt-4 pt-3 border-t border-white/[0.08] font-mono text-[11px] text-text-dim leading-relaxed">
-            The {violation.points}-pt penalty is a <span className="text-text-muted">DSI deduction</span>, not a direct BSS subtraction.
-            Your daily DSI score{dsiScore !== null ? ` (${dsiScore}/100)` : ''} feeds into BSS via EWMA smoothing
-            {alpha !== null && ` (alpha: ${alpha})`}, which is why the dashboard shows{' '}
-            {actualBssDelta !== null
-              ? <span className="text-white font-semibold">{actualBssDelta}</span>
-              : 'a smaller delta'}{' '}
-            — not -{violation.points}.
-          </div>
-        </GlowPanel>
-      </div>
+            <p className="font-mono text-[12px] text-text-muted leading-relaxed text-center">
+              {impactLabel} on your Behavioral Stability Score. Session score for this day was {dsiScore}/100.
+            </p>
+          </>
+        ) : (
+          <p className="font-mono text-[13px] text-text-muted leading-relaxed">
+            This pattern reduced your session score for the day. The exact impact on your overall score depends on how many sessions you&apos;ve completed — newer accounts see larger swings.
+          </p>
+        )}
+      </GlowPanel>
+
+      {/* ═══ WHAT TO DO — actionable suggestion ═══ */}
+      <GlowPanel className="p-5 border-l-4 border-[rgba(200,169,110,0.3)]">
+        <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-2">
+          What To Do
+        </div>
+        <div className="font-mono text-[13px] text-text-secondary leading-relaxed">
+          {violation.mode === 'FREQUENCY' && 'Consider setting a maximum number of trades per session in your protocol rules. Fewer, higher-quality entries improve your score over time.'}
+          {violation.mode === 'OVERSIZE' && 'Review your max contract limit in Settings → Trading Rules. Keeping position sizes within your protocol prevents this pattern.'}
+          {violation.mode === 'OFF_SESSION' && 'Trades outside your session window always flag. If your trading hours have changed, update your session windows in Settings.'}
+          {violation.mode === 'REVENGE_ENTRY' && 'After a loss, pause before re-entering. The cooldown feature can help enforce a waiting period between trades.'}
+          {violation.mode === 'SIZE_ESCALATION' && 'Keep position sizes consistent throughout your session. Increasing size after losses is a common discipline leak.'}
+          {violation.mode === 'HESITATION' && 'Delayed entries or exits can indicate uncertainty. Review your pre-session intention to stay aligned with your plan.'}
+          {violation.mode === 'BASELINE_SHIFT' && 'Your behavior changed significantly from your baseline. This may be fine if intentional — review whether your protocol needs updating.'}
+          {!['FREQUENCY', 'OVERSIZE', 'OFF_SESSION', 'REVENGE_ENTRY', 'SIZE_ESCALATION', 'HESITATION', 'BASELINE_SHIFT'].includes(violation.mode) && 'Review your protocol settings and consider adjusting detection thresholds for this pattern type.'}
+        </div>
+      </GlowPanel>
 
       {/* ═══ SESSION CONTEXT ═══ */}
       <div>
@@ -484,13 +434,12 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
           Session Context
         </div>
         <GlowPanel className="overflow-hidden">
-          <div className="grid grid-cols-5 gap-px bg-white/[0.06]">
+          <div className="grid grid-cols-4 gap-px bg-white/[0.06]">
             {[
               { label: 'Duration', value: `${windowMinutes} min`, color: 'text-white' },
-              { label: 'Entries', value: `${entries}`, color: 'text-white' },
+              { label: 'Trades', value: `${tradeCount}`, color: 'text-white' },
               { label: 'Win Rate', value: `${winRate}%`, color: winRate < 50 ? 'text-white/60' : 'text-white' },
-              { label: 'Max Lot', value: `${maxLot || '—'}`, color: 'text-white' },
-              { label: 'Fills', value: `${violation.evidence_event_ids.length}`, color: 'text-white' },
+              { label: 'Max Position', value: `${maxLot || '—'}`, color: 'text-white' },
             ].map((item) => (
               <div key={item.label} className="bg-white/[0.04] px-4 py-3">
                 <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mb-1">
@@ -513,7 +462,6 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
           </div>
           <GlowPanel className="px-5 py-4">
             <div className="flex items-center gap-2 mb-3">
-              {/* Occurrence bars */}
               {recurrence.map((r) => (
                 <div
                   key={r.id}
@@ -537,7 +485,66 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
         </div>
       )}
 
-      {/* ═══ EVIDENCE FILLS ═══ */}
+      {/* ═══ HOW IT'S CALCULATED — expandable, for power users ═══ */}
+      <div>
+        <button
+          onClick={() => setMathExpanded(!mathExpanded)}
+          className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.15em] text-text-dim hover:text-text-muted transition-colors"
+        >
+          {mathExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+          How It&apos;s Calculated
+        </button>
+
+        {mathExpanded && (
+          <GlowPanel className="p-5 mt-3">
+            <div className="grid grid-cols-4 gap-3 items-center mb-4">
+              <div className="text-center">
+                <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  -{violation.points}
+                </div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
+                  Session Penalty
+                </div>
+                <div className="font-mono text-[9px] text-text-dim mt-0.5">
+                  ×{modeWeight} weight
+                </div>
+              </div>
+              <div className="text-center font-mono text-[14px] text-text-dim">→</div>
+              <div className="text-center">
+                <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {dsiScore !== null ? `${dsiScore}/100` : '—'}
+                </div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
+                  Session Score
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="font-mono text-[11px] text-text-dim mb-1">Smoothed →</div>
+                <div className="font-mono text-[20px] font-bold text-white" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {actualBssDelta !== null ? (actualBssDelta > 0 ? `+${actualBssDelta}` : actualBssDelta) : '—'}
+                </div>
+                <div className="font-mono text-[10px] uppercase tracking-[0.12em] text-text-muted mt-1">
+                  Score Change
+                </div>
+                {bssBefore !== null && bssAfter !== null && (
+                  <div className="font-mono text-[9px] text-text-dim mt-0.5">
+                    {bssBefore} → {bssAfter}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-white/[0.08] font-mono text-[11px] text-text-dim leading-relaxed">
+              The {violation.points}-pt penalty is deducted from your session score (not directly from BSS).
+              Your session score{dsiScore !== null ? ` (${dsiScore}/100)` : ''} is then smoothed into your overall BSS
+              {alpha !== null && ` using exponential smoothing (alpha: ${alpha})`}. This is why the score change
+              ({actualBssDelta !== null ? actualBssDelta : '—'}) differs from the raw penalty (-{violation.points}).
+            </div>
+          </GlowPanel>
+        )}
+      </div>
+
+      {/* ═══ FLAGGED TRADES ═══ */}
       {fillsLoading ? (
         <div className="flex justify-center py-6">
           <div className="h-4 w-4 animate-pulse rounded-full bg-white/[0.06]" />
@@ -545,7 +552,7 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
       ) : fills.length > 0 ? (
         <div>
           <div className="font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted mb-3">
-            Evidence Fills
+            Flagged Trades
           </div>
           <div className="space-y-1.5">
             {fills.map((fill) => {
