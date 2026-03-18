@@ -115,7 +115,7 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
     group: 'protocol',
     title: 'Upload your trading protocol',
     description: 'Upload your written trading protocol and the engine will extract rules automatically. These rules power violation detection — turning your own plan into enforceable guardrails.',
-    href: '/settings',
+    href: '/protocol',
     targetSelector: '[data-onboard="protocol-settings"]',
     tooltipPosition: 'bottom',
   },

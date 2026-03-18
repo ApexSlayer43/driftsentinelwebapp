@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, X, Shield, Plug, Unplug, ExternalLink, Loader2, Puzzle, Globe, Clock, Zap, Rocket } from 'lucide-react';
+import { Save, Plus, Trash2, X, Plug, Unplug, ExternalLink, Loader2, Puzzle, Globe, Clock, Zap, Rocket } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { SessionConfig } from '@/lib/types';
-import Link from 'next/link';
 import { GlowPanel } from '@/components/ui/glow-panel';
 import { useOnboarding } from '@/lib/onboarding-context';
 
@@ -340,7 +339,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div data-onboard="protocol-settings" className="overflow-auto px-8 py-8">
+    <div className="overflow-auto px-8 py-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-text-primary">Settings</h1>
@@ -383,27 +382,6 @@ export default function SettingsPage() {
       )}
 
       <div className="mt-8 grid gap-6">
-        {/* Protocol — managed on dedicated page */}
-        <GlowPanel className="">
-          <Link
-            href="/protocol"
-            className="group flex items-center justify-between rounded-xl p-6 transition-colors hover:bg-white/[0.06]"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-primary/10">
-                <Shield size={16} className="text-positive" />
-              </div>
-              <div>
-                <h3 className="font-display text-sm font-bold text-text-primary">Protocol</h3>
-                <p className="mt-0.5 font-mono text-[12px] text-text-muted">
-                  Upload and manage your trading protocol rules
-                </p>
-              </div>
-            </div>
-            <ExternalLink size={14} className="text-text-dim group-hover:text-positive transition-colors" />
-          </Link>
-        </GlowPanel>
-
         {/* Timezone */}
         <div data-onboard="timezone-picker">
         <GlowPanel className="p-6">

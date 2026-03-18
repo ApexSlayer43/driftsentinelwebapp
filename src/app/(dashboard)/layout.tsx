@@ -33,7 +33,7 @@ const NAV_ITEMS: { title: string; icon: LucideIcon; href: string }[] = [
   { title: 'Upload', icon: Upload, href: '/ingest' },
   { title: 'Sessions', icon: Radar, href: '/sessions' },
   { title: 'Forensics', icon: Crosshair, href: '/forensics' },
-  { title: 'Signal Config', icon: Shield, href: '/protocol' },
+  { title: 'Protocol', icon: Shield, href: '/protocol' },
   { title: 'DS Trader ID', icon: UserCircle, href: '/trader-id' },
   { title: 'Senti', icon: Bot, href: '/senti' },
   { title: 'Settings', icon: Settings, href: '/settings' },
