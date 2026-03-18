@@ -25,7 +25,6 @@ export default function ForensicsPage() {
   const [loading, setLoading] = useState(true);
   const [detailFills, setDetailFills] = useState<FillCanonical[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [showResolved, setShowResolved] = useState(false);
 
   // Load violations
   useEffect(() => {
@@ -173,7 +172,7 @@ export default function ForensicsPage() {
 
   return (
     <div className="flex h-full gap-0 overflow-hidden">
-      {/* ═══ LEFT PANEL — Pattern Cards ═══ */}
+      {/* ═══ LEFT PANEL — Active Pattern Cards ═══ */}
       <div className="w-[320px] shrink-0 border-r border-white/[0.08] overflow-y-auto">
         <div className="px-5 pt-5 pb-3">
           <h1 className="font-mono text-[15px] font-bold uppercase tracking-[0.15em] text-text-primary">
@@ -184,8 +183,7 @@ export default function ForensicsPage() {
           </div>
         </div>
 
-        {/* Active patterns */}
-        <div className="px-3 pb-2 space-y-2">
+        <div className="px-3 pb-4 space-y-2">
           {activeViolations.map((v) => (
             <PatternCard
               key={v.violation_id}
@@ -196,42 +194,9 @@ export default function ForensicsPage() {
             />
           ))}
         </div>
-
-        {/* ═══ REVIEWED HISTORY — fills left panel empty space ═══ */}
-        {resolvedViolations.length > 0 && (
-          <div className="px-3 pb-4 mt-2">
-            <div className="mx-1 mb-2 flex items-center gap-2">
-              <div className="h-px flex-1 bg-white/[0.06]" />
-              <button
-                onClick={() => setShowResolved(!showResolved)}
-                className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[#7a766d] hover:text-[#c8a96e] transition-colors"
-              >
-                <CheckCircle2 size={10} />
-                {resolvedViolations.length} reviewed
-                {showResolved ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
-              </button>
-              <div className="h-px flex-1 bg-white/[0.06]" />
-            </div>
-
-            {showResolved && (
-              <div className="space-y-1.5">
-                {resolvedViolations.map((v) => (
-                  <PatternCard
-                    key={v.violation_id}
-                    violation={v}
-                    isActive={v.violation_id === selectedId}
-                    fillMap={fillMap}
-                    onSelect={setSelectedId}
-                    dimmed
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* ═══ RIGHT PANEL — Detail View ═══ */}
+      {/* ═══ CENTER PANEL — Detail View ═══ */}
       <div className="flex-1 overflow-y-auto px-8 py-6">
         {selected ? (
           <ForensicDetail
@@ -248,6 +213,62 @@ export default function ForensicsPage() {
           </div>
         )}
       </div>
+
+      {/* ═══ RIGHT PANEL — Reviewed History ═══ */}
+      {resolvedViolations.length > 0 && (
+        <div className="w-[280px] shrink-0 border-l border-white/[0.08] overflow-y-auto">
+          <div className="px-4 pt-5 pb-3">
+            <div className="flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+              <CheckCircle2 size={11} className="text-[#c8a96e]" />
+              Reviewed
+            </div>
+            <div className="mt-1 font-mono text-[10px] text-text-dim">
+              {resolvedViolations.length} pattern{resolvedViolations.length !== 1 ? 's' : ''} acknowledged
+            </div>
+          </div>
+          <div className="px-2 pb-4 space-y-1.5">
+            {resolvedViolations.map((v) => {
+              const modeLabel = getModeLabel(v.mode);
+              const modeIcon = getModeIcon(v.mode);
+              const dateStr = new Date(v.first_seen_utc).toLocaleDateString('en-US', {
+                month: 'short', day: 'numeric',
+              });
+              const isActive = v.violation_id === selectedId;
+
+              return (
+                <button
+                  key={v.violation_id}
+                  onClick={() => setSelectedId(v.violation_id)}
+                  className={`w-full text-left rounded-lg px-3 py-2.5 transition-all ${
+                    isActive
+                      ? 'bg-white/[0.06] ring-1 ring-[rgba(200,169,110,0.2)]'
+                      : 'hover:bg-white/[0.04]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <DynamicIcon name={modeIcon} size={12} className="text-[#7a766d] shrink-0" />
+                    <span className="font-mono text-[12px] font-semibold text-text-secondary truncate">
+                      {modeLabel}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-text-dim">
+                    <span>{dateStr}</span>
+                    <span>·</span>
+                    <span className="text-[#c8a96e]">
+                      {v.status === 'acknowledged' ? 'Reviewed' : 'Resolved'}
+                    </span>
+                  </div>
+                  {v.resolution_note && (
+                    <div className="mt-1 font-mono text-[9px] text-[#7a766d] italic line-clamp-2 leading-relaxed">
+                      &ldquo;{v.resolution_note}&rdquo;
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
