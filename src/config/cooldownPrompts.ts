@@ -120,6 +120,7 @@ export function behavioralInsightPrompt(
  * Socratic question bank — always available.
  */
 export const QUESTION_BANK: readonly string[] = [
+  // Therapeutic / self-awareness
   'Who suffers the most if you continue to trade against your own rules?',
   'The trader you described in your goals — would they take this trade?',
   'What would you tell a trader you were mentoring if they sent you this session so far?',
@@ -128,6 +129,21 @@ export const QUESTION_BANK: readonly string[] = [
   'You built something over the last several sessions. What happens to it in the next 20 minutes if you stay in this chair?',
   'What specifically changed between the start of this session and right now?',
   'If your BSS score is the measure of your discipline — what is it measuring at this moment?',
+  // Emotional regulation
+  'Name the emotion you\'re feeling right now. Not the trade — the emotion.',
+  'Are you trading to make money, or trading to feel something?',
+  'The urge to re-enter after a loss isn\'t strategy. What is it?',
+  'If you close the platform right now and come back tomorrow, what do you lose? What do you protect?',
+  'Your body knows before your mind does. What is it telling you right now?',
+  // Identity / purpose
+  'The version of you that\'s funded and consistent — how does that person handle this moment?',
+  'You\'re not behind. You\'re building. Is the next trade building or burning?',
+  'Discipline isn\'t something you have. It\'s something you do. What are you doing right now?',
+  'This pause is proof that something is different about how you trade now.',
+  // Pattern recognition
+  'How many times have you been in this exact emotional state and traded anyway? What happened?',
+  'The last time you felt this way during a session, what did the next 30 minutes look like?',
+  'You know what happens next if you don\'t stop. You\'ve seen this movie before.',
 ] as const;
 
 /**
@@ -140,6 +156,10 @@ export const MARK_DOUGLAS_QUOTES: readonly string[] = [
   'The traders who can make money consistently have learned to think in probabilities.',
   'Every loss, every time you move your stop, every time you hesitate — you are creating the consistency of a loser.',
   'Risk is the truth of trading. Accepting it is the edge.',
+  'The consistency you seek in the market is a reflection of the consistency within you.',
+  'The best signal in the world is worthless if you can\'t execute it with discipline.',
+  'Trading is a psychological game. Most people think they\'re playing a money game.',
+  'When you genuinely accept the risks, you will be at peace with any outcome.',
 ] as const;
 
 // ── Prompt Selection Logic ───────────────────────────────────────

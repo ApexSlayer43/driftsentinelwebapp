@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X, Timer, Infinity as InfinityIcon } from 'lucide-react';
 import { GradientBackground } from '@/components/ui/noisy-gradient-backgrounds';
 import type { PromptSequenceItem } from '@/lib/cooldown-context';
 
@@ -33,25 +33,27 @@ interface CooldownModeProps {
 /**
  * Cooldown Mode — full-screen behavioral intervention overlay.
  *
- * Timing sequence:
- *   0s:       Visual appears. Full opacity. No text. Just the light breathing.
- *   8s:       First prompt fades in over 2s.
- *   8+8=16s:  First prompt fades out over 1.5s.
- *   17.5s:    Second prompt fades in over 2s.
- *   ...       Each subsequent prompt: 8s hold → 1.5s out → 2s in
- *   ∞:        No auto-close. Trader closes when ready.
+ * Timing sequence (spaced out — let each prompt sink in):
+ *   0s:        Visual appears. Full opacity. No text. Just the light breathing.
+ *   10s:       First prompt fades in over 2.5s.
+ *   10+12=22s: First prompt fades out over 2s.
+ *   22+6=28s:  Silence between prompts (breathing room).
+ *   28s:       Second prompt fades in over 2.5s.
+ *   ...        Each subsequent prompt: 12s hold → 2s out → 6s silence → 2.5s in
  *
- * The silence is the feature. Do not shorten it.
+ * Timer: Default 90s countdown shown bottom-center.
+ * Toggle to indefinite mode — no timer, close manually.
  */
 
 // Timing constants (ms)
-const INITIAL_SILENCE = 8000;
-const FADE_IN_DURATION = 2000;
-const HOLD_DURATION = 8000;
-const FADE_OUT_DURATION = 1500;
-const CYCLE = FADE_IN_DURATION + HOLD_DURATION + FADE_OUT_DURATION; // 11500ms per prompt
+const INITIAL_SILENCE = 10000;
+const FADE_IN_DURATION = 2500;
+const HOLD_DURATION = 12000;
+const FADE_OUT_DURATION = 2000;
+const BETWEEN_SILENCE = 6000; // breathing room between prompts
+const DEFAULT_TIMER_SECONDS = 90;
 
-type FadePhase = 'silent' | 'fading-in' | 'visible' | 'fading-out';
+type FadePhase = 'silent' | 'fading-in' | 'visible' | 'fading-out' | 'between';
 
 export function CooldownMode({
   isOpen,
@@ -62,7 +64,10 @@ export function CooldownMode({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState<FadePhase>('silent');
   const [closing, setClosing] = useState(false);
+  const [indefiniteMode, setIndefiniteMode] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(DEFAULT_TIMER_SECONDS);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const clearTimer = () => {
     if (timerRef.current) {
@@ -77,7 +82,9 @@ export function CooldownMode({
       setCurrentIndex(0);
       setPhase('silent');
       setClosing(false);
+      setSecondsLeft(DEFAULT_TIMER_SECONDS);
       clearTimer();
+      if (countdownRef.current) clearInterval(countdownRef.current);
       return;
     }
 
@@ -94,39 +101,61 @@ export function CooldownMode({
     // Start the initial silence → first fade-in
     setPhase('silent');
     setCurrentIndex(0);
+    setSecondsLeft(DEFAULT_TIMER_SECONDS);
 
     schedulePhase('fading-in', INITIAL_SILENCE);
+
+    // Countdown timer
+    countdownRef.current = setInterval(() => {
+      if (cancelled) return;
+      setSecondsLeft(prev => {
+        if (prev <= 1) return 0;
+        return prev - 1;
+      });
+    }, 1000);
 
     return () => {
       cancelled = true;
       clearTimer();
+      if (countdownRef.current) clearInterval(countdownRef.current);
     };
-  }, [isOpen, promptSequence]);
+  }, [isOpen, promptSequence, activationId]);
 
-  // Phase transitions after first fade-in
+  // Auto-close when timer hits 0 (unless indefinite mode)
+  useEffect(() => {
+    if (secondsLeft === 0 && !indefiniteMode && isOpen && !closing) {
+      handleClose();
+    }
+  }, [secondsLeft, indefiniteMode, isOpen, closing]);
+
+  // Phase transitions — includes breathing room between prompts
   useEffect(() => {
     if (!isOpen || promptSequence.length === 0) return;
 
     let cancelled = false;
 
     if (phase === 'fading-in') {
-      // After fade-in animation completes → visible (hold)
       timerRef.current = setTimeout(() => {
         if (!cancelled) setPhase('visible');
       }, FADE_IN_DURATION);
     } else if (phase === 'visible') {
-      // After hold → fade out
       timerRef.current = setTimeout(() => {
         if (!cancelled) setPhase('fading-out');
       }, HOLD_DURATION);
     } else if (phase === 'fading-out') {
-      // After fade-out → advance to next prompt or loop
+      // After fade-out → breathing silence before next prompt
+      timerRef.current = setTimeout(() => {
+        if (cancelled) return;
+        setPhase('between');
+      }, FADE_OUT_DURATION);
+    } else if (phase === 'between') {
+      // Silence between prompts — let it sink in
       timerRef.current = setTimeout(() => {
         if (cancelled) return;
         const nextIndex = (currentIndex + 1) % promptSequence.length;
         setCurrentIndex(nextIndex);
         setPhase('fading-in');
-      }, FADE_OUT_DURATION);
+      }, BETWEEN_SILENCE);
     }
 
     return () => {
@@ -172,21 +201,22 @@ export function CooldownMode({
 
   // Opacity based on phase
   const textOpacity =
-    phase === 'fading-in'
+    phase === 'fading-in' || phase === 'visible'
       ? 'opacity-100'
-      : phase === 'visible'
-        ? 'opacity-100'
-        : phase === 'fading-out'
-          ? 'opacity-0'
-          : 'opacity-0';
+      : 'opacity-0';
 
   // Transition duration matches the current phase
   const transitionDuration =
     phase === 'fading-in'
-      ? 'duration-[2000ms]'
+      ? 'duration-[2500ms]'
       : phase === 'fading-out'
-        ? 'duration-[1500ms]'
+        ? 'duration-[2000ms]'
         : 'duration-[300ms]';
+
+  // Format timer
+  const minutes = Math.floor(secondsLeft / 60);
+  const seconds = secondsLeft % 60;
+  const timerDisplay = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
   return (
     <div className="fixed inset-0 z-[100] overflow-hidden" style={{ animation: 'cooldownFadeIn 1.5s ease-out' }}>
@@ -209,6 +239,38 @@ export function CooldownMode({
       >
         <X size={20} />
       </button>
+
+      {/* Timer + indefinite toggle — bottom center */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[110] flex items-center gap-4">
+        {!indefiniteMode && (
+          <span
+            className="font-mono text-[28px] font-light text-white/30 tabular-nums tracking-wider"
+            style={{ textShadow: '0 1px 8px rgba(0,0,0,0.3)' }}
+          >
+            {timerDisplay}
+          </span>
+        )}
+        <button
+          onClick={() => setIndefiniteMode(!indefiniteMode)}
+          className={`flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.15em] transition-all backdrop-blur-sm ${
+            indefiniteMode
+              ? 'bg-white/15 text-white/60 border border-white/20'
+              : 'bg-white/5 text-white/25 border border-white/10 hover:text-white/40 hover:bg-white/10'
+          }`}
+        >
+          {indefiniteMode ? (
+            <>
+              <InfinityIcon size={12} />
+              Indefinite
+            </>
+          ) : (
+            <>
+              <Timer size={12} />
+              Stay longer
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Prompt carousel — positioned in upper-center, above the "sun" */}
       <div
