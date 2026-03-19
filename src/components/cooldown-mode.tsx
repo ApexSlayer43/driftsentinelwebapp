@@ -126,6 +126,7 @@ export function CooldownMode({
     if (secondsLeft === 0 && !indefiniteMode && isOpen && !closing) {
       handleClose();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [secondsLeft, indefiniteMode, isOpen, closing]);
 
   // Phase transitions — includes breathing room between prompts

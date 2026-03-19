@@ -17,6 +17,7 @@ import {
  * Response: { activation_id, prompt, prompt_type, bss_at_activation }
  */
 export async function POST(req: Request) {
+  try {
   /* 1. Auth */
   const supabase = await createAuthClient();
   const {
@@ -215,4 +216,11 @@ export async function POST(req: Request) {
     prompt_sequence: promptSequence,
     bss_at_activation: bssAtActivation,
   });
+  } catch (err) {
+    console.error('Cooldown start unhandled error:', err);
+    return Response.json(
+      { error: 'Internal error', detail: err instanceof Error ? err.message : String(err) },
+      { status: 500 },
+    );
+  }
 }
