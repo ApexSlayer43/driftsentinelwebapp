@@ -253,25 +253,40 @@ export default function SettingsPage() {
     setSaved(false);
     setSaveError(null);
 
+    const sentPayload = {
+      account_ref: accountRef,
+      max_contracts: Number(maxContracts),
+      max_fills_per_day: Number(maxFillsPerDay),
+      baseline_window_fills: Number(baselineWindowFills),
+      scoring_window_fills: Number(scoringWindowFills),
+      sessions_utc: sessions,
+      timezone: timezone || null,
+      profile_goal: profileGoal || null,
+    };
+
     try {
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          account_ref: accountRef,
-          max_contracts: maxContracts,
-          max_fills_per_day: maxFillsPerDay,
-          baseline_window_fills: baselineWindowFills,
-          scoring_window_fills: scoringWindowFills,
-          sessions_utc: sessions,
-          timezone: timezone || null,
-          profile_goal: profileGoal || null,
-        }),
+        body: JSON.stringify(sentPayload),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
         throw new Error(data.error || `Save failed (${res.status})`);
+      }
+
+      // Verify round-trip — check what the DB actually stored
+      if (data.saved) {
+        const db = data.saved;
+        if (Number(db.max_contracts) !== sentPayload.max_contracts ||
+            Number(db.max_fills_per_day) !== sentPayload.max_fills_per_day) {
+          throw new Error(
+            `Save verification failed: sent max_contracts=${sentPayload.max_contracts} but DB has ${db.max_contracts}. ` +
+            `Sent max_fills=${sentPayload.max_fills_per_day} but DB has ${db.max_fills_per_day}.`
+          );
+        }
       }
 
       setSaved(true);

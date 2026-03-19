@@ -80,5 +80,12 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Failed to save settings' }, { status: 500 });
   }
 
-  return Response.json({ ok: true });
+  /* 6. Read back to verify the write actually persisted */
+  const { data: verify } = await admin
+    .from('user_configs')
+    .select('max_contracts,max_fills_per_day,baseline_window_fills,scoring_window_fills,timezone,profile_goal')
+    .eq('account_ref', accountRef)
+    .single();
+
+  return Response.json({ ok: true, saved: verify });
 }
