@@ -4,6 +4,7 @@ import {
   selectCooldownPrompt,
   buildCooldownSequence,
   type BehavioralInsightData,
+  type SessionContext,
 } from '@/config/cooldownPrompts';
 
 /**
@@ -52,7 +53,9 @@ export async function POST(req: Request) {
   const today = new Date().toISOString().slice(0, 10);
 
   /* 3. Gather context in parallel */
-  const [intentionRes, profileRes, cooldownHistoryRes, latestScoreRes] =
+  const todayStart = today + 'T00:00:00.000Z';
+
+  const [intentionRes, profileRes, cooldownHistoryRes, latestScoreRes, todayViolationsRes, todayFillsRes, todayScoreRes] =
     await Promise.all([
       // Today's daily intention
       admin
@@ -66,8 +69,8 @@ export async function POST(req: Request) {
       // Profile goal (north star)
       admin
         .from('user_configs')
-        .select('profile_goal')
-        .eq('user_id', user.id)
+        .select('profile_goal,sessions_utc')
+        .eq('account_ref', accountRef)
         .limit(1),
 
       // Cooldown activation history
@@ -85,11 +88,56 @@ export async function POST(req: Request) {
         .eq('account_ref', accountRef)
         .order('trading_date', { ascending: false })
         .limit(1),
+
+      // Today's violations
+      admin
+        .from('violations')
+        .select('mode,points,severity')
+        .eq('account_ref', accountRef)
+        .gte('created_at', todayStart),
+
+      // Today's fills
+      admin
+        .from('fills_canonical')
+        .select('qty,off_session,timestamp_utc')
+        .eq('account_ref', accountRef)
+        .gte('timestamp_utc', todayStart)
+        .order('timestamp_utc', { ascending: true }),
+
+      // Today's DSI score
+      admin
+        .from('daily_scores')
+        .select('dsi_score,bss_score')
+        .eq('account_ref', accountRef)
+        .eq('trading_date', today)
+        .maybeSingle(),
     ]);
 
   const todayGoal = intentionRes.data?.[0]?.goal_text ?? null;
   const profileGoal = profileRes.data?.[0]?.profile_goal ?? null;
   const bssAtActivation = latestScoreRes.data?.[0]?.bss_score ?? null;
+
+  /* 3b. Build session context from today's data */
+  const todayFills = todayFillsRes.data ?? [];
+  const todayViolations = todayViolationsRes.data ?? [];
+
+  const sessionContext: SessionContext = {
+    fillsToday: todayFills.length,
+    violationsToday: todayViolations.length,
+    violationModes: todayViolations.map((v: { mode: string }) => v.mode),
+    dsiToday: todayScoreRes.data?.dsi_score ?? null,
+    bssCurrent: todayScoreRes.data?.bss_score ?? bssAtActivation,
+    isOffSession: todayFills.some((f: { off_session: boolean }) => f.off_session),
+    maxQtyToday: todayFills.reduce((max: number, f: { qty: number }) => Math.max(max, f.qty), 0),
+    sessionDuration: todayFills.length >= 2
+      ? (() => {
+          const first = new Date(todayFills[0].timestamp_utc).getTime();
+          const last = new Date(todayFills[todayFills.length - 1].timestamp_utc).getTime();
+          const mins = Math.round((last - first) / 60000);
+          return mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`;
+        })()
+      : null,
+  };
 
   /* 4. Build behavioral insight data if enough history */
   let insightData: BehavioralInsightData | null = null;
@@ -125,6 +173,7 @@ export async function POST(req: Request) {
     todayGoal,
     profileGoal,
     insightData,
+    sessionContext,
   });
 
   /* 6. Parse optional template from request body */

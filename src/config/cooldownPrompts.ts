@@ -39,6 +39,18 @@ export interface BehavioralInsightData {
   avgBssWithoutCooldown: number;
 }
 
+/** Today's live session context — fed from DB at cooldown activation */
+export interface SessionContext {
+  fillsToday: number;
+  violationsToday: number;
+  violationModes: string[];    // e.g. ['OVERSIZE', 'FREQUENCY']
+  dsiToday: number | null;     // null if no score yet
+  bssCurrent: number | null;
+  isOffSession: boolean;
+  maxQtyToday: number;
+  sessionDuration: string | null; // e.g. "2h 15m" or null
+}
+
 // ── Prompt Generators ────────────────────────────────────────────
 
 /**
@@ -112,6 +124,91 @@ export function behavioralInsightPrompt(
     `The pattern you're building isn't about one session — it's about who you're becoming.\n\n` +
     `The trader who pauses is already different from the one who doesn't.`
   );
+}
+
+/**
+ * Session-aware prompts — generated from today's actual trading data.
+ * These make the cooldown feel intelligent, not generic.
+ */
+export function sessionAwarePrompts(ctx: SessionContext): string[] {
+  const prompts: string[] = [];
+
+  // Clean day — reinforce, don't warn
+  if (ctx.violationsToday === 0 && ctx.fillsToday > 0) {
+    prompts.push(
+      `${ctx.fillsToday} fills today. Zero violations. ` +
+      `You're in control. This pause isn't because something went wrong — it's because you're building the habit of checking in.`
+    );
+    if (ctx.dsiToday !== null && ctx.dsiToday >= 90) {
+      prompts.push(
+        `DSI ${ctx.dsiToday}/100 today. That's discipline in action. ` +
+        `The trader who pauses on a good day is the one who stays consistent.`
+      );
+    }
+  }
+
+  // Violations detected — specific, not generic
+  if (ctx.violationsToday > 0) {
+    const modeLabels = ctx.violationModes.map(m =>
+      m === 'OVERSIZE' ? 'position sizing' :
+      m === 'FREQUENCY' ? 'trade frequency' :
+      m === 'OFF_SESSION' ? 'off-session trading' :
+      m === 'REVENGE_ENTRY' ? 'revenge entry' :
+      m === 'SIZE_ESCALATION' ? 'size escalation' :
+      m === 'HESITATION' ? 'hesitation' :
+      m === 'BASELINE_SHIFT' ? 'baseline shift' :
+      m.toLowerCase().replace('_', ' ')
+    );
+    const unique = [...new Set(modeLabels)];
+
+    prompts.push(
+      `${ctx.violationsToday} pattern${ctx.violationsToday > 1 ? 's' : ''} detected today: ${unique.join(', ')}.\n\n` +
+      `This is what drift looks like from the inside. You don't feel it happening — but the data sees it.`
+    );
+
+    if (ctx.dsiToday !== null && ctx.dsiToday < 60) {
+      prompts.push(
+        `DSI ${ctx.dsiToday}/100. The session is already scored. ` +
+        `The question isn't whether today was clean — it wasn't. ` +
+        `The question is: does the next trade make it worse or does stopping here protect tomorrow?`
+      );
+    }
+  }
+
+  // Off-session trading
+  if (ctx.isOffSession) {
+    prompts.push(
+      `You're outside your session window right now. ` +
+      `Every fill from here gets flagged. Is this trade part of your plan, or part of the pattern?`
+    );
+  }
+
+  // High fill count — overtrading signal
+  if (ctx.fillsToday >= 15) {
+    prompts.push(
+      `${ctx.fillsToday} fills today. That's a lot of activity. ` +
+      `More trades doesn't mean more edge — it usually means less discipline. ` +
+      `What's driving the volume?`
+    );
+  }
+
+  // Large position size
+  if (ctx.maxQtyToday >= 5) {
+    prompts.push(
+      `Your largest position today was ${ctx.maxQtyToday} contracts. ` +
+      `Size follows emotion. Is this the size your protocol calls for, or the size your ego wants?`
+    );
+  }
+
+  // No fills yet — pre-session cooldown
+  if (ctx.fillsToday === 0) {
+    prompts.push(
+      `No trades yet today. You activated cooldown before entering the market. ` +
+      `That's awareness. Use this time to set your intention — not just what you'll trade, but how.`
+    );
+  }
+
+  return prompts;
 }
 
 // ── Curated Banks ────────────────────────────────────────────────
@@ -264,10 +361,30 @@ export function buildCooldownSequence(opts: {
   todayGoal?: string | null;
   profileGoal?: string | null;
   insightData?: BehavioralInsightData | null;
+  sessionContext?: SessionContext | null;
 }): PromptSequenceItem[] {
   const sequence: PromptSequenceItem[] = [];
 
-  // Slot 1: Personal reflection
+  // Slot 1: Session-aware insight (most relevant — reads today's actual data)
+  if (opts.sessionContext) {
+    const sessionPrompts = sessionAwarePrompts(opts.sessionContext);
+    if (sessionPrompts.length > 0) {
+      // Pick the most relevant one (first is highest priority)
+      sequence.push({
+        text: sessionPrompts[0],
+        type: 'behavioral_insight',
+      });
+      // If there's a second data-driven insight, queue it for later
+      if (sessionPrompts.length > 1) {
+        sequence.push({
+          text: sessionPrompts[1],
+          type: 'behavioral_insight',
+        });
+      }
+    }
+  }
+
+  // Slot 2: Personal reflection
   if (opts.todayGoal && opts.profileGoal) {
     sequence.push({
       text: blendedReflectionPrompt(opts.todayGoal, opts.profileGoal),
@@ -285,7 +402,7 @@ export function buildCooldownSequence(opts: {
     });
   }
 
-  // Slot 2: Behavioral insight
+  // Slot 3: Cooldown history insight
   if (opts.insightData) {
     const insight = behavioralInsightPrompt(opts.insightData);
     if (insight) {
@@ -293,14 +410,14 @@ export function buildCooldownSequence(opts: {
     }
   }
 
-  // Slot 3: Socratic question(s) — fill to ensure at least 3 total
-  const questionsNeeded = Math.max(1, 3 - sequence.length);
+  // Slot 4: Socratic question — fill to ensure at least 4 total
+  const questionsNeeded = Math.max(1, 4 - sequence.length);
   const questions = pickUniqueRandom(QUESTION_BANK, questionsNeeded);
   for (const q of questions) {
     sequence.push({ text: q, type: 'question_bank' });
   }
 
-  // Slot 4: Always end with Mark Douglas
+  // Slot 5: Always end with Mark Douglas
   sequence.push({
     text: pickRandom(MARK_DOUGLAS_QUOTES),
     type: 'mark_douglas',
