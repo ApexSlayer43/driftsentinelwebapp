@@ -331,10 +331,12 @@ export async function POST(req: Request) {
     .eq('ingest_run_id', ingestRunId);
 
   // If fills were accepted, trigger compute pipeline via Express backend (best-effort)
-  if (acceptedCount > 0) {
+  // Trigger compute for any fills (new or duplicate re-uploads)
+  const totalFills = acceptedCount + dupCount;
+  if (totalFills > 0) {
     const apiUrl = process.env.API_URL || 'https://api.driftsentinel.io';
     try {
-      await fetch(`${apiUrl}/v1/compute/trigger`, {
+      const computeRes = await fetch(`${apiUrl}/v1/compute/trigger`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${rawToken}`,
@@ -342,8 +344,13 @@ export async function POST(req: Request) {
         },
         body: JSON.stringify({ account_ref: accountRef }),
       });
-    } catch {
-      // Best-effort — compute will pick up on next cycle
+      const computeBody = await computeRes.text();
+      console.log(`[PDF ingest] Compute trigger response: ${computeRes.status} ${computeBody.slice(0, 500)}`);
+      if (!computeRes.ok) {
+        console.error(`[PDF ingest] Compute trigger FAILED: ${computeRes.status} ${computeBody.slice(0, 500)}`);
+      }
+    } catch (computeErr) {
+      console.error('[PDF ingest] Compute trigger fetch error:', computeErr instanceof Error ? computeErr.message : computeErr);
     }
   }
 

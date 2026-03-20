@@ -180,7 +180,9 @@ export async function POST(req: Request) {
       });
     }
 
-    /* 3. Also run the ingest pipeline (best-effort) */
+    /* 3. Also run the ingest pipeline — track status for frontend */
+    let ingestStatus: 'ok' | 'partial' | 'failed' = 'ok';
+    let ingestError = '';
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (serviceKey) {
       try {
@@ -208,7 +210,7 @@ export async function POST(req: Request) {
 
           // Await the backend ingest so the ingest_run row exists before we update it
           try {
-            await fetch(`${apiUrl}/v1/ingest/fills/csv`, {
+            const ingestRes = await fetch(`${apiUrl}/v1/ingest/fills/csv`, {
               method: 'POST',
               headers: {
                 Authorization: `Bearer ${rawToken}`,
@@ -216,13 +218,22 @@ export async function POST(req: Request) {
               },
               body: JSON.stringify({ csv_text: csvText, source_file: fileName }),
             });
+            const ingestBody = await ingestRes.text();
+            console.log(`[Senti ingest] Backend ingest response: ${ingestRes.status} ${ingestBody.slice(0, 500)}`);
+            if (!ingestRes.ok) {
+              console.error(`[Senti ingest] Backend ingest FAILED: ${ingestRes.status} ${ingestBody.slice(0, 500)}`);
+              ingestStatus = 'partial';
+              ingestError = `Data sync failed (${ingestRes.status}). Your analysis is still accurate — re-upload through the Ingest page to sync your dashboard.`;
+            }
           } catch (ingestErr) {
             console.error('[Senti ingest] backend ingest failed:', ingestErr);
+            ingestStatus = 'partial';
+            ingestError = 'Data sync failed — backend unreachable. Re-upload through the Ingest page to sync your dashboard.';
           }
 
           // Trigger BSS compute pipeline (same as performance-pdf ingest)
           try {
-            await fetch(`${apiUrl}/v1/compute/trigger`, {
+            const computeRes = await fetch(`${apiUrl}/v1/compute/trigger`, {
               method: 'POST',
               headers: {
                 Authorization: `Bearer ${rawToken}`,
@@ -230,9 +241,13 @@ export async function POST(req: Request) {
               },
               body: JSON.stringify({ account_ref: accounts[0].account_ref }),
             });
-            console.log('[Senti ingest] Compute trigger sent');
-          } catch {
-            // Best-effort — compute will pick up on next cycle
+            const computeBody = await computeRes.text();
+            console.log(`[Senti ingest] Compute trigger response: ${computeRes.status} ${computeBody.slice(0, 500)}`);
+            if (!computeRes.ok) {
+              console.error(`[Senti ingest] Compute trigger FAILED: ${computeRes.status} ${computeBody.slice(0, 500)}`);
+            }
+          } catch (computeErr) {
+            console.error('[Senti ingest] Compute trigger fetch error:', computeErr instanceof Error ? computeErr.message : computeErr);
           }
 
           // Build the full parsed summary for the Intelligence Panel
@@ -315,6 +330,8 @@ export async function POST(req: Request) {
         }
       } catch (err) {
         console.error('[Senti ingest] ingest pipeline error:', err);
+        ingestStatus = 'failed';
+        ingestError = 'Data sync failed completely. Re-upload through the Ingest page to sync your dashboard.';
       }
     }
 
@@ -341,7 +358,11 @@ export async function POST(req: Request) {
     // Attach parsed data as a custom header so the frontend can show summary stats
     // Expose the full parsed summary + custom headers
     // Access-Control-Expose-Headers is needed for the frontend to read custom headers
-    response.headers.set('Access-Control-Expose-Headers', 'X-Parsed-Summary');
+    response.headers.set('Access-Control-Expose-Headers', 'X-Parsed-Summary, X-Ingest-Status');
+    response.headers.set('X-Ingest-Status', JSON.stringify({
+      status: ingestStatus,
+      error: ingestError || undefined,
+    }));
     response.headers.set(
       'X-Parsed-Summary',
       JSON.stringify({

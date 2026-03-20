@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Upload, CheckCircle, XCircle, Copy, Plus, ChevronDown } from 'lucide-react';
+import { Upload, CheckCircle, XCircle, Copy, Plus, ChevronDown, RefreshCw } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { GlowPanel } from '@/components/ui/glow-panel';
 import { useStrategies } from '@/hooks/use-strategies';
@@ -35,6 +35,8 @@ export default function IngestPage() {
   const [showStrategyDropdown, setShowStrategyDropdown] = useState(false);
   const [newStrategyName, setNewStrategyName] = useState('');
   const [creatingStrategy, setCreatingStrategy] = useState(false);
+  const [recomputing, setRecomputing] = useState(false);
+  const [recomputeResult, setRecomputeResult] = useState<{ ok: boolean; bss_score?: number; bss_tier?: string; error?: string } | null>(null);
 
   // Auto-select default strategy when loaded
   useEffect(() => {
@@ -291,6 +293,41 @@ export default function IngestPage() {
           <span className="font-mono text-sm text-negative">{error}</span>
         </div>
       )}
+
+      {/* Recompute BSS button */}
+      <div className="mt-4 flex items-center gap-3">
+        <button
+          onClick={async () => {
+            setRecomputing(true);
+            setRecomputeResult(null);
+            try {
+              const res = await fetch('/api/compute/trigger', { method: 'POST' });
+              const data = await res.json();
+              if (res.ok) {
+                setRecomputeResult({ ok: true, bss_score: data.bss_score, bss_tier: data.bss_tier });
+              } else {
+                setRecomputeResult({ ok: false, error: data.error || 'Compute failed' });
+              }
+            } catch (err) {
+              setRecomputeResult({ ok: false, error: err instanceof Error ? err.message : 'Failed' });
+            } finally {
+              setRecomputing(false);
+            }
+          }}
+          disabled={recomputing}
+          className="flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.04] backdrop-blur-xl px-4 py-2 font-mono text-[12px] text-text-secondary hover:border-white/[0.15] hover:bg-white/[0.06] transition-all disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={recomputing ? 'animate-spin' : ''} />
+          {recomputing ? 'Recomputing...' : 'Recompute BSS'}
+        </button>
+        {recomputeResult && (
+          <span className={`font-mono text-[11px] ${recomputeResult.ok ? 'text-positive' : 'text-negative'}`}>
+            {recomputeResult.ok
+              ? `BSS updated${recomputeResult.bss_score != null ? `: ${recomputeResult.bss_score} (${recomputeResult.bss_tier})` : ''}`
+              : recomputeResult.error}
+          </span>
+        )}
+      </div>
 
       {/* Recent uploads */}
       <div className="mt-8">

@@ -453,6 +453,22 @@ function SentiPageInner() {
         }
       }
 
+      // Check ingest status — surface failures to user
+      const ingestStatusHeader = res.headers.get('X-Ingest-Status');
+      if (ingestStatusHeader) {
+        try {
+          const ingestInfo = JSON.parse(ingestStatusHeader);
+          if (ingestInfo.status !== 'ok' && ingestInfo.error) {
+            // Show warning after stream completes (we'll append it below)
+            console.warn('[Senti] Ingest status:', ingestInfo.status, ingestInfo.error);
+            // We'll append the warning after streaming finishes
+            (window as unknown as Record<string, unknown>).__sentiIngestWarning = ingestInfo.error;
+          }
+        } catch {
+          // Non-critical
+        }
+      }
+
       // Stream the response
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
@@ -471,6 +487,20 @@ function SentiPageInner() {
             )
           );
         }
+      }
+
+      // After stream completes, check if there was an ingest warning
+      const ingestWarning = (window as unknown as Record<string, unknown>).__sentiIngestWarning as string | undefined;
+      if (ingestWarning) {
+        delete (window as unknown as Record<string, unknown>).__sentiIngestWarning;
+        fullText += `\n\n---\n⚠️ **Data sync notice:** ${ingestWarning}`;
+        setMessages((prev: UIMessage[]) =>
+          prev.map((m: UIMessage) =>
+            m.id === sentiMsgId
+              ? { ...m, parts: [{ type: 'text' as const, text: fullText }] }
+              : m
+          )
+        );
       }
     } catch (err) {
       const errorText = err instanceof Error ? err.message : 'Failed to analyze file';

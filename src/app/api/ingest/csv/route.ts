@@ -221,7 +221,7 @@ export async function POST(req: Request) {
 
     if (fillsTotal > 0 && !computeTriggered) {
       try {
-        await fetch(`${apiUrl}/v1/compute/trigger`, {
+        const computeRes = await fetch(`${apiUrl}/v1/compute/trigger`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${rawToken}`,
@@ -229,10 +229,36 @@ export async function POST(req: Request) {
           },
           body: JSON.stringify({ account_ref: accountRef }),
         });
-        computeTriggered = true;
-        console.log('[CSV ingest] Compute trigger sent explicitly');
+        const computeBody = await computeRes.text();
+        console.log(`[CSV ingest] Compute trigger response: ${computeRes.status} ${computeBody.slice(0, 500)}`);
+        if (computeRes.ok) {
+          computeTriggered = true;
+        } else {
+          console.error(`[CSV ingest] Compute trigger FAILED: ${computeRes.status} ${computeBody.slice(0, 500)}`);
+        }
+      } catch (computeErr) {
+        console.error('[CSV ingest] Compute trigger fetch error:', computeErr instanceof Error ? computeErr.message : computeErr);
+      }
+    }
+
+    // Post-compute verification: check if BSS actually updated
+    let computeVerified = false;
+    if (computeTriggered) {
+      try {
+        const stateRes = await fetch(`${apiUrl}/v1/state`, {
+          method: 'GET',
+          headers: { Authorization: `Bearer ${rawToken}` },
+        });
+        if (stateRes.ok) {
+          const stateData = await stateRes.json();
+          const bss = stateData?.bss_score ?? stateData?.bss?.score;
+          console.log(`[CSV ingest] Post-compute BSS verification: bss_score=${bss}, bss_tier=${stateData?.bss_tier ?? stateData?.bss?.tier}`);
+          computeVerified = bss !== undefined && bss !== null;
+        } else {
+          console.warn(`[CSV ingest] Post-compute state check failed: ${stateRes.status}`);
+        }
       } catch {
-        // Best-effort — compute will pick up on next cycle
+        // Non-critical — just verification logging
       }
     }
 
@@ -249,6 +275,7 @@ export async function POST(req: Request) {
       fills_duplicate: backendResult.fills_duplicate ?? 0,
       fills_rejected: backendResult.fills_rejected ?? 0,
       compute_triggered: computeTriggered,
+      compute_verified: computeVerified,
       backfill: backendResult.backfill ?? null,
       sessions: backendResult.sessions ?? null,
     });
