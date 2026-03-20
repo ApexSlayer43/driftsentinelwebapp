@@ -212,11 +212,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // If fills were accepted but compute wasn't triggered by backend, trigger it explicitly
+    // Always trigger compute if the backend didn't — even on duplicate fills.
+    // The compute pipeline is idempotent (recalculates from all fills in DB).
+    // Without this, re-uploading the same CSV would never update BSS.
     const fillsNew = backendResult.fills_new ?? 0;
+    const fillsTotal = fillsNew + (backendResult.fills_duplicate ?? 0);
     let computeTriggered = backendResult.compute_triggered ?? false;
 
-    if (fillsNew > 0 && !computeTriggered) {
+    if (fillsTotal > 0 && !computeTriggered) {
       try {
         await fetch(`${apiUrl}/v1/compute/trigger`, {
           method: 'POST',
