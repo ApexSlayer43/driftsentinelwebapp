@@ -1,16 +1,13 @@
 import { createClient as createAuthClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
-import { createHash } from 'crypto';
-
-function deriveWebToken(userId: string): string {
-  return createHash('sha256')
-    .update(`web:${userId}:drift-sentinel`)
-    .digest('hex');
-}
+import { runComputeEngine } from '@/lib/compute-engine';
 
 /**
  * POST /api/compute/trigger
- * Manual BSS recompute trigger — calls the Express backend's /v1/compute/trigger
+ * Runs the full behavioral compute engine:
+ * fills → sessions → violations → DSI → BSS
+ *
+ * No longer proxies to Express backend — we own the pipeline.
  */
 export async function POST() {
   /* 1. Authenticate */
@@ -47,56 +44,19 @@ export async function POST() {
   }
 
   const accountRef = accounts[0].account_ref;
-  const rawToken = deriveWebToken(user.id);
-  const apiUrl = process.env.API_URL || 'https://api.driftsentinel.io';
 
-  /* 3. Trigger compute */
+  /* 3. Run the behavioral compute engine */
   try {
-    const computeRes = await fetch(`${apiUrl}/v1/compute/trigger`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${rawToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ account_ref: accountRef }),
-    });
-
-    const computeBody = await computeRes.text();
-    console.log(`[Manual compute] Trigger response: ${computeRes.status} ${computeBody.slice(0, 500)}`);
-
-    if (!computeRes.ok) {
-      return Response.json(
-        { error: 'Compute trigger failed', status: computeRes.status, detail: computeBody.slice(0, 200) },
-        { status: 502 },
-      );
-    }
-
-    /* 4. Verify — read back state */
-    let bssScore: number | null = null;
-    let bssTier: string | null = null;
-    try {
-      const stateRes = await fetch(`${apiUrl}/v1/state`, {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${rawToken}` },
-      });
-      if (stateRes.ok) {
-        const stateData = await stateRes.json();
-        bssScore = stateData?.bss_score ?? stateData?.bss?.score ?? null;
-        bssTier = stateData?.bss_tier ?? stateData?.bss?.tier ?? null;
-      }
-    } catch {
-      // Non-critical
-    }
+    const result = await runComputeEngine(admin, accountRef, user.id);
 
     return Response.json({
       ok: true,
       account_ref: accountRef,
-      bss_score: bssScore,
-      bss_tier: bssTier,
+      ...result,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error('[Manual compute] Trigger fetch error:', msg);
-    return Response.json({ error: 'Backend unreachable', detail: msg }, { status: 502 });
+    console.error('[compute/trigger] Engine error:', msg);
+    return Response.json({ error: 'Compute engine failed', detail: msg }, { status: 500 });
   }
 }

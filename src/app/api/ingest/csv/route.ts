@@ -2,6 +2,7 @@ import { createClient as createAuthClient } from '@/lib/supabase/server';
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'crypto';
 import { parsePerformanceCsv, extractRoot } from '@/lib/parse-performance-csv';
+import { runComputeEngine } from '@/lib/compute-engine';
 
 /* ---------- helpers ---------- */
 
@@ -219,46 +220,17 @@ export async function POST(req: Request) {
     const fillsTotal = fillsNew + (backendResult.fills_duplicate ?? 0);
     let computeTriggered = backendResult.compute_triggered ?? false;
 
-    if (fillsTotal > 0 && !computeTriggered) {
-      try {
-        const computeRes = await fetch(`${apiUrl}/v1/compute/trigger`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${rawToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ account_ref: accountRef }),
-        });
-        const computeBody = await computeRes.text();
-        console.log(`[CSV ingest] Compute trigger response: ${computeRes.status} ${computeBody.slice(0, 500)}`);
-        if (computeRes.ok) {
-          computeTriggered = true;
-        } else {
-          console.error(`[CSV ingest] Compute trigger FAILED: ${computeRes.status} ${computeBody.slice(0, 500)}`);
-        }
-      } catch (computeErr) {
-        console.error('[CSV ingest] Compute trigger fetch error:', computeErr instanceof Error ? computeErr.message : computeErr);
-      }
-    }
-
-    // Post-compute verification: check if BSS actually updated
+    // Run the behavioral compute engine directly (sessions → violations → DSI → BSS)
     let computeVerified = false;
-    if (computeTriggered) {
+    let computeResult: { sessions_built: number; violations_found: number; bss_score: number | null; bss_tier: string | null } | null = null;
+    if (fillsTotal > 0) {
       try {
-        const stateRes = await fetch(`${apiUrl}/v1/state`, {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${rawToken}` },
-        });
-        if (stateRes.ok) {
-          const stateData = await stateRes.json();
-          const bss = stateData?.bss_score ?? stateData?.bss?.score;
-          console.log(`[CSV ingest] Post-compute BSS verification: bss_score=${bss}, bss_tier=${stateData?.bss_tier ?? stateData?.bss?.tier}`);
-          computeVerified = bss !== undefined && bss !== null;
-        } else {
-          console.warn(`[CSV ingest] Post-compute state check failed: ${stateRes.status}`);
-        }
-      } catch {
-        // Non-critical — just verification logging
+        computeResult = await runComputeEngine(admin, accountRef, user.id);
+        computeTriggered = true;
+        computeVerified = computeResult.bss_score !== null;
+        console.log(`[CSV ingest] Compute engine result: ${JSON.stringify(computeResult)}`);
+      } catch (computeErr) {
+        console.error('[CSV ingest] Compute engine error:', computeErr instanceof Error ? computeErr.message : computeErr);
       }
     }
 
@@ -276,6 +248,7 @@ export async function POST(req: Request) {
       fills_rejected: backendResult.fills_rejected ?? 0,
       compute_triggered: computeTriggered,
       compute_verified: computeVerified,
+      compute: computeResult ?? null,
       backfill: backendResult.backfill ?? null,
       sessions: backendResult.sessions ?? null,
     });
