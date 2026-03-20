@@ -206,18 +206,21 @@ export async function POST(req: Request) {
           );
           const csvText = [csvHeader, ...csvRows].join('\n');
 
-          fetch(`${apiUrl}/v1/ingest/fills/csv`, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${rawToken}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ csv_text: csvText, source_file: fileName }),
-          }).catch((err) => {
-            console.error('[Senti ingest] backend ingest failed:', err);
-          });
+          // Await the backend ingest so the ingest_run row exists before we update it
+          try {
+            await fetch(`${apiUrl}/v1/ingest/fills/csv`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${rawToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ csv_text: csvText, source_file: fileName }),
+            });
+          } catch (ingestErr) {
+            console.error('[Senti ingest] backend ingest failed:', ingestErr);
+          }
 
-          // Store the full parsed summary so the Intelligence Panel can recall it later
+          // Build the full parsed summary for the Intelligence Panel
           const s = pdfResult.summary;
           const trades = pdfResult.trades;
           const avgQty = trades.length > 0 ? trades.reduce((sum, t) => sum + t.qty, 0) / trades.length : 0;
@@ -275,28 +278,25 @@ export async function POST(req: Request) {
             behavioralFlags,
           };
 
-          // Write to the most recent ingest_run for this account (just created by the CSV ingest)
-          // Use a small delay to let the backend create the row first, then update it
-          setTimeout(async () => {
-            try {
-              const { data: latestRun } = await admin
-                .from('ingest_runs')
-                .select('ingest_run_id')
-                .eq('account_ref', accounts[0].account_ref)
-                .order('created_at', { ascending: false })
-                .limit(1);
+          // Store on the ingest_run row (backend just created it above)
+          try {
+            const { data: latestRun } = await admin
+              .from('ingest_runs')
+              .select('ingest_run_id')
+              .eq('account_ref', accounts[0].account_ref)
+              .order('created_at', { ascending: false })
+              .limit(1);
 
-              if (latestRun && latestRun.length > 0) {
-                await admin
-                  .from('ingest_runs')
-                  .update({ parsed_summary: parsedSummary })
-                  .eq('ingest_run_id', latestRun[0].ingest_run_id);
-                console.log('[Senti ingest] Stored parsed_summary on ingest_run', latestRun[0].ingest_run_id);
-              }
-            } catch (err) {
-              console.error('[Senti ingest] Failed to store parsed_summary:', err);
+            if (latestRun && latestRun.length > 0) {
+              await admin
+                .from('ingest_runs')
+                .update({ parsed_summary: parsedSummary })
+                .eq('ingest_run_id', latestRun[0].ingest_run_id);
+              console.log('[Senti ingest] Stored parsed_summary on ingest_run', latestRun[0].ingest_run_id);
             }
-          }, 3000);
+          } catch (storeErr) {
+            console.error('[Senti ingest] Failed to store parsed_summary:', storeErr);
+          }
         }
       } catch (err) {
         console.error('[Senti ingest] ingest pipeline error:', err);
