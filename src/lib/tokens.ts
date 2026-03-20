@@ -60,6 +60,9 @@ export const MODE_LABELS: Record<string, string> = {
   HESITATION: 'Hesitation Pattern',
   REVENGE_ENTRY: 'Revenge Entry',
   SIZE_ESCALATION: 'Size Escalation',
+  ONE_SHOT: 'Daily Loss Limit Exceeded',
+  PROTECT_GREEN: 'Gave Back Gains',
+  GHOST_EQUITY: 'Late Session Entry',
 };
 
 /** Human-readable descriptions of what each pattern means — no jargon */
@@ -71,6 +74,9 @@ export const MODE_DESCRIPTIONS: Record<string, string> = {
   HESITATION: 'Delayed entries or exits suggest hesitation in execution.',
   REVENGE_ENTRY: 'Rapid re-entry after a loss suggests emotional re-engagement.',
   SIZE_ESCALATION: 'Position sizes increased progressively through the session.',
+  ONE_SHOT: 'Hit your daily loss limit and kept trading — discipline requires walking away.',
+  PROTECT_GREEN: 'Session was profitable but you gave it all back. Protect your gains.',
+  GHOST_EQUITY: 'Entered trades too close to session close — risk of floating drawdown at settlement.',
 };
 
 export function getModeDescription(mode: string) {
@@ -85,6 +91,9 @@ export const MODE_ICONS: Record<string, string> = {
   HESITATION: 'Pause',
   REVENGE_ENTRY: 'Zap',
   SIZE_ESCALATION: 'ArrowUpRight',
+  ONE_SHOT: 'ShieldOff',
+  PROTECT_GREEN: 'TrendingDown',
+  GHOST_EQUITY: 'Timer',
 };
 
 // Session quality styles — maps session_quality enum to visual tokens

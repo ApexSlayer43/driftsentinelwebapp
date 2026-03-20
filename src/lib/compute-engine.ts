@@ -347,14 +347,14 @@ function evaluateOneShot(
       mode_instance_id: `${accountRef}:${session.trading_date}`,
       account_ref: accountRef,
       rule_id: 'one-shot',
-      mode: 'SESSION',
+      mode: 'ONE_SHOT',
       severity: 'HIGH',
       points: 15,
       first_seen_utc: tradesAfterLimit[0].buy_time,
       window_start_utc: session.session_start_utc,
       window_end_utc: session.session_end_utc,
       evidence_event_ids: evidenceIds,
-      status: 'ACTIVE',
+      status: 'active',
     }];
   }
 
@@ -413,14 +413,14 @@ function evaluateProtectGreen(
       mode_instance_id: `${accountRef}:${session.trading_date}`,
       account_ref: accountRef,
       rule_id: 'protect-green',
-      mode: 'SESSION',
+      mode: 'PROTECT_GREEN',
       severity: 'MEDIUM',
       points: 10,
       first_seen_utc: crossTrade.sell_time || crossTrade.buy_time,
       window_start_utc: session.session_start_utc,
       window_end_utc: session.session_end_utc,
       evidence_event_ids: evidenceIds,
-      status: 'ACTIVE',
+      status: 'active',
     }];
   }
 
@@ -452,14 +452,14 @@ function evaluateGhostEquity(
     mode_instance_id: `${accountRef}:${session.trading_date}`,
     account_ref: accountRef,
     rule_id: 'ghost-equity',
-    mode: 'SESSION',
+    mode: 'GHOST_EQUITY',
     severity: 'MEDIUM',
     points: 10,
     first_seen_utc: lateFills[0].timestamp_utc,
     window_start_utc: session.session_start_utc,
     window_end_utc: session.session_end_utc,
     evidence_event_ids: lateFills.map(f => f.event_id),
-    status: 'ACTIVE',
+    status: 'active',
   }];
 }
 
