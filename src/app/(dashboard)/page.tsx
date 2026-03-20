@@ -30,20 +30,36 @@ const EVIDENCE_STEP_IDS = new Set(['evidence-sessions', 'evidence-violations', '
  */
 
 /** Data freshness — ambient indicator, not a surface element */
-type FreshnessState = 'LIVE' | 'STALE' | 'ERROR';
+type FreshnessState = 'LIVE' | 'STALE' | 'COMPUTING' | 'ERROR';
+
+/** Freshness thresholds (seconds) */
+const LIVE_THRESHOLD = 3600;      // 1 hour  — just computed or recently uploaded
+const STALE_THRESHOLD = 86400;    // 24 hours — uploaded today but not in the last hour
 
 function getDataFreshness(computedAt: string | null): { state: FreshnessState; label: string } {
-  if (!computedAt) return { state: 'ERROR', label: 'ERROR' };
+  /* null computed_at = backend hasn't finished computing yet (new account or first ingest) */
+  if (!computedAt) return { state: 'COMPUTING', label: 'COMPUTING' };
+
   const age = (Date.now() - new Date(computedAt).getTime()) / 1000;
+
+  /* Invalid date / clock skew → real error */
   if (!Number.isFinite(age) || age < 0) return { state: 'ERROR', label: 'ERROR' };
-  if (age < 120) return { state: 'LIVE', label: 'LIVE' };
+
+  /* Computed within the last hour → live */
+  if (age < LIVE_THRESHOLD) return { state: 'LIVE', label: 'LIVE' };
+
+  /* Computed within the last 24 hours → still fresh for the trading day */
+  if (age < STALE_THRESHOLD) return { state: 'LIVE', label: 'LIVE' };
+
+  /* Older than 24 hours → stale, needs a new upload */
   return { state: 'STALE', label: 'STALE' };
 }
 
 const FRESHNESS_STYLES: Record<FreshnessState, { dot: string; text: string }> = {
-  LIVE:  { dot: 'bg-positive',    text: 'text-positive' },
-  STALE: { dot: 'bg-warning',     text: 'text-warning' },
-  ERROR: { dot: 'bg-negative',    text: 'text-negative' },
+  LIVE:      { dot: 'bg-positive',    text: 'text-positive' },
+  STALE:     { dot: 'bg-warning',     text: 'text-warning' },
+  COMPUTING: { dot: 'bg-gold',        text: 'text-gold' },
+  ERROR:     { dot: 'bg-negative',    text: 'text-negative' },
 };
 
 function DataFreshnessIndicator({ computedAt }: { computedAt: string | null }) {
