@@ -168,32 +168,41 @@ function parseSummary(text: string): PerformanceSummary {
 function parseTrades(text: string): ParsedTrade[] {
   const trades: ParsedTrade[] = [];
 
-  // Find the TRADES section
-  const idx = text.indexOf('TRADES\n');
-  if (idx === -1) return trades;
-  let tradeText = text.slice(idx);
+  // Find the TRADES section — flexible: case-insensitive, any whitespace/newline after
+  const tradesMatch = text.match(/TRADES[\s\r\n]/i);
+  if (!tradesMatch || tradesMatch.index === undefined) {
+    console.warn('[parseTrades] No TRADES header found in PDF text');
+    return trades;
+  }
+  let tradeText = text.slice(tradesMatch.index);
 
-  // Remove header rows
-  tradeText = tradeText.replace(/SymbolQtyBuy PriceBuy TimeDurationSell TimeSell PriceP&L/g, '');
+  // Remove header rows — flexible spacing
+  tradeText = tradeText.replace(/Symbol\s*Qty\s*Buy\s*Price\s*Buy\s*Time\s*Duration\s*Sell\s*Time\s*Sell\s*Price\s*P\s*&\s*L/gi, '');
 
   // Collapse multi-line entries. Pattern:
   //   MESH626718.7503/12/2026 15:16:3214min    ← line 1 (trade start + partial duration)
   //   26sec                                     ← line 2 (rest of duration)
   //   03/12/2026 15:02:056719.25$5.00           ← line 3 (sell side)
   // Join line2 (just digits+sec/min) back to line1, then join line3 (starts with date)
-  tradeText = tradeText.replace(/(\d+min)\n(\d+sec)\n(\d{2}\/)/g, '$1 $2$3');
+  tradeText = tradeText.replace(/(\d+min)\s*\n\s*(\d+sec)\s*\n?\s*(\d{2}\/)/g, '$1 $2$3');
 
   // Also handle single-line wrap where just sec is on next line
-  tradeText = tradeText.replace(/(\d+min)\n(\d+sec)(\d{2}\/)/g, '$1 $2$3');
+  tradeText = tradeText.replace(/(\d+min)\s*\n\s*(\d+sec)\s*(\d{2}\/)/g, '$1 $2$3');
+
+  // Also handle duration on next line followed by sell date on same or next line
+  tradeText = tradeText.replace(/(\d{2}:\d{2}:\d{2})\s*\n\s*(\d+(?:min|sec|h))/g, '$1$2');
+
+  // Collapse remaining line breaks between sell-side data
+  tradeText = tradeText.replace(/((?:min|sec))\s*\n\s*(\d{2}\/)/g, '$1$2');
 
   // Futures symbol: 2-4 letters + month code (FGHJKMNQUVXZ) + 1-2 year digits
-  // Qty: 1-2 digits (1-99)
-  // Price: 4-5 whole digits + .2 decimals
+  // Qty: 1-3 digits (1-999)
+  // Price: 3-6 whole digits + .2 decimals (covers MES ~5800, NQ ~20000+)
   // Timestamp: MM/DD/YYYY HH:MM:SS
-  // Duration: Xmin Xsec | Xmin | Xsec | XhXmin
-  // Then sell timestamp, sell price, $P&L
+  // Duration: Xmin Xsec | Xmin | Xsec | XhXmin | Xh Xmin
+  // Then sell timestamp, sell price, $P&L (possibly negative in parens or with minus)
 
-  const lineRegex = /([A-Z]{2,4}[FGHJKMNQUVXZ]\d{1,2})(\d{1,2})(\d{4,5}\.\d{2})(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})(\d+(?:min|sec|h)(?:\s*\d+(?:min|sec))?)(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})(\d{4,5}\.\d{2})\$([\d.,()]+)/g;
+  const lineRegex = /([A-Z]{2,4}[FGHJKMNQUVXZ]\d{1,2})(\d{1,3})(\d{3,6}\.\d{2})(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})\s*(\d+(?:min|sec|h)(?:\s*\d+(?:min|sec))?)\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})(\d{3,6}\.\d{2})\$?([-\d.,()]+)/g;
 
   let match;
   while ((match = lineRegex.exec(tradeText)) !== null) {
@@ -207,6 +216,11 @@ function parseTrades(text: string): ParsedTrade[] {
       sellPrice: parseFloat(match[7]),
       pnl: parseMoney('$' + match[8]),
     });
+  }
+
+  if (trades.length === 0) {
+    // Log a snippet around the TRADES section for debugging
+    console.warn('[parseTrades] Regex matched 0 trades. Trade text snippet (first 800 chars):', tradeText.slice(0, 800));
   }
 
   return trades;

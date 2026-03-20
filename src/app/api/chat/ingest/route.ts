@@ -145,10 +145,17 @@ export async function POST(req: Request) {
     const pdfBuffer = Buffer.from(await file.arrayBuffer());
 
     let pdfResult: PerformancePdfResult;
+    let rawPdfText = '';
     try {
       const parsed = await pdfParse(pdfBuffer);
-      pdfResult = parsePerformancePdf(parsed.text);
+      rawPdfText = parsed.text ?? '';
+      console.log('[Senti ingest] PDF text length:', rawPdfText.length);
+      console.log('[Senti ingest] PDF text preview (first 1500 chars):', rawPdfText.slice(0, 1500));
+      console.log('[Senti ingest] TRADES header found:', rawPdfText.indexOf('TRADES') !== -1);
+      pdfResult = parsePerformancePdf(rawPdfText);
+      console.log('[Senti ingest] Trades parsed:', pdfResult.trades.length, 'Fills:', pdfResult.fills.length);
     } catch (err) {
+      console.error('[Senti ingest] PDF parse error:', err);
       return new Response(JSON.stringify({
         error: 'Failed to parse PDF',
         detail: err instanceof Error ? err.message : 'Unknown error',
@@ -159,8 +166,14 @@ export async function POST(req: Request) {
     }
 
     if (pdfResult.trades.length === 0) {
+      console.warn('[Senti ingest] No trades found. PDF text snippet around TRADES:', rawPdfText.slice(Math.max(0, rawPdfText.indexOf('TRADE') - 50), rawPdfText.indexOf('TRADE') + 500));
       return new Response(JSON.stringify({
         error: 'No trades found in PDF',
+        debug: {
+          text_length: rawPdfText.length,
+          has_trades_header: rawPdfText.includes('TRADES'),
+          first_200_chars: rawPdfText.slice(0, 200),
+        },
       }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },

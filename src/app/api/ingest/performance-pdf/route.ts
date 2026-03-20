@@ -160,7 +160,11 @@ export async function POST(req: Request) {
   let pdfResult;
   try {
     const parsed = await pdfParse(pdfBuffer);
-    pdfResult = parsePerformancePdf(parsed.text);
+    const rawText = parsed.text ?? '';
+    console.log('[PDF ingest] text length:', rawText.length, 'TRADES header:', rawText.includes('TRADES'));
+    console.log('[PDF ingest] text preview:', rawText.slice(0, 1500));
+    pdfResult = parsePerformancePdf(rawText);
+    console.log('[PDF ingest] trades parsed:', pdfResult.trades.length);
   } catch (err) {
     console.error('PDF parse error:', err);
     return Response.json(
