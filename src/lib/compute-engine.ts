@@ -637,10 +637,12 @@ export async function runComputeEngine(
     }
 
     // Determine session quality
+    // DB CHECK constraint: CLEAN | MINOR | DEGRADED | COMPROMISED | BREAKDOWN
     const totalPnl = session.trades.reduce((s, t) => s + t.pnl, 0);
     let quality = 'CLEAN';
-    if (sessionViolations.length > 0) quality = 'VIOLATED';
-    else if (totalPnl < 0) quality = 'LOSS';
+    if (sessionViolations.length >= 2) quality = 'COMPROMISED';
+    else if (sessionViolations.length === 1) quality = 'DEGRADED';
+    else if (totalPnl < 0) quality = 'MINOR';
 
     const sessionId = randomUUID();
     const latestIngestRun = fills[fills.length - 1]?.ingest_run_id ?? null;
@@ -659,8 +661,6 @@ export async function runComputeEngine(
       bss_delta: bssDay ? Math.round((bssDay.bss_score - bssDay.bss_previous) * 100) / 100 : null,
       max_consecutive_losses: maxConsecLosses,
       session_quality: quality,
-      ingest_run_id: latestIngestRun,
-      tag: session.window_name,
     });
 
     if (sessErr) {
