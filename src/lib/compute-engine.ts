@@ -656,7 +656,7 @@ export async function runComputeEngine(
       violation_count: sessionViolations.length,
       dsi_score: dsi,
       bss_at_session: bssDay?.bss_score ?? null,
-      bss_delta: bssDay ? bssDay.bss_score - bssDay.bss_previous : null,
+      bss_delta: bssDay ? Math.round((bssDay.bss_score - bssDay.bss_previous) * 100) / 100 : null,
       max_consecutive_losses: maxConsecLosses,
       session_quality: quality,
       ingest_run_id: latestIngestRun,
@@ -738,8 +738,8 @@ export async function runComputeEngine(
       violation_count: day.violation_count,
       fills_count: day.fills_count,
       computed_at: new Date().toISOString(),
-      bss_score: day.bss_score,
-      bss_previous: day.bss_previous,
+      bss_score: Math.round(day.bss_score * 100) / 100,
+      bss_previous: Math.round(day.bss_previous * 100) / 100,
       streak_count: day.streak_count,
     });
     if (dsErr) console.error(`[compute-engine] Daily score insert error (${day.trading_date}):`, dsErr.message);
