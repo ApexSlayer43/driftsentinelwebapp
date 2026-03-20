@@ -6,6 +6,9 @@ import { TextStreamChatTransport, type UIMessage } from 'ai';
 import { Radar, Loader2, RotateCcw, MessageSquare, Clock, Plus, TrendingUp, Flame, Shield } from 'lucide-react';
 import { GradientAIChatInput } from '@/components/ui/gradient-ai-chat-input';
 import LiveEye from '@/components/live-eye';
+import { IntelligencePanel } from '@/components/intelligence-panel';
+import { IntelligencePanelProvider, useIntelligencePanel, type IntelligencePanelData, type PanelDayBreakdown, type PanelBehavioralFlag } from '@/lib/intelligence-panel-context';
+import type { PerformanceSummary, ParsedTrade } from '@/lib/parse-performance-pdf';
 import type { StatePayload } from '@/lib/types';
 
 type SentiMode = 'morningBriefing' | 'sessionCompanion' | 'postSessionAAR' | 'onboarding';
@@ -55,6 +58,11 @@ function getTextFromMessage(msg: UIMessage): string {
     .join('');
 }
 
+/** Strip [SHOW_PANEL:YYYY-MM-DD] directives from displayed text */
+function stripPanelDirectives(text: string): string {
+  return text.replace(/\[SHOW_PANEL:\d{4}-\d{2}-\d{2}\]\s*/g, '').trim();
+}
+
 function formatRelativeDate(dateStr: string): string {
   const date = new Date(dateStr);
   const now = new Date();
@@ -90,7 +98,82 @@ function groupByDay(convos: ConversationSummary[]): { label: string; items: Conv
   return Array.from(groups.entries()).map(([label, items]) => ({ label, items }));
 }
 
+/** Build panel data from parsed PDF result */
+function buildPanelData(
+  pdfResult: { summary: PerformanceSummary; trades: ParsedTrade[]; tradeCount: number; fills: { timestamp_utc: string; contract: string; side: string; qty: number; price: number }[]; dateRange: { start: string; end: string } | null },
+  fileName: string,
+  source: 'upload' | 'recall' = 'upload',
+): IntelligencePanelData {
+  const trades = pdfResult.trades;
+  const avgQty = trades.length > 0 ? trades.reduce((s, t) => s + t.qty, 0) / trades.length : 0;
+
+  // Per-day breakdown
+  const dayMap = new Map<string, PanelDayBreakdown>();
+  for (const t of trades) {
+    const date = t.buyTime.split(' ')[0];
+    const existing = dayMap.get(date) || { date, trades: 0, pnl: 0, wins: 0, losses: 0 };
+    existing.trades++;
+    existing.pnl += t.pnl;
+    if (t.pnl > 0) existing.wins++;
+    else if (t.pnl < 0) existing.losses++;
+    dayMap.set(date, existing);
+  }
+
+  // Behavioral flags
+  const flags: PanelBehavioralFlag[] = [];
+  const oversized = trades.filter((t) => t.qty > avgQty * 1.5);
+  if (oversized.length > 0) {
+    flags.push({
+      type: 'oversize',
+      description: `${oversized.length} trade${oversized.length > 1 ? 's' : ''} exceeded 1.5x avg size (${avgQty.toFixed(1)} contracts)`,
+      severity: oversized.length > 3 ? 'high' : 'medium',
+    });
+  }
+
+  // Revenge patterns
+  for (let i = 1; i < trades.length; i++) {
+    const prev = trades[i - 1];
+    const curr = trades[i];
+    if (prev.pnl < -100 && curr.pnl < 0) {
+      const prevEnd = new Date(prev.sellTime.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2'));
+      const currStart = new Date(curr.buyTime.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2'));
+      const gapMs = currStart.getTime() - prevEnd.getTime();
+      if (gapMs >= 0 && gapMs < 300000) {
+        flags.push({
+          type: 'revenge',
+          description: `After -$${Math.abs(prev.pnl).toFixed(2)} loss, re-entered within ${Math.round(gapMs / 1000)}s for another -$${Math.abs(curr.pnl).toFixed(2)} loss`,
+          severity: 'high',
+        });
+      }
+    }
+  }
+
+  const biggestWin = trades.length > 0 ? trades.reduce((best, t) => (t.pnl > best.pnl ? t : best), trades[0]) : null;
+  const biggestLoss = trades.length > 0 ? trades.reduce((worst, t) => (t.pnl < worst.pnl ? t : worst), trades[0]) : null;
+
+  return {
+    fileName,
+    dateRange: pdfResult.dateRange,
+    tradeCount: pdfResult.tradeCount,
+    fillCount: pdfResult.fills.length,
+    summary: pdfResult.summary,
+    dayBreakdown: Array.from(dayMap.values()),
+    behavioralFlags: flags,
+    keyTrades: { biggestWin, biggestLoss, oversized },
+    source,
+    timestamp: new Date().toISOString(),
+  };
+}
+
 export default function SentiPage() {
+  return (
+    <IntelligencePanelProvider>
+      <SentiPageInner />
+    </IntelligencePanelProvider>
+  );
+}
+
+function SentiPageInner() {
   const [mode, setMode] = useState<SentiMode>('sessionCompanion');
   const [input, setInput] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -99,6 +182,7 @@ export default function SentiPage() {
   const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
   const [stateData, setStateData] = useState<StatePayload | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { openPanel } = useIntelligencePanel();
 
   const transport = useMemo(
     () =>
@@ -129,6 +213,52 @@ export default function SentiPage() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
+
+  // Detect [SHOW_PANEL:YYYY-MM-DD] directives in assistant messages and trigger panel
+  useEffect(() => {
+    const lastMsg = messages[messages.length - 1];
+    if (!lastMsg || lastMsg.role !== 'assistant') return;
+    const text = getTextFromMessage(lastMsg);
+    const panelMatch = text.match(/\[SHOW_PANEL:(\d{4}-\d{2}-\d{2})\]/);
+    if (panelMatch) {
+      const targetDate = panelMatch[1];
+      // Fetch data for that date and open panel
+      fetch(`/api/uploads?date=${targetDate}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.uploads && data.uploads.length > 0) {
+            const run = data.uploads[0];
+            const evt = run.upload_event;
+            openPanel({
+              fileName: run.file_name ?? `Session ${targetDate}`,
+              dateRange: evt ? { start: evt.date_range_start ?? targetDate, end: evt.date_range_end ?? targetDate } : { start: targetDate, end: targetDate },
+              tradeCount: evt?.trade_count ?? run.accepted_count ?? 0,
+              fillCount: run.accepted_count ?? 0,
+              summary: {
+                grossPnl: 0, totalPnl: 0, tradeCount: evt?.trade_count ?? 0, contractCount: 0,
+                avgTradeTime: '', longestTradeTime: '', winRate: 0, expectancy: 0, fees: 0,
+                totalProfit: 0, winningTrades: 0, winningContracts: 0, largestWin: 0, avgWin: 0, stdDevWin: 0,
+                totalLoss: 0, losingTrades: 0, losingContracts: 0, largestLoss: 0, avgLoss: 0, stdDevLoss: 0,
+                maxRunUp: 0, maxDrawdown: 0, maxDrawdownFrom: null, maxDrawdownTo: null,
+                breakEvenPercent: 0, lossBreakdown: null,
+              },
+              dayBreakdown: (data.daily_scores ?? []).map((s: { trading_date: string; fills_count: number; dsi_score: number; violation_count: number }) => ({
+                date: s.trading_date,
+                trades: s.fills_count,
+                pnl: 0,
+                wins: 0,
+                losses: 0,
+              })),
+              behavioralFlags: [],
+              keyTrades: { biggestWin: null, biggestLoss: null, oversized: [] },
+              source: 'recall' as const,
+              timestamp: new Date().toISOString(),
+            });
+          }
+        })
+        .catch(() => { /* non-critical */ });
+    }
+  }, [messages, openPanel]);
 
   // Fetch BSS state for intelligence strip
   useEffect(() => {
@@ -276,6 +406,18 @@ export default function SentiPage() {
         throw new Error(errBody?.error || `Upload failed: ${res.status}`);
       }
 
+      // Try to open intelligence panel from the X-Parsed-Summary header
+      const parsedHeader = res.headers.get('X-Parsed-Summary');
+      if (parsedHeader) {
+        try {
+          const parsed = JSON.parse(parsedHeader);
+          // Fetch the full parsed data for the panel via a separate lightweight call
+          fetchAndOpenPanel(file.name, parsed);
+        } catch {
+          // Non-critical — panel just won't open
+        }
+      }
+
       // Stream the response
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
@@ -307,6 +449,50 @@ export default function SentiPage() {
     } finally {
       setUploadingFile(false);
     }
+  }
+
+  // Fetch full parsed data and open the intelligence panel
+  async function fetchAndOpenPanel(fileName: string, headerSummary: { trades_parsed: number; date_range: { start: string; end: string } | null; gross_pnl: number; net_pnl: number; win_rate: number; trade_count: number }) {
+    try {
+      const res = await fetch(`/api/uploads?latest=true`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.panelData) {
+          openPanel({ ...data.panelData, fileName, source: 'upload' as const, timestamp: new Date().toISOString() });
+          return;
+        }
+      }
+    } catch {
+      // Fallback: build minimal panel from header data
+    }
+
+    // Fallback: build a minimal panel from what we have in the header
+    openPanel({
+      fileName,
+      dateRange: headerSummary.date_range,
+      tradeCount: headerSummary.trades_parsed,
+      fillCount: headerSummary.trades_parsed * 2,
+      summary: {
+        grossPnl: headerSummary.gross_pnl,
+        totalPnl: headerSummary.net_pnl,
+        tradeCount: headerSummary.trade_count,
+        contractCount: 0,
+        avgTradeTime: '',
+        longestTradeTime: '',
+        winRate: headerSummary.win_rate,
+        expectancy: headerSummary.trade_count > 0 ? headerSummary.net_pnl / headerSummary.trade_count : 0,
+        fees: headerSummary.gross_pnl - headerSummary.net_pnl,
+        totalProfit: 0, winningTrades: 0, winningContracts: 0, largestWin: 0, avgWin: 0, stdDevWin: 0,
+        totalLoss: 0, losingTrades: 0, losingContracts: 0, largestLoss: 0, avgLoss: 0, stdDevLoss: 0,
+        maxRunUp: 0, maxDrawdown: 0, maxDrawdownFrom: null, maxDrawdownTo: null,
+        breakEvenPercent: 0, lossBreakdown: null,
+      },
+      dayBreakdown: [],
+      behavioralFlags: [],
+      keyTrades: { biggestWin: null, biggestLoss: null, oversized: [] },
+      source: 'upload',
+      timestamp: new Date().toISOString(),
+    });
   }
 
   // Map modes to dropdown options for the gradient input
@@ -437,13 +623,16 @@ export default function SentiPage() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════ */}
-      {/* MAIN AREA — Intelligence Strip + Dialogue + Input      */}
+      {/* MAIN AREA — Chat + Intelligence Panel                   */}
       {/* ═══════════════════════════════════════════════════════ */}
-      <div className="flex-1 flex flex-col min-w-0" data-onboard="senti-chat">
+      <div className="flex-1 flex min-w-0">
+
+        {/* ── Chat Column ── */}
+        <div className="flex-1 flex flex-col min-w-0" data-onboard="senti-chat">
 
         {/* ── Intelligence Strip ── */}
         <div className="border-b border-[rgba(200,169,110,0.06)] bg-[rgba(200,169,110,0.02)]">
-          <div className="max-w-2xl mx-auto flex items-center gap-6 px-6 py-2.5">
+          <div className="flex items-center gap-6 px-6 py-2.5">
             {/* Mode label */}
             <div className="flex items-center gap-2">
               <div className="h-1 w-1 rounded-full bg-[#c8a96e]" />
@@ -509,7 +698,7 @@ export default function SentiPage() {
           className="flex-1 overflow-auto px-6 py-6"
           style={{ scrollbarWidth: 'thin' }}
         >
-          <div className="max-w-2xl mx-auto">
+          <div>
             {/* Centered Eye — Idle State */}
             {isIdleState && (
               <div className="flex flex-col items-center justify-center pt-12 pb-8">
@@ -560,7 +749,7 @@ export default function SentiPage() {
                           className="border-l-2 border-[rgba(200,169,110,0.15)] pl-4 py-0.5"
                         >
                           <p className="font-display text-[15px] font-light italic text-[#bdb8ae] leading-relaxed whitespace-pre-wrap">
-                            {text}
+                            {stripPanelDirectives(text)}
                           </p>
                         </div>
                       </div>
@@ -581,7 +770,7 @@ export default function SentiPage() {
 
         {/* ── Input Area ── */}
         <div className="px-6 pb-4 pt-2" data-onboard="senti-input">
-          <div className="max-w-2xl mx-auto">
+          <div>
             <GradientAIChatInput
               placeholder="Ask about your behavioral data..."
               disabled={isBusy}
@@ -602,7 +791,13 @@ export default function SentiPage() {
             </div>
           </div>
         </div>
-      </div>
+
+        </div>{/* end Chat Column */}
+
+        {/* ── Intelligence Panel — slides in from right ── */}
+        <IntelligencePanel />
+
+      </div>{/* end MAIN AREA flex */}
     </div>
   );
 }

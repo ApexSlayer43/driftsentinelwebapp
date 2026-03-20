@@ -165,10 +165,24 @@ export async function POST(req: Request) {
     // 6. Build the full layered system prompt
     const systemPrompt = composeSentiPromptString(mode, traderProfile);
 
-    // 7. Stream from Claude via Vercel AI SDK
+    // 7. Append intelligence panel awareness to system prompt
+    const panelInstruction = `
+
+INTELLIGENCE PANEL CAPABILITY:
+You have access to a side panel that can display behavioral data visually. When the trader asks about a specific date's data, a past upload, or says things like "show me March 12th", "pull up today's upload", "what happened last Tuesday", "show me my data from yesterday" — include this exact directive on its own line in your response:
+
+[SHOW_PANEL:YYYY-MM-DD]
+
+Replace YYYY-MM-DD with the relevant date. The frontend will detect this and open the intelligence panel with that day's data. You can include this directive naturally within your response — it will be hidden from the displayed text and replaced with the panel.
+
+Only use this when the trader explicitly asks to see or review data for a specific date. Do not use it unprompted.`;
+
+    const fullSystemPrompt = systemPrompt + panelInstruction;
+
+    // 8. Stream from Claude via Vercel AI SDK
     const result = streamText({
       model: anthropic('claude-sonnet-4-20250514'),
-      system: systemPrompt,
+      system: fullSystemPrompt,
       messages: await convertToModelMessages(messages),
       maxOutputTokens: 4096,
       temperature: 0.3,
