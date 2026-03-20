@@ -508,30 +508,32 @@ function computeBSS(
 
     const effectiveAlpha = ALPHA * (1 + streak * 0.02);
     const newBSS = (effectiveAlpha * day.dsi) + ((1 - effectiveAlpha) * prevBSS);
-    const rounded = Math.round(newBSS * 100) / 100;
+    // Round to integer — matches backend bssV3 behavior (Math.round(raw))
+    const score = Math.max(0, Math.min(100, Math.round(newBSS)));
 
     results.push({
       trading_date: day.date,
       dsi_score: day.dsi,
       violation_count: day.violations,
       fills_count: day.fills,
-      bss_score: rounded,
+      bss_score: score,
       bss_previous: prevBSS,
       streak_count: streak,
     });
 
-    prevBSS = rounded;
+    prevBSS = score;
   }
 
   return results;
 }
 
 function bssTier(score: number): string {
-  if (score >= 85) return 'ELITE';
-  if (score >= 70) return 'STEADY';
-  if (score >= 50) return 'DEVELOPING';
-  if (score >= 30) return 'FRAGILE';
-  return 'CRITICAL';
+  // Match backend bssV3 tier system
+  if (score >= 90) return 'SOVEREIGN';
+  if (score >= 80) return 'PROVEN';
+  if (score >= 65) return 'GROUNDED';
+  if (score >= 50) return 'DEFINED';
+  return 'FORMING';
 }
 
 /* ─────────────────────────────────────────────
@@ -658,7 +660,7 @@ export async function runComputeEngine(
       violation_count: sessionViolations.length,
       dsi_score: dsi,
       bss_at_session: bssDay?.bss_score ?? null,
-      bss_delta: bssDay ? Math.round((bssDay.bss_score - bssDay.bss_previous) * 100) / 100 : null,
+      bss_delta: bssDay ? Math.round(bssDay.bss_score) - Math.round(bssDay.bss_previous) : null,
       max_consecutive_losses: maxConsecLosses,
       session_quality: quality,
     });
@@ -738,8 +740,8 @@ export async function runComputeEngine(
       violation_count: day.violation_count,
       fills_count: day.fills_count,
       computed_at: new Date().toISOString(),
-      bss_score: Math.round(day.bss_score * 100) / 100,
-      bss_previous: Math.round(day.bss_previous * 100) / 100,
+      bss_score: Math.round(day.bss_score),
+      bss_previous: Math.round(day.bss_previous),
       streak_count: day.streak_count,
     });
     if (dsErr) console.error(`[compute-engine] Daily score insert error (${day.trading_date}):`, dsErr.message);
