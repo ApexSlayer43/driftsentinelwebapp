@@ -9,46 +9,8 @@ import { runComputeEngine } from '@/lib/compute-engine';
  *
  * No longer proxies to Express backend — we own the pipeline.
  */
-export async function POST(req: Request) {
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!serviceKey) {
-    return Response.json({ error: 'Server misconfigured' }, { status: 500 });
-  }
-
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceKey,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
-
-  /* Check for admin recompute (service-level, specific account) */
-  const url = new URL(req.url);
-  const adminKey = url.searchParams.get('admin_key');
-  const targetAccount = url.searchParams.get('account_ref');
-
-  if (adminKey && adminKey === process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(-12) && targetAccount) {
-    // Admin bypass — recompute specific account without user auth
-    const { data: acct } = await admin
-      .from('accounts')
-      .select('user_id')
-      .eq('account_ref', targetAccount)
-      .single();
-
-    if (!acct) {
-      return Response.json({ error: 'Account not found' }, { status: 404 });
-    }
-
-    try {
-      const result = await runComputeEngine(admin, targetAccount, acct.user_id);
-      return Response.json({ ok: true, account_ref: targetAccount, ...result });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error('[compute/trigger] Admin engine error:', msg);
-      return Response.json({ error: 'Compute engine failed', detail: msg }, { status: 500 });
-    }
-  }
-
-  /* 1. Authenticate (normal user flow) */
+export async function POST() {
+  /* 1. Authenticate */
   const supabase = await createAuthClient();
   const {
     data: { user },
@@ -60,6 +22,17 @@ export async function POST(req: Request) {
   }
 
   /* 2. Get account ref */
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) {
+    return Response.json({ error: 'Server misconfigured' }, { status: 500 });
+  }
+
+  const admin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    serviceKey,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+
   const { data: accounts } = await admin
     .from('accounts')
     .select('account_ref')
