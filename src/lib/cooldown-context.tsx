@@ -58,23 +58,33 @@ export function CooldownProvider({ children }: { children: ReactNode }) {
       });
 
       if (!res.ok) {
-        console.error('Cooldown start failed:', res.status);
+        const errBody = await res.json().catch(() => ({}));
+        console.error('Cooldown start failed:', res.status, errBody);
+        alert(`Cooldown failed: ${errBody.detail || errBody.error || res.status}`);
         setLoading(false);
         return;
       }
 
       const data = await res.json();
 
+      if (!data.prompt_sequence || data.prompt_sequence.length === 0) {
+        console.error('Cooldown returned empty prompt sequence:', data);
+        alert('Cooldown failed: no prompts returned');
+        setLoading(false);
+        return;
+      }
+
       setState({
         isActive: true,
         activationId: data.activation_id,
         prompt: data.prompt,
         promptType: data.prompt_type,
-        promptSequence: data.prompt_sequence ?? [],
+        promptSequence: data.prompt_sequence,
         bssAtActivation: data.bss_at_activation,
       });
     } catch (err) {
       console.error('Cooldown start error:', err);
+      alert(`Cooldown error: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLoading(false);
     }
