@@ -212,6 +212,27 @@ export async function POST(req: Request) {
       );
     }
 
+    // If fills were accepted but compute wasn't triggered by backend, trigger it explicitly
+    const fillsNew = backendResult.fills_new ?? 0;
+    let computeTriggered = backendResult.compute_triggered ?? false;
+
+    if (fillsNew > 0 && !computeTriggered) {
+      try {
+        await fetch(`${apiUrl}/v1/compute/trigger`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${rawToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ account_ref: accountRef }),
+        });
+        computeTriggered = true;
+        console.log('[CSV ingest] Compute trigger sent explicitly');
+      } catch {
+        // Best-effort — compute will pick up on next cycle
+      }
+    }
+
     // Merge backend ingest result with our CSV parse summary
     return Response.json({
       ok: true,
@@ -221,10 +242,10 @@ export async function POST(req: Request) {
       date_range: csvResult.dateRange,
       summary: csvResult.summary,
       fills_generated: csvResult.fills.length,
-      fills_new: backendResult.fills_new ?? 0,
+      fills_new: fillsNew,
       fills_duplicate: backendResult.fills_duplicate ?? 0,
       fills_rejected: backendResult.fills_rejected ?? 0,
-      compute_triggered: backendResult.compute_triggered ?? false,
+      compute_triggered: computeTriggered,
       backfill: backendResult.backfill ?? null,
       sessions: backendResult.sessions ?? null,
     });
