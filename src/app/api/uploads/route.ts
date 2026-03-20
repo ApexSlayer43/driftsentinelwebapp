@@ -57,7 +57,7 @@ export async function GET(req: Request) {
   /* 5. Query ingest_runs */
   let query = admin
     .from('ingest_runs')
-    .select('ingest_run_id, file_name, file_hash, accepted_count, dup_count, reject_count, compute_triggered, created_at')
+    .select('ingest_run_id, file_name, file_hash, accepted_count, dup_count, reject_count, compute_triggered, created_at, parsed_summary')
     .eq('account_ref', accountRef)
     .order('created_at', { ascending: false });
 

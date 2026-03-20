@@ -229,31 +229,50 @@ function SentiPageInner() {
           if (data.uploads && data.uploads.length > 0) {
             const run = data.uploads[0];
             const evt = run.upload_event;
-            openPanel({
-              fileName: run.file_name ?? `Session ${targetDate}`,
-              dateRange: evt ? { start: evt.date_range_start ?? targetDate, end: evt.date_range_end ?? targetDate } : { start: targetDate, end: targetDate },
-              tradeCount: evt?.trade_count ?? run.accepted_count ?? 0,
-              fillCount: run.accepted_count ?? 0,
-              summary: {
-                grossPnl: 0, totalPnl: 0, tradeCount: evt?.trade_count ?? 0, contractCount: 0,
-                avgTradeTime: '', longestTradeTime: '', winRate: 0, expectancy: 0, fees: 0,
-                totalProfit: 0, winningTrades: 0, winningContracts: 0, largestWin: 0, avgWin: 0, stdDevWin: 0,
-                totalLoss: 0, losingTrades: 0, losingContracts: 0, largestLoss: 0, avgLoss: 0, stdDevLoss: 0,
-                maxRunUp: 0, maxDrawdown: 0, maxDrawdownFrom: null, maxDrawdownTo: null,
-                breakEvenPercent: 0, lossBreakdown: null,
-              },
-              dayBreakdown: (data.daily_scores ?? []).map((s: { trading_date: string; fills_count: number; dsi_score: number; violation_count: number }) => ({
-                date: s.trading_date,
-                trades: s.fills_count,
-                pnl: 0,
-                wins: 0,
-                losses: 0,
-              })),
-              behavioralFlags: [],
-              keyTrades: { biggestWin: null, biggestLoss: null, oversized: [] },
-              source: 'recall' as const,
-              timestamp: new Date().toISOString(),
-            });
+            const ps = run.parsed_summary;
+
+            // If parsed_summary exists, use it for full-fidelity recall
+            if (ps && ps.summary) {
+              openPanel({
+                fileName: run.file_name ?? `Session ${targetDate}`,
+                dateRange: ps.dateRange ?? (evt ? { start: evt.date_range_start ?? targetDate, end: evt.date_range_end ?? targetDate } : { start: targetDate, end: targetDate }),
+                tradeCount: ps.tradeCount ?? evt?.trade_count ?? 0,
+                fillCount: ps.fillCount ?? run.accepted_count ?? 0,
+                summary: ps.summary,
+                dayBreakdown: ps.dayBreakdown ?? [],
+                behavioralFlags: ps.behavioralFlags ?? [],
+                keyTrades: ps.keyTrades ?? { biggestWin: null, biggestLoss: null, oversized: [] },
+                source: 'recall' as const,
+                timestamp: new Date().toISOString(),
+              });
+            } else {
+              // Fallback: minimal panel from DB metadata
+              openPanel({
+                fileName: run.file_name ?? `Session ${targetDate}`,
+                dateRange: evt ? { start: evt.date_range_start ?? targetDate, end: evt.date_range_end ?? targetDate } : { start: targetDate, end: targetDate },
+                tradeCount: evt?.trade_count ?? run.accepted_count ?? 0,
+                fillCount: run.accepted_count ?? 0,
+                summary: {
+                  grossPnl: 0, totalPnl: 0, tradeCount: evt?.trade_count ?? 0, contractCount: 0,
+                  avgTradeTime: '', longestTradeTime: '', winRate: 0, expectancy: 0, fees: 0,
+                  totalProfit: 0, winningTrades: 0, winningContracts: 0, largestWin: 0, avgWin: 0, stdDevWin: 0,
+                  totalLoss: 0, losingTrades: 0, losingContracts: 0, largestLoss: 0, avgLoss: 0, stdDevLoss: 0,
+                  maxRunUp: 0, maxDrawdown: 0, maxDrawdownFrom: null, maxDrawdownTo: null,
+                  breakEvenPercent: 0, lossBreakdown: null,
+                },
+                dayBreakdown: (data.daily_scores ?? []).map((s: { trading_date: string; fills_count: number }) => ({
+                  date: s.trading_date,
+                  trades: s.fills_count,
+                  pnl: 0,
+                  wins: 0,
+                  losses: 0,
+                })),
+                behavioralFlags: [],
+                keyTrades: { biggestWin: null, biggestLoss: null, oversized: [] },
+                source: 'recall' as const,
+                timestamp: new Date().toISOString(),
+              });
+            }
           }
         })
         .catch(() => { /* non-critical */ });
@@ -411,8 +430,24 @@ function SentiPageInner() {
       if (parsedHeader) {
         try {
           const parsed = JSON.parse(parsedHeader);
-          // Fetch the full parsed data for the panel via a separate lightweight call
-          fetchAndOpenPanel(file.name, parsed);
+          if (parsed.summary && parsed.trades) {
+            // Full data available — build panel directly from parsed PDF result
+            const panelData = buildPanelData(
+              {
+                summary: parsed.summary,
+                trades: parsed.trades,
+                tradeCount: parsed.trades_parsed,
+                fills: [],
+                dateRange: parsed.date_range,
+              },
+              file.name,
+              'upload',
+            );
+            openPanel(panelData);
+          } else {
+            // Fallback: try fetching from uploads API
+            fetchAndOpenPanel(file.name, parsed);
+          }
         } catch {
           // Non-critical — panel just won't open
         }
@@ -451,37 +486,51 @@ function SentiPageInner() {
     }
   }
 
-  // Fetch full parsed data and open the intelligence panel
-  async function fetchAndOpenPanel(fileName: string, headerSummary: { trades_parsed: number; date_range: { start: string; end: string } | null; gross_pnl: number; net_pnl: number; win_rate: number; trade_count: number }) {
+  // Fetch full parsed data from uploads API and open the intelligence panel
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function fetchAndOpenPanel(fileName: string, headerSummary: any) {
     try {
       const res = await fetch(`/api/uploads?latest=true`);
       if (res.ok) {
         const data = await res.json();
-        if (data.panelData) {
-          openPanel({ ...data.panelData, fileName, source: 'upload' as const, timestamp: new Date().toISOString() });
-          return;
+        if (data.uploads && data.uploads.length > 0) {
+          const run = data.uploads[0];
+          const ps = run.parsed_summary;
+          if (ps && ps.summary) {
+            openPanel({
+              fileName,
+              dateRange: ps.dateRange,
+              tradeCount: ps.tradeCount ?? 0,
+              fillCount: ps.fillCount ?? 0,
+              summary: ps.summary,
+              dayBreakdown: ps.dayBreakdown ?? [],
+              behavioralFlags: ps.behavioralFlags ?? [],
+              keyTrades: ps.keyTrades ?? { biggestWin: null, biggestLoss: null, oversized: [] },
+              source: 'upload' as const,
+              timestamp: new Date().toISOString(),
+            });
+            return;
+          }
         }
       }
     } catch {
-      // Fallback: build minimal panel from header data
+      // Fallback below
     }
 
-    // Fallback: build a minimal panel from what we have in the header
+    // Fallback: build minimal panel from header summary
+    const tc = headerSummary?.trade_count ?? headerSummary?.trades_parsed ?? 0;
+    const gp = headerSummary?.gross_pnl ?? 0;
+    const np = headerSummary?.net_pnl ?? 0;
+    const wr = headerSummary?.win_rate ?? 0;
     openPanel({
       fileName,
-      dateRange: headerSummary.date_range,
-      tradeCount: headerSummary.trades_parsed,
-      fillCount: headerSummary.trades_parsed * 2,
+      dateRange: headerSummary?.date_range ?? null,
+      tradeCount: tc,
+      fillCount: tc * 2,
       summary: {
-        grossPnl: headerSummary.gross_pnl,
-        totalPnl: headerSummary.net_pnl,
-        tradeCount: headerSummary.trade_count,
-        contractCount: 0,
-        avgTradeTime: '',
-        longestTradeTime: '',
-        winRate: headerSummary.win_rate,
-        expectancy: headerSummary.trade_count > 0 ? headerSummary.net_pnl / headerSummary.trade_count : 0,
-        fees: headerSummary.gross_pnl - headerSummary.net_pnl,
+        grossPnl: gp, totalPnl: np, tradeCount: tc, contractCount: 0,
+        avgTradeTime: '', longestTradeTime: '', winRate: wr,
+        expectancy: tc > 0 ? np / tc : 0, fees: gp - np,
         totalProfit: 0, winningTrades: 0, winningContracts: 0, largestWin: 0, avgWin: 0, stdDevWin: 0,
         totalLoss: 0, losingTrades: 0, losingContracts: 0, largestLoss: 0, avgLoss: 0, stdDevLoss: 0,
         maxRunUp: 0, maxDrawdown: 0, maxDrawdownFrom: null, maxDrawdownTo: null,

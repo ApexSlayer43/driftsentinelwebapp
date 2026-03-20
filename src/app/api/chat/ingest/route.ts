@@ -216,6 +216,87 @@ export async function POST(req: Request) {
           }).catch((err) => {
             console.error('[Senti ingest] backend ingest failed:', err);
           });
+
+          // Store the full parsed summary so the Intelligence Panel can recall it later
+          const s = pdfResult.summary;
+          const trades = pdfResult.trades;
+          const avgQty = trades.length > 0 ? trades.reduce((sum, t) => sum + t.qty, 0) / trades.length : 0;
+
+          // Per-day breakdown
+          const dayMap = new Map<string, { date: string; trades: number; pnl: number; wins: number; losses: number }>();
+          for (const t of trades) {
+            const date = t.buyTime.split(' ')[0];
+            const existing = dayMap.get(date) || { date, trades: 0, pnl: 0, wins: 0, losses: 0 };
+            existing.trades++;
+            existing.pnl += t.pnl;
+            if (t.pnl > 0) existing.wins++;
+            else if (t.pnl < 0) existing.losses++;
+            dayMap.set(date, existing);
+          }
+
+          // Key trades
+          const biggestWin = trades.length > 0 ? trades.reduce((best, t) => t.pnl > best.pnl ? t : best, trades[0]) : null;
+          const biggestLoss = trades.length > 0 ? trades.reduce((worst, t) => t.pnl < worst.pnl ? t : worst, trades[0]) : null;
+          const oversized = trades.filter(t => t.qty > avgQty * 1.5);
+
+          // Behavioral flags
+          const behavioralFlags: { type: string; description: string; severity: string }[] = [];
+          if (oversized.length > 0) {
+            behavioralFlags.push({
+              type: 'oversize',
+              description: `${oversized.length} trade${oversized.length > 1 ? 's' : ''} exceeded 1.5x avg size (${avgQty.toFixed(1)} contracts)`,
+              severity: oversized.length > 3 ? 'high' : 'medium',
+            });
+          }
+          for (let i = 1; i < trades.length; i++) {
+            const prev = trades[i - 1];
+            const curr = trades[i];
+            if (prev.pnl < -100 && curr.pnl < 0) {
+              const prevEnd = new Date(prev.sellTime.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2'));
+              const currStart = new Date(curr.buyTime.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2'));
+              const gapMs = currStart.getTime() - prevEnd.getTime();
+              if (gapMs >= 0 && gapMs < 300000) {
+                behavioralFlags.push({
+                  type: 'revenge',
+                  description: `After -$${Math.abs(prev.pnl).toFixed(2)} loss, re-entered within ${Math.round(gapMs / 1000)}s for another -$${Math.abs(curr.pnl).toFixed(2)} loss`,
+                  severity: 'high',
+                });
+              }
+            }
+          }
+
+          const parsedSummary = {
+            summary: s,
+            tradeCount: pdfResult.tradeCount,
+            fillCount: pdfResult.fills.length,
+            dateRange: pdfResult.dateRange,
+            dayBreakdown: Array.from(dayMap.values()),
+            keyTrades: { biggestWin, biggestLoss, oversized },
+            behavioralFlags,
+          };
+
+          // Write to the most recent ingest_run for this account (just created by the CSV ingest)
+          // Use a small delay to let the backend create the row first, then update it
+          setTimeout(async () => {
+            try {
+              const { data: latestRun } = await admin
+                .from('ingest_runs')
+                .select('ingest_run_id')
+                .eq('account_ref', accounts[0].account_ref)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+              if (latestRun && latestRun.length > 0) {
+                await admin
+                  .from('ingest_runs')
+                  .update({ parsed_summary: parsedSummary })
+                  .eq('ingest_run_id', latestRun[0].ingest_run_id);
+                console.log('[Senti ingest] Stored parsed_summary on ingest_run', latestRun[0].ingest_run_id);
+              }
+            } catch (err) {
+              console.error('[Senti ingest] Failed to store parsed_summary:', err);
+            }
+          }, 3000);
         }
       } catch (err) {
         console.error('[Senti ingest] ingest pipeline error:', err);
@@ -243,15 +324,17 @@ export async function POST(req: Request) {
     const response = result.toTextStreamResponse();
 
     // Attach parsed data as a custom header so the frontend can show summary stats
+    // Expose the full parsed summary + custom headers
+    // Access-Control-Expose-Headers is needed for the frontend to read custom headers
+    response.headers.set('Access-Control-Expose-Headers', 'X-Parsed-Summary');
     response.headers.set(
       'X-Parsed-Summary',
       JSON.stringify({
         trades_parsed: pdfResult.tradeCount,
         date_range: pdfResult.dateRange,
-        gross_pnl: pdfResult.summary.grossPnl,
-        net_pnl: pdfResult.summary.totalPnl,
-        win_rate: pdfResult.summary.winRate,
-        trade_count: pdfResult.summary.tradeCount,
+        summary: pdfResult.summary,
+        trades: pdfResult.trades,
+        fills_count: pdfResult.fills.length,
       }),
     );
 
