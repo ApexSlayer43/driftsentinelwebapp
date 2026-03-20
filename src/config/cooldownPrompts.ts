@@ -60,8 +60,8 @@ export interface SessionContext {
 export function blendedReflectionPrompt(dailyGoal: string, profileGoal: string): string {
   return (
     `This morning you said: "${dailyGoal}"\n\n` +
-    `But the reason you're here at all is because you told me:\n"${profileGoal}"\n\n` +
-    `Which version of yourself is sitting in this chair right now?`
+    `And the reason you trade at all:\n"${profileGoal}"\n\n` +
+    `Is the next trade aligned with both?`
   );
 }
 
