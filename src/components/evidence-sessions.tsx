@@ -91,8 +91,8 @@ export function EvidenceSessions({ accountRef }: EvidenceSessionsProps) {
           : 'DORMANT';
         const tierStyle = getTierStyle(tier);
 
-        // BSS delta
-        const delta = day.bss_score - day.bss_previous;
+        // BSS delta — round to avoid IEEE 754 floating point noise
+        const delta = Math.round((day.bss_score - day.bss_previous) * 100) / 100;
 
         return (
           <GlowPanel
