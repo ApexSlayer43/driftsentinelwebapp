@@ -64,12 +64,4 @@
     letter-spacing="2.5"
     filter="url(#glowText)">SENTINEL</text>
 
-  <!-- ALWAYS WATCHING — faint tagline -->
-  <text x="104" y="92"
-    font-family="'Courier New', Courier, monospace"
-    font-size="7.5"
-    font-weight="400"
-    fill="#6366F1"
-    letter-spacing="5.5"
-    opacity="0.4">ALWAYS  WATCHING</text>
 </svg>

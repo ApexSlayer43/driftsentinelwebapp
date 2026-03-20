@@ -36,7 +36,7 @@ function GoogleIcon({ className }: { className?: string }) {
 function TextLoop() {
   const phrases = [
     'Discipline is edge.',
-    'Always watching.',
+    'Eyes on the process.',
     'Protect the process.',
     'Drift detected.',
   ];

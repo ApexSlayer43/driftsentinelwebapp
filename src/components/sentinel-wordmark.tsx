@@ -106,19 +106,6 @@ export function SentinelWordmark({ className = '', height = 100 }: SentinelWordm
       >
         SENTINEL
       </text>
-      {/* ALWAYS WATCHING - faint tagline */}
-      <text
-        x="104"
-        y="92"
-        fontFamily="'JetBrains Mono', 'Courier New', Courier, monospace"
-        fontSize="7.5"
-        fontWeight="400"
-        fill="#C0C8D8"
-        letterSpacing="5.5"
-        opacity="0.4"
-      >
-        ALWAYS  WATCHING
-      </text>
     </svg>
   );
 }
