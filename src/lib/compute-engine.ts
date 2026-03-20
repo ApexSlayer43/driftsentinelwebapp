@@ -414,7 +414,7 @@ function evaluateProtectGreen(
       account_ref: accountRef,
       rule_id: 'protect-green',
       mode: 'PROTECT_GREEN',
-      severity: 'MEDIUM',
+      severity: 'MED',
       points: 10,
       first_seen_utc: crossTrade.sell_time || crossTrade.buy_time,
       window_start_utc: session.session_start_utc,
