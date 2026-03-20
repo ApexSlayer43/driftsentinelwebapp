@@ -189,6 +189,7 @@ export async function POST(req: Request) {
   }
 
   /* 7. Insert activation record */
+  const bssInt = bssAtActivation !== null ? Math.round(Number(bssAtActivation)) : null;
   const { data: activation, error: insertErr } = await admin
     .from('cooldown_activations')
     .insert({
@@ -197,14 +198,15 @@ export async function POST(req: Request) {
       template_used: templateUsed,
       prompt_delivered: prompt,
       prompt_type: promptType,
-      bss_at_activation: bssAtActivation,
+      bss_at_activation: bssInt,
     })
     .select('activation_id')
     .single();
 
   if (insertErr || !activation) {
+    console.error('Cooldown activation insert failed:', insertErr);
     return Response.json(
-      { error: 'Failed to create activation' },
+      { error: 'Failed to create activation', detail: insertErr?.message ?? 'no activation returned' },
       { status: 500 },
     );
   }
