@@ -622,6 +622,9 @@ export async function runComputeEngine(
   await admin.from('violations').delete().eq('account_ref', accountRef);
   await admin.from('daily_scores').delete().eq('account_ref', accountRef);
 
+  // Track session inserts for event building after violations are written
+  const sessionInserts: { sessionId: string; session: BuiltSession; sessionViolations: Violation[] }[] = [];
+
   // 8b. Write sessions
   for (const session of sessions) {
     const bssDay = bssResults.find(b => b.trading_date === session.trading_date);
@@ -670,7 +673,18 @@ export async function runComputeEngine(
       continue;
     }
 
-    // 8c. Write session_events (fills as events)
+    // Store session info for event building after violations are written
+    sessionInserts.push({ sessionId, session, sessionViolations });
+  }
+
+  // 8c. Write violations FIRST (session_events FK references violations)
+  if (allViolations.length > 0) {
+    const { error: vErr } = await admin.from('violations').insert(allViolations);
+    if (vErr) console.error(`[compute-engine] Violations insert error:`, vErr.message);
+  }
+
+  // 8d. Write session_events (needs violations to exist for FK)
+  for (const { sessionId, session, sessionViolations } of sessionInserts) {
     const sessionEvents: {
       event_id: string; session_id: string; account_ref: string; user_id: string;
       sequence_number: number; elapsed_seconds: number; event_type: string;
@@ -684,7 +698,7 @@ export async function runComputeEngine(
       elapsed_seconds: Math.round(
         (new Date(f.timestamp_utc).getTime() - new Date(session.session_start_utc).getTime()) / 1000,
       ),
-      event_type: 'FILL',
+      event_type: 'TRADE_OPEN',
       metadata: {
         side: f.side,
         contract: f.contract,
@@ -707,7 +721,7 @@ export async function runComputeEngine(
         elapsed_seconds: Math.round(
           (new Date(v.first_seen_utc).getTime() - new Date(session.session_start_utc).getTime()) / 1000,
         ),
-        event_type: 'VIOLATION',
+        event_type: 'VIOLATION_TRIGGERED',
         metadata: {
           rule_id: v.rule_id,
           severity: v.severity,
@@ -722,12 +736,6 @@ export async function runComputeEngine(
       const { error: evErr } = await admin.from('session_events').insert(sessionEvents);
       if (evErr) console.error(`[compute-engine] Session events insert error:`, evErr.message);
     }
-  }
-
-  // 8d. Write violations
-  if (allViolations.length > 0) {
-    const { error: vErr } = await admin.from('violations').insert(allViolations);
-    if (vErr) console.error(`[compute-engine] Violations insert error:`, vErr.message);
   }
 
   // 8e. Write daily_scores
