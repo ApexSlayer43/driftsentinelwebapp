@@ -220,6 +220,21 @@ export async function POST(req: Request) {
             console.error('[Senti ingest] backend ingest failed:', ingestErr);
           }
 
+          // Trigger BSS compute pipeline (same as performance-pdf ingest)
+          try {
+            await fetch(`${apiUrl}/v1/compute/trigger`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${rawToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ account_ref: accounts[0].account_ref }),
+            });
+            console.log('[Senti ingest] Compute trigger sent');
+          } catch {
+            // Best-effort — compute will pick up on next cycle
+          }
+
           // Build the full parsed summary for the Intelligence Panel
           const s = pdfResult.summary;
           const trades = pdfResult.trades;
