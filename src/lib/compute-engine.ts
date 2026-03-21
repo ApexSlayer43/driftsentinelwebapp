@@ -483,31 +483,61 @@ interface DayScore {
   bss_score: number;
   bss_previous: number;
   streak_count: number;
+  alpha_effective: number;
 }
 
 function computeBSS(
   dailyScores: { date: string; dsi: number; violations: number; fills: number }[],
 ): DayScore[] {
-  const ALPHA = 0.15;
-  const STARTING_BSS = 50;
+  // Algorithm Spec §3 (Equation 2) — EWMA with asymmetric streak modifier
+  const ALPHA = 0.15;              // baseline smoothing factor, half-life ≈ 4.3 days
+  const ALPHA_CAP = 0.50;          // stability floor — α_eff never exceeds this
+  const DECLINE_MULTIPLIER = 0.10; // declining streak accelerator
+  const IMPROVE_MULTIPLIER = 0.03; // improving streak accelerator (3.3:1 asymmetry)
+  const STARTING_BSS = 50;         // cold start midpoint
+  const ROLLING_WINDOW = 30;       // days for rolling BSS mean baseline
 
   // Sort chronologically
   dailyScores.sort((a, b) => a.date.localeCompare(b.date));
 
   const results: DayScore[] = [];
   let prevBSS = STARTING_BSS;
-  let streak = 0;
+  let decliningStreak = 0;
+  let improvingStreak = 0;
 
-  for (const day of dailyScores) {
-    if (day.dsi === 100) {
-      streak++;
+  for (let i = 0; i < dailyScores.length; i++) {
+    const day = dailyScores[i];
+
+    // Calculate 30-day rolling BSS mean as the baseline for streak detection
+    // Before enough history exists, use current prevBSS as the baseline
+    const windowStart = Math.max(0, results.length - ROLLING_WINDOW);
+    const windowScores = results.slice(windowStart);
+    const rollingMean = windowScores.length > 0
+      ? windowScores.reduce((sum, r) => sum + r.bss_score, 0) / windowScores.length
+      : prevBSS;
+
+    // Determine if this session is declining or improving
+    // relative to the rolling mean — NOT based on DSI == 100
+    const isDeclining = day.dsi < rollingMean;
+
+    if (isDeclining) {
+      decliningStreak++;
+      improvingStreak = 0;
     } else {
-      streak = 0;
+      improvingStreak++;
+      decliningStreak = 0;
     }
 
-    const effectiveAlpha = ALPHA * (1 + streak * 0.02);
+    // Asymmetric alpha: declining sessions accelerate alpha 3.3× faster
+    // than improving sessions — trust is harder to rebuild than to lose
+    const streakModifier = isDeclining
+      ? DECLINE_MULTIPLIER * decliningStreak
+      : IMPROVE_MULTIPLIER * improvingStreak;
+
+    const effectiveAlpha = Math.min(ALPHA_CAP, ALPHA * (1 + streakModifier));
+
+    // Standard EWMA with asymmetric alpha
     const newBSS = (effectiveAlpha * day.dsi) + ((1 - effectiveAlpha) * prevBSS);
-    // Round to integer — matches backend bssV3 behavior (Math.round(raw))
     const score = Math.max(0, Math.min(100, Math.round(newBSS)));
 
     results.push({
@@ -517,7 +547,8 @@ function computeBSS(
       fills_count: day.fills,
       bss_score: score,
       bss_previous: prevBSS,
-      streak_count: streak,
+      streak_count: isDeclining ? -decliningStreak : improvingStreak,
+      alpha_effective: effectiveAlpha,
     });
 
     prevBSS = score;
@@ -798,6 +829,7 @@ export async function runComputeEngine(
       bss_score: Math.round(day.bss_score),
       bss_previous: Math.round(day.bss_previous),
       streak_count: day.streak_count,
+      alpha_effective: day.alpha_effective,
     });
     if (dsErr) console.error(`[compute-engine] Daily score insert error (${day.trading_date}):`, dsErr.message);
   }
