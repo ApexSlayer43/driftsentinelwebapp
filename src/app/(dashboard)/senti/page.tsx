@@ -3,15 +3,13 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { TextStreamChatTransport, type UIMessage } from 'ai';
-import { Radar, Loader2, RotateCcw, MessageSquare, Clock, Plus, TrendingUp, Flame, Shield } from 'lucide-react';
+import { Radar, Loader2, MessageSquare, Plus, Flame, Shield } from 'lucide-react';
 import { GradientAIChatInput } from '@/components/ui/gradient-ai-chat-input';
 import LiveEye from '@/components/live-eye';
 import { IntelligencePanel } from '@/components/intelligence-panel';
 import { IntelligencePanelProvider, useIntelligencePanel, type IntelligencePanelData, type PanelDayBreakdown, type PanelBehavioralFlag } from '@/lib/intelligence-panel-context';
 import type { PerformanceSummary, ParsedTrade } from '@/lib/parse-performance-pdf';
 import type { StatePayload } from '@/lib/types';
-
-type SentiMode = 'morningBriefing' | 'sessionCompanion' | 'postSessionAAR' | 'onboarding';
 
 interface ConversationSummary {
   id: string;
@@ -28,27 +26,7 @@ interface SavedMessage {
   created_at: string;
 }
 
-const MODE_OPTIONS: { value: SentiMode; label: string; description: string }[] = [
-  { value: 'sessionCompanion', label: 'Session Companion', description: 'Ambient companion. Speaks when spoken to.' },
-  { value: 'morningBriefing', label: 'Morning Briefing', description: 'Proactive daily brief with key patterns.' },
-  { value: 'postSessionAAR', label: 'After Action Review', description: 'Deep post-session behavioral analysis.' },
-  { value: 'onboarding', label: 'Onboarding', description: 'First-time orientation. Get oriented.' },
-];
-
-const WELCOME_MESSAGES: Record<SentiMode, string> = {
-  sessionCompanion: 'Watching. Ask when you need me.',
-  morningBriefing: 'Your data from yesterday is ready. Want the briefing?',
-  postSessionAAR: 'Session closed. Walk me through what happened.',
-  onboarding: "You're here. Let's get oriented. Three things matter at the start — your protocol, your behavioral baseline, and what Drift Sentinel watches for. Which do you want first?",
-};
-
-// Mode-specific intelligence strip messages
-const MODE_STRIP_LABELS: Record<SentiMode, string> = {
-  sessionCompanion: 'Monitoring',
-  morningBriefing: 'Yesterday\'s Brief',
-  postSessionAAR: 'Session Debrief',
-  onboarding: 'Getting Started',
-};
+const SENTI_WELCOME = 'Watching. Ask when you need me.';
 
 function getTextFromMessage(msg: UIMessage): string {
   if (!msg.parts) return '';
@@ -174,7 +152,6 @@ export default function SentiPage() {
 }
 
 function SentiPageInner() {
-  const [mode, setMode] = useState<SentiMode>('sessionCompanion');
   const [input, setInput] = useState('');
   const [uploadingFile, setUploadingFile] = useState(false);
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
@@ -188,16 +165,15 @@ function SentiPageInner() {
     () =>
       new TextStreamChatTransport({
         api: '/api/chat',
-        body: { mode },
       }),
-    [mode]
+    []
   );
 
   const initialMessages: UIMessage[] = [
     {
       id: 'welcome',
       role: 'assistant',
-      parts: [{ type: 'text', text: WELCOME_MESSAGES[mode] }],
+      parts: [{ type: 'text', text: SENTI_WELCOME }],
     },
   ];
 
@@ -338,25 +314,10 @@ function SentiPageInner() {
       if (uiMessages.length > 0) {
         setMessages(uiMessages);
         setActiveConvoId(convo.id);
-        setMode((convo.mode as SentiMode) || 'sessionCompanion');
       }
     } catch {
       // Silent fail
     }
-  }
-
-  function switchMode(newMode: SentiMode) {
-    setMode(newMode);
-    setActiveConvoId(null);
-    const newWelcome: UIMessage[] = [
-      {
-        id: 'welcome-' + newMode,
-        role: 'assistant',
-        parts: [{ type: 'text', text: WELCOME_MESSAGES[newMode] }],
-      },
-    ];
-    setMessages(newWelcome);
-    setInput('');
   }
 
   function resetConversation() {
@@ -365,7 +326,7 @@ function SentiPageInner() {
       {
         id: 'welcome-reset-' + Date.now(),
         role: 'assistant',
-        parts: [{ type: 'text', text: WELCOME_MESSAGES[mode] }],
+        parts: [{ type: 'text', text: SENTI_WELCOME }],
       },
     ];
     setMessages(resetWelcome);
@@ -574,15 +535,6 @@ function SentiPageInner() {
     });
   }
 
-  // Map modes to dropdown options for the gradient input
-  const modeDropdownOptions = MODE_OPTIONS.map((opt) => ({
-    id: opt.value,
-    label: opt.label,
-    value: opt.value,
-  }));
-
-  const selectedModeOption = modeDropdownOptions.find((o) => o.value === mode) ?? null;
-
   const dayGroups = useMemo(() => groupByDay(conversations), [conversations]);
 
   // Derive delta display
@@ -712,11 +664,11 @@ function SentiPageInner() {
         {/* ── Intelligence Strip ── */}
         <div className="border-b border-[rgba(200,169,110,0.06)] bg-[rgba(200,169,110,0.02)]">
           <div className="flex items-center gap-6 px-6 py-2.5">
-            {/* Mode label */}
+            {/* Senti status */}
             <div className="flex items-center gap-2">
               <div className="h-1 w-1 rounded-full bg-[#c8a96e]" />
               <span className="font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-[#c8a96e]">
-                {MODE_STRIP_LABELS[mode]}
+                Watching
               </span>
             </div>
 
@@ -859,9 +811,6 @@ function SentiPageInner() {
                 sendMessage({ text: msg });
               }}
               onFileAttach={handleFileUpload}
-              dropdownOptions={modeDropdownOptions}
-              selectedOption={selectedModeOption}
-              onOptionSelect={(opt) => switchMode(opt.value as SentiMode)}
             />
             <div className="text-center mt-2">
               <span className="font-mono text-[9px] text-text-dim">

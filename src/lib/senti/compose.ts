@@ -12,6 +12,34 @@ import { SENTI_CORE_IDENTITY } from './identity';
 import { SENTI_MODES, type SentiMode } from './modes';
 import { buildDynamicContext, type TraderProfile } from './context';
 
+/**
+ * resolveMode — auto-detect the best Senti mode from trader context.
+ * No manual mode picker needed. The system reads the clock and data.
+ */
+export function resolveMode(user: TraderProfile): SentiMode {
+  // New user with no data → onboarding
+  if (user.fills.length === 0 && user.totalViolations === 0 && user.dailyScores.length === 0) {
+    return 'onboarding';
+  }
+
+  // Session clock drives mode selection
+  if (user.sessionState) {
+    switch (user.sessionState.state) {
+      case 'PRE_SESSION':
+        return 'morningBriefing';
+      case 'IN_SESSION':
+        return 'sessionCompanion';
+      case 'POST_SESSION':
+        return 'postSessionAAR';
+      case 'OFF_DAY':
+        return 'sessionCompanion';
+    }
+  }
+
+  // Fallback — ambient companion
+  return 'sessionCompanion';
+}
+
 export interface SystemPromptBlock {
   type: 'text';
   text: string;
@@ -27,11 +55,12 @@ export interface SystemPromptBlock {
  * @returns Array of system prompt blocks (for prompt caching) OR a single string
  */
 export function composeSentiPrompt(
-  mode: SentiMode,
+  mode: SentiMode | undefined,
   user: TraderProfile,
   ragContext?: string
 ): SystemPromptBlock[] {
-  const modeInstructions = SENTI_MODES[mode];
+  const resolvedMode = mode ?? resolveMode(user);
+  const modeInstructions = SENTI_MODES[resolvedMode];
   const dynamicContext = buildDynamicContext(user);
   const ragSection = ragContext
     ? `\n<retrieved_behavioral_history>\n${ragContext}\n</retrieved_behavioral_history>`
@@ -57,11 +86,12 @@ export function composeSentiPrompt(
  * but gain simplicity. Good enough for MVP.
  */
 export function composeSentiPromptString(
-  mode: SentiMode,
+  mode: SentiMode | undefined,
   user: TraderProfile,
   ragContext?: string
 ): string {
-  const modeInstructions = SENTI_MODES[mode];
+  const resolvedMode = mode ?? resolveMode(user);
+  const modeInstructions = SENTI_MODES[resolvedMode];
   const dynamicContext = buildDynamicContext(user);
   const ragSection = ragContext
     ? `\n<retrieved_behavioral_history>\n${ragContext}\n</retrieved_behavioral_history>`

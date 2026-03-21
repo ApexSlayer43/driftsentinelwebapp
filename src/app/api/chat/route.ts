@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     // 2. Parse request
     const body = await req.json();
     const messages: UIMessage[] = body.messages;
-    const mode: SentiMode = body.mode || 'sessionCompanion';
+    const mode: SentiMode | undefined = body.mode || undefined;
     const conversationId: string | undefined = body.conversationId;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
