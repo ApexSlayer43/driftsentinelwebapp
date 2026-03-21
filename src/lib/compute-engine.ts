@@ -453,7 +453,7 @@ function evaluateGhostEquity(
     account_ref: accountRef,
     rule_id: 'ghost-equity',
     mode: 'GHOST_EQUITY',
-    severity: 'MEDIUM',
+    severity: 'MED',
     points: 10,
     first_seen_utc: lateFills[0].timestamp_utc,
     window_start_utc: session.session_start_utc,
@@ -689,48 +689,103 @@ export async function runComputeEngine(
       event_id: string; session_id: string; account_ref: string; user_id: string;
       sequence_number: number; elapsed_seconds: number; event_type: string;
       metadata: Record<string, unknown>; fill_event_id: string | null; violation_id: string | null;
-    }[] = session.fills.map((f, idx) => ({
+    }[] = [];
+
+    let seqNum = 0;
+    const sessionStartTime = new Date(session.session_start_utc).getTime();
+    const sessionEndTime = new Date(session.session_end_utc).getTime();
+
+    // SESSION_START event
+    seqNum++;
+    sessionEvents.push({
       event_id: randomUUID(),
       session_id: sessionId,
       account_ref: accountRef,
       user_id: userId,
-      sequence_number: idx + 1,
-      elapsed_seconds: Math.round(
-        (new Date(f.timestamp_utc).getTime() - new Date(session.session_start_utc).getTime()) / 1000,
-      ),
-      event_type: 'TRADE_OPEN',
-      metadata: {
-        side: f.side,
-        contract: f.contract,
-        qty: f.qty,
-        price: f.price,
-        instrument_root: f.instrument_root,
-      },
-      fill_event_id: f.event_id,
+      sequence_number: seqNum,
+      elapsed_seconds: 0,
+      event_type: 'SESSION_START',
+      metadata: { fills_count: session.fills_count },
+      fill_event_id: null,
       violation_id: null,
-    }));
+    });
 
-    // Add violation events
+    // Build a violation lookup by evidence fill
+    const violationByFillId = new Map<string, Violation>();
     for (const v of sessionViolations) {
+      for (const eid of v.evidence_event_ids) {
+        if (!violationByFillId.has(eid)) violationByFillId.set(eid, v);
+      }
+    }
+    const emittedViolations = new Set<string>();
+
+    // TRADE_OPEN events for each fill
+    for (const f of session.fills) {
+      seqNum++;
+      const elapsed = Math.round(
+        (new Date(f.timestamp_utc).getTime() - sessionStartTime) / 1000,
+      );
       sessionEvents.push({
         event_id: randomUUID(),
         session_id: sessionId,
         account_ref: accountRef,
         user_id: userId,
-        sequence_number: sessionEvents.length + 1,
-        elapsed_seconds: Math.round(
-          (new Date(v.first_seen_utc).getTime() - new Date(session.session_start_utc).getTime()) / 1000,
-        ),
-        event_type: 'VIOLATION_TRIGGERED',
+        sequence_number: seqNum,
+        elapsed_seconds: elapsed,
+        event_type: 'TRADE_OPEN',
         metadata: {
-          rule_id: v.rule_id,
-          severity: v.severity,
-          points: v.points,
+          side: f.side,
+          contract: f.contract,
+          qty: f.qty,
+          price: f.price,
+          instrument_root: f.instrument_root,
         },
-        fill_event_id: null,
-        violation_id: v.violation_id,
+        fill_event_id: f.event_id,
+        violation_id: null,
       });
+
+      // If this fill triggered a violation, add VIOLATION_TRIGGERED event
+      const triggeredViolation = violationByFillId.get(f.event_id);
+      if (triggeredViolation && !emittedViolations.has(triggeredViolation.violation_id)) {
+        emittedViolations.add(triggeredViolation.violation_id);
+        seqNum++;
+        sessionEvents.push({
+          event_id: randomUUID(),
+          session_id: sessionId,
+          account_ref: accountRef,
+          user_id: userId,
+          sequence_number: seqNum,
+          elapsed_seconds: elapsed,
+          event_type: 'VIOLATION_TRIGGERED',
+          metadata: {
+            rule_id: triggeredViolation.rule_id,
+            severity: triggeredViolation.severity,
+            points: triggeredViolation.points,
+          },
+          fill_event_id: f.event_id,
+          violation_id: triggeredViolation.violation_id,
+        });
+      }
     }
+
+    // SESSION_END event
+    seqNum++;
+    sessionEvents.push({
+      event_id: randomUUID(),
+      session_id: sessionId,
+      account_ref: accountRef,
+      user_id: userId,
+      sequence_number: seqNum,
+      elapsed_seconds: Math.round((sessionEndTime - sessionStartTime) / 1000),
+      event_type: 'SESSION_END',
+      metadata: {
+        session_quality: session.trades.length > 0 ? 'computed' : 'empty',
+        violation_count: sessionViolations.length,
+        fills_count: session.fills_count,
+      },
+      fill_event_id: null,
+      violation_id: null,
+    });
 
     if (sessionEvents.length > 0) {
       const { error: evErr } = await admin.from('session_events').insert(sessionEvents);
