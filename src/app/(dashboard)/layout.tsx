@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   Shield,
+  ShieldCheck,
   UserCircle,
   Crosshair,
   Bot,
@@ -29,6 +30,8 @@ import { CooldownProvider, useCooldown } from '@/lib/cooldown-context';
 import { CooldownMode } from '@/components/cooldown-mode';
 import { CooldownTrigger } from '@/components/cooldown-trigger';
 
+const ADMIN_USER_ID = '4c8b3b98-7a0e-4862-a67c-bcce026468d6';
+
 const NAV_ITEMS: { title: string; icon: LucideIcon; href: string }[] = [
   { title: 'Dashboard', icon: LayoutDashboard, href: '/' },
   { title: 'Upload', icon: Upload, href: '/ingest' },
@@ -40,6 +43,8 @@ const NAV_ITEMS: { title: string; icon: LucideIcon; href: string }[] = [
   { title: 'Settings', icon: Settings, href: '/settings' },
 ];
 
+const ADMIN_NAV_ITEM = { title: 'Admin', icon: ShieldCheck, href: '/admin' };
+
 export default function DashboardLayout({
   children,
 }: {
@@ -48,8 +53,17 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [currentState, setCurrentState] = useState<BehavioralState>('BUILDING');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [bssScore, setBssScore] = useState<number | undefined>(undefined);
   const [bssTier, setBssTier] = useState<string | undefined>(undefined);
+  // Check admin status
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.id === ADMIN_USER_ID) setIsAdmin(true);
+    });
+  }, []);
+
   // Listen for state updates from child pages
   useEffect(() => {
     function handleStateUpdate(e: CustomEvent) {
@@ -138,6 +152,7 @@ export default function DashboardLayout({
           currentState={currentState}
           bssScore={bssScore}
           bssTier={bssTier}
+          isAdmin={isAdmin}
         >
           {children}
         </DashboardShell>
@@ -154,6 +169,7 @@ function DashboardShell({
   pathname,
   navTo,
   handleSignOut,
+  isAdmin,
 }: {
   children: React.ReactNode;
   pathname: string;
@@ -161,6 +177,7 @@ function DashboardShell({
   handleSignOut: () => void;
   currentState: BehavioralState;
   bssScore?: number;
+  isAdmin: boolean;
   bssTier?: string;
 }) {
   const { isActive, promptSequence, activationId, deactivate } = useCooldown();
@@ -198,7 +215,7 @@ function DashboardShell({
             }
           />
           {/* Nav items */}
-          {NAV_ITEMS.map((item) => {
+          {[...NAV_ITEMS, ...(isAdmin ? [ADMIN_NAV_ITEM] : [])].map((item) => {
             const Icon = item.icon;
             const isNavActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             return (
