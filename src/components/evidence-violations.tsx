@@ -171,7 +171,7 @@ export function EvidenceViolations({ accountRef }: EvidenceViolationsProps) {
                 </div>
                 <div className="font-mono text-[11px]">
                   <span className="text-text-muted">Impact: </span>
-                  <span className="text-text-secondary">−{v.points} DSI penalty · Rule {v.rule_id}</span>
+                  <span className="text-text-secondary">−{v.points} pts daily score impact</span>
                 </div>
               </div>
             )}

@@ -17,7 +17,7 @@ export function getInsight(data: StatePayload): Insight {
     const progress = onboarding.baseline_progress;
     const pct = Math.round((progress.collected / progress.required) * 100);
     return {
-      text: `Calibrating baseline. ${progress.collected}/${progress.required} fills collected (${pct}%).`,
+      text: `Building your trading profile. ${progress.collected}/${progress.required} fills collected (${pct}%).`,
       tone: 'neutral',
     };
   }
@@ -55,14 +55,14 @@ export function getInsight(data: StatePayload): Insight {
 
   if (topDriver && topDriver.points >= 10) {
     return {
-      text: `Primary drift source: ${MODE_LABELS[topDriver.mode] ?? topDriver.mode}. ${topDriver.points} points accumulated.`,
+      text: `Top behavioral pattern: ${MODE_LABELS[topDriver.mode] ?? topDriver.mode}. ${topDriver.points} points accumulated.`,
       tone: 'warning',
     };
   }
 
   if (violations_today.length > 0) {
     return {
-      text: `${violations_today.length} violation${violations_today.length > 1 ? 's' : ''} today. Review and adjust.`,
+      text: `${violations_today.length} pattern${violations_today.length > 1 ? 's' : ''} detected today. Review and adjust.`,
       tone: 'caution',
     };
   }

@@ -56,22 +56,23 @@ export function ViolationRow({ violation }: ViolationRowProps) {
       </button>
       {expanded && (
         <div className="ml-6 mt-1 rounded-lg bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3">
+          {/* TB-006: Trader-friendly labels, no raw IDs */}
           <div className="grid grid-cols-2 gap-2 font-mono text-[12px]">
             <div>
-              <span className="text-text-muted">Rule: </span>
-              <span className="text-text-secondary">{violation.rule_id}</span>
+              <span className="text-text-muted">Pattern: </span>
+              <span className="text-text-secondary">{modeLabel}</span>
             </div>
             <div>
-              <span className="text-text-muted">Points: </span>
-              <span className="text-text-secondary">{violation.points}</span>
+              <span className="text-text-muted">Score impact: </span>
+              <span className="text-text-secondary">-{violation.points} pts</span>
             </div>
             <div>
-              <span className="text-text-muted">First seen: </span>
+              <span className="text-text-muted">Detected at: </span>
               <span className="text-text-secondary">{time}</span>
             </div>
             <div>
-              <span className="text-text-muted">ID: </span>
-              <span className="text-text-secondary">{violation.violation_id.slice(0, 8)}</span>
+              <span className="text-text-muted">Severity: </span>
+              <span className="text-text-secondary" style={{ color: sevColor }}>{violation.severity}</span>
             </div>
           </div>
         </div>

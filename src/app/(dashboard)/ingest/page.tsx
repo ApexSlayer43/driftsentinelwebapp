@@ -269,7 +269,7 @@ export default function IngestPage() {
           </div>
 
           <div className="border-t border-white/[0.08] pt-3 mt-3">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-text-muted mb-2">Pipeline Result</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-text-muted mb-2">Import Summary</p>
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <div className="font-mono text-[12px] uppercase tracking-[0.15em] text-text-muted">Accepted</div>

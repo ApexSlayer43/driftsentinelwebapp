@@ -38,21 +38,22 @@ const STALE_THRESHOLD = 86400;    // 24 hours — uploaded today but not in the 
 
 function getDataFreshness(computedAt: string | null): { state: FreshnessState; label: string } {
   /* null computed_at = backend hasn't finished computing yet (new account or first ingest) */
-  if (!computedAt) return { state: 'COMPUTING', label: 'COMPUTING' };
+  // TB-006: Trader-friendly state labels
+  if (!computedAt) return { state: 'COMPUTING', label: 'Analyzing' };
 
   const age = (Date.now() - new Date(computedAt).getTime()) / 1000;
 
   /* Invalid date / clock skew → real error */
-  if (!Number.isFinite(age) || age < 0) return { state: 'ERROR', label: 'ERROR' };
+  if (!Number.isFinite(age) || age < 0) return { state: 'ERROR', label: 'Update failed' };
 
   /* Computed within the last hour → live */
-  if (age < LIVE_THRESHOLD) return { state: 'LIVE', label: 'LIVE' };
+  if (age < LIVE_THRESHOLD) return { state: 'LIVE', label: 'Current' };
 
   /* Computed within the last 24 hours → still fresh for the trading day */
-  if (age < STALE_THRESHOLD) return { state: 'LIVE', label: 'LIVE' };
+  if (age < STALE_THRESHOLD) return { state: 'LIVE', label: 'Current' };
 
   /* Older than 24 hours → stale, needs a new upload */
-  return { state: 'STALE', label: 'STALE' };
+  return { state: 'STALE', label: 'Outdated' };
 }
 
 const FRESHNESS_STYLES: Record<FreshnessState, { dot: string; text: string }> = {

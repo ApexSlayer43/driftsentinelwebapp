@@ -40,7 +40,7 @@ export function DriverRow({ driver, rank }: DriverRowProps) {
           {modeLabel}
         </div>
         <div className="font-mono text-[12px] text-text-muted">
-          Onset: {onset}
+          First detected: {onset}
         </div>
       </div>
       <span

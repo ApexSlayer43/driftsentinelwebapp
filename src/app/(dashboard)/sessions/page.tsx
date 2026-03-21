@@ -118,7 +118,7 @@ export default function SessionsPage() {
             Sessions
           </h1>
           <p className="mt-1 font-mono text-xs text-text-muted">
-            Your behavioral black box — every session, every event, every pattern
+            Your session journal — every trade, every event, every pattern
           </p>
         </div>
         <div className="flex gap-1 rounded-full bg-white/[0.04] p-1 border border-white/[0.08] backdrop-blur-xl">

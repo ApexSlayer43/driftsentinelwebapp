@@ -220,11 +220,11 @@ export default function OnboardingChecklist() {
                   <div className="flex items-center gap-2">
                     <Sparkles size={14} className="text-[#c8a96e]" />
                     <span className="font-mono text-[11px] font-bold text-[#c8a96e]">
-                      Setup complete. You&apos;re operational.
+                      Setup complete. You&apos;re ready to trade.
                     </span>
                   </div>
                   <p className="font-mono text-[10px] text-text-muted leading-relaxed">
-                    Your timezone, sessions, and rules are locked in. Upload data and let the engine work. Stay disciplined.
+                    Your timezone, sessions, and rules are locked in. Upload your data and the system handles the rest. Stay disciplined.
                   </p>
                   <button
                     onClick={dismissOnboarding}

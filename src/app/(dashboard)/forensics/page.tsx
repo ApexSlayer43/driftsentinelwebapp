@@ -163,7 +163,7 @@ export default function ForensicsPage() {
             No patterns detected
           </div>
           <div className="mt-1 font-mono text-[12px] text-text-muted">
-            Forensics will populate as behavioral patterns are identified in your trading data.
+            Patterns will appear here as they are detected in your trading data.
           </div>
         </div>
       </div>
@@ -176,7 +176,7 @@ export default function ForensicsPage() {
       <div className="w-[320px] shrink-0 border-r border-white/[0.08] overflow-y-auto">
         <div className="px-5 pt-5 pb-3">
           <h1 className="font-mono text-[15px] font-bold uppercase tracking-[0.15em] text-text-primary">
-            Forensics
+            Pattern Review
           </h1>
           <div className="mt-1 font-mono text-[11px] text-text-muted">
             {activeCount} active{resolvedCount > 0 ? ` · ${resolvedCount} reviewed` : ''} · 30 days
@@ -715,8 +715,8 @@ function ForensicDetail({ violation, fills, fillsLoading, recurrence, dailyScore
                   </span>
                 </div>
                 <div className="mt-1.5 font-mono text-[10px] text-[#7a766d] leading-relaxed">
-                  Your DSI is blended into your Behavioral Stability Score (BSS)
-                  {alpha !== null && ` using smoothing factor ${alpha}`}.
+                  Your daily score feeds into your Behavioral Stability Score (BSS)
+                  {alpha !== null && ` with a weight of ${alpha}`}.
                   {actualBssDelta > 0 && ' BSS went up because your DSI was higher than your previous average.'}
                   {actualBssDelta < 0 && ' BSS decreased because your DSI pulled the average down.'}
                   {actualBssDelta === 0 && ' No net change — your DSI matched your existing BSS average.'}

@@ -37,7 +37,7 @@ function formatViolations(violations: SentiContext['recentViolations']): string 
   return violations
     .map(
       (v) =>
-        `- ${MODE_LABELS[v.mode] ?? v.mode} | ${v.severity} | -${v.points}pts | ${v.rule_id} | ${v.first_seen_utc}`
+        `- ${MODE_LABELS[v.mode] ?? v.mode} | ${v.severity} severity | -${v.points}pts | ${new Date(v.first_seen_utc).toLocaleString()}`
     )
     .join('\n');
 }
@@ -71,14 +71,15 @@ RULES — ABSOLUTE, NO EXCEPTIONS
 - If the data doesn't contain the answer, say: "I don't have data on that."
 - Keep responses concise. 2-4 sentences unless the user asks for a breakdown.
 
-KNOWLEDGE — SCORING SYSTEM
-- BSS (Behavioral Stability Score): EWMA with asymmetric streak modifier. alpha=0.15 base (~4.3 day half-life). Clean streaks lower alpha (more stability). Violation days spike alpha to 0.375. Range 0-100. New users start at 50.
-- DSI (Daily Stability Index): Starts at 100 each session. Degrades as violations are detected. Locked at session end. Clean day = DSI >= 80.
-- 6-Tier System: DORMANT (<30 fills, insufficient data) → FORMING (BSS <50, early/unproven) → DEVELOPING (BSS 50-64, pattern visible) → CONSISTENT (BSS 65-79, consistent) → DISCIPLINED (BSS 80-89, strong track record) → SOVEREIGN (BSS 90+, elite behavioral stability)
-- States: STABLE → DRIFT_FORMING → COMPROMISED → BREAKDOWN
-- Drift Index: 0-100 scale measuring behavioral deviation intensity.
-- Severity levels: LOW, MED, HIGH, CRITICAL — each carries different point deductions.
-- Inactivity Decay: BSS decays toward 50 at 0.98/day after 3-day grace period.
+KNOWLEDGE — SCORING SYSTEM (use trader-friendly language when explaining to users)
+- BSS (Behavioral Stability Score): A rolling score (0-100) that tracks trading discipline over time. Drops fast when patterns are detected, recovers slowly with clean sessions. New traders start at 50. The worse the streak of bad sessions, the faster it drops. The better the streak, the slower it climbs — trust is harder to rebuild than to lose.
+- DSI (Daily Scoring Index): Each trading day starts at 100. Points are deducted for each behavioral pattern detected. Clean day = DSI 100. The more you drift from your rules, the lower the daily score.
+- 6-Tier System: DORMANT (not enough data yet) → FORMING (early, unproven) → DEVELOPING (pattern emerging) → CONSISTENT (above average) → DISCIPLINED (strong track record) → SOVEREIGN (elite behavioral stability)
+- Behavioral States: STABLE → DRIFT FORMING → COMPROMISED → BREAKDOWN
+- Drift Index: 0-100, measures how much your behavior is deviating from your baseline.
+- Severity levels: LOW, MED, HIGH, CRITICAL — each carries different score deductions.
+- Inactivity: If you don't trade for 3+ days, your BSS gradually stabilizes back toward 50.
+- IMPORTANT: Never use technical terms like "EWMA", "alpha", "smoothing factor", "half-life", or "exponent" when talking to the user. Use plain language.
 
 VIOLATION MODES
 ${Object.entries(MODE_LABELS)
