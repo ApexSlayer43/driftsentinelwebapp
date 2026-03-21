@@ -79,7 +79,6 @@ interface ComputeResult {
   sessions_built: number;
   violations_found: number;
   bss_score: number | null;
-  bss_tier: string | null;
   days_scored: number;
 }
 
@@ -527,14 +526,7 @@ function computeBSS(
   return results;
 }
 
-function bssTier(score: number): string {
-  // Match backend bssV3 tier system
-  if (score >= 90) return 'SOVEREIGN';
-  if (score >= 80) return 'PROVEN';
-  if (score >= 65) return 'GROUNDED';
-  if (score >= 50) return 'DEFINED';
-  return 'FORMING';
-}
+// bssTier() REMOVED per TB-002 — engine returns score only, frontend resolves tier via resolveTier() in tokens.ts
 
 /* ─────────────────────────────────────────────
    MAIN COMPUTE PIPELINE
@@ -556,7 +548,7 @@ export async function runComputeEngine(
 
   if (fillsErr || !rawFills || rawFills.length === 0) {
     console.log(`[compute-engine] No fills found for ${accountRef}`);
-    return { sessions_built: 0, violations_found: 0, bss_score: null, bss_tier: null, days_scored: 0 };
+    return { sessions_built: 0, violations_found: 0, bss_score: null, days_scored: 0 };
   }
 
   const fills = rawFills as Fill[];
@@ -811,15 +803,13 @@ export async function runComputeEngine(
   }
 
   const finalBSS = bssResults.length > 0 ? bssResults[bssResults.length - 1].bss_score : null;
-  const tier = finalBSS !== null ? bssTier(finalBSS) : null;
 
-  console.log(`[compute-engine] Complete. Sessions: ${sessions.length}, Violations: ${allViolations.length}, BSS: ${finalBSS} (${tier})`);
+  console.log(`[compute-engine] Complete. Sessions: ${sessions.length}, Violations: ${allViolations.length}, BSS: ${finalBSS}`);
 
   return {
     sessions_built: sessions.length,
     violations_found: allViolations.length,
     bss_score: finalBSS,
-    bss_tier: tier,
     days_scored: bssResults.length,
   };
 }

@@ -222,7 +222,7 @@ export async function POST(req: Request) {
 
     // Run the behavioral compute engine directly (sessions → violations → DSI → BSS)
     let computeVerified = false;
-    let computeResult: { sessions_built: number; violations_found: number; bss_score: number | null; bss_tier: string | null } | null = null;
+    let computeResult: { sessions_built: number; violations_found: number; bss_score: number | null } | null = null;
     if (fillsTotal > 0) {
       try {
         computeResult = await runComputeEngine(admin, accountRef, user.id);

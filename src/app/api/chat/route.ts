@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 import { composeSentiPromptString, computeSessionState, type SentiMode } from '@/lib/senti';
 import type { TraderProfile } from '@/lib/senti';
 import type { SessionConfig } from '@/lib/types';
+import { resolveTier } from '@/lib/tokens';
 
 export const maxDuration = 60;
 
@@ -144,7 +145,7 @@ export async function POST(req: Request) {
       displayName: profileResult.data?.display_name || 'Trader',
       accountRef,
       bssScore: drift?.bss_score ?? 0,
-      tier: drift?.bss_tier ?? 'DORMANT',
+      tier: drift?.bss_score != null ? resolveTier(drift.bss_score) : 'DORMANT',
       dsiScore: drift?.dsi_score ?? 100,
       behavioralState: drift?.behavioral_state ?? 'BUILDING',
       driftIndex: drift?.drift_index ?? 0,

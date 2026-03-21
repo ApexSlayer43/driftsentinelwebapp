@@ -20,6 +20,7 @@ import { Particles } from '@/components/ui/particles';
 import { MenuContainer, MenuItem } from '@/components/ui/fluid-menu';
 import LiveEye from '@/components/live-eye';
 import { createClient } from '@/lib/supabase/client';
+import { resolveTier } from '@/lib/tokens';
 import type { BehavioralState } from '@/lib/tokens';
 import { OnboardingProvider } from '@/lib/onboarding-context';
 import OnboardingChecklist from '@/components/onboarding-checklist';
@@ -54,7 +55,7 @@ export default function DashboardLayout({
     function handleStateUpdate(e: CustomEvent) {
       if (e.detail.state) setCurrentState(e.detail.state as BehavioralState);
       if (e.detail.bssScore !== undefined) setBssScore(e.detail.bssScore);
-      if (e.detail.bssTier) setBssTier(e.detail.bssTier);
+      if (e.detail.bssScore != null) setBssTier(resolveTier(e.detail.bssScore));
     }
 
     window.addEventListener('drift-state-update', handleStateUpdate as EventListener);

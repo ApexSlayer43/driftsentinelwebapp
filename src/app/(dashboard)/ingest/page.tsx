@@ -5,6 +5,7 @@ import { Upload, CheckCircle, XCircle, Copy, Plus, ChevronDown, RefreshCw } from
 import { createClient } from '@/lib/supabase/client';
 import { GlowPanel } from '@/components/ui/glow-panel';
 import { useStrategies } from '@/hooks/use-strategies';
+import { resolveTier } from '@/lib/tokens';
 import type { IngestRun } from '@/lib/types';
 
 interface CsvResult {
@@ -36,7 +37,7 @@ export default function IngestPage() {
   const [newStrategyName, setNewStrategyName] = useState('');
   const [creatingStrategy, setCreatingStrategy] = useState(false);
   const [recomputing, setRecomputing] = useState(false);
-  const [recomputeResult, setRecomputeResult] = useState<{ ok: boolean; bss_score?: number; bss_tier?: string; error?: string } | null>(null);
+  const [recomputeResult, setRecomputeResult] = useState<{ ok: boolean; bss_score?: number; error?: string } | null>(null);
 
   // Auto-select default strategy when loaded
   useEffect(() => {
@@ -304,7 +305,7 @@ export default function IngestPage() {
               const res = await fetch('/api/compute/trigger', { method: 'POST' });
               const data = await res.json();
               if (res.ok) {
-                setRecomputeResult({ ok: true, bss_score: data.bss_score, bss_tier: data.bss_tier });
+                setRecomputeResult({ ok: true, bss_score: data.bss_score });
               } else {
                 setRecomputeResult({ ok: false, error: data.error || 'Compute failed' });
               }
@@ -323,7 +324,7 @@ export default function IngestPage() {
         {recomputeResult && (
           <span className={`font-mono text-[11px] ${recomputeResult.ok ? 'text-positive' : 'text-negative'}`}>
             {recomputeResult.ok
-              ? `BSS updated${recomputeResult.bss_score != null ? `: ${recomputeResult.bss_score} (${recomputeResult.bss_tier})` : ''}`
+              ? `BSS updated${recomputeResult.bss_score != null ? `: ${recomputeResult.bss_score} (${resolveTier(recomputeResult.bss_score)})` : ''}`
               : recomputeResult.error}
           </span>
         )}
