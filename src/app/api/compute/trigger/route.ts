@@ -49,6 +49,17 @@ export async function POST() {
   try {
     const result = await runComputeEngine(admin, accountRef, user.id);
 
+    // TB-005: Check for pipeline errors — return 500 if engine reported failure
+    if (result.error) {
+      console.error('[compute/trigger] Pipeline error:', result.error);
+      return Response.json({
+        ok: false,
+        account_ref: accountRef,
+        error: result.error,
+        ...result,
+      }, { status: 500 });
+    }
+
     return Response.json({
       ok: true,
       account_ref: accountRef,

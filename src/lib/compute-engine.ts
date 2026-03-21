@@ -12,6 +12,18 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 
 /* ─────────────────────────────────────────────
+   GRADUATED PENALTY CONSTANTS — TB-004
+   Algorithm Spec §2 (Equation 1): M_i = (actual/threshold)^n
+   ───────────────────────────────────────────── */
+
+const VIOLATION_WEIGHTS: Record<string, number> = {
+  ONE_SHOT: 15, PROTECT_GREEN: 10, GHOST_EQUITY: 10,
+  OVERSIZE: 12, OFF_SESSION: 12, FREQUENCY: 8,
+  REVENGE_ENTRY: 15, SIZE_ESCALATION: 10, BASELINE_SHIFT: 6, HESITATION: 5,
+};
+const PENALTY_EXPONENT = 1.5;
+
+/* ─────────────────────────────────────────────
    TYPES
    ───────────────────────────────────────────── */
 
@@ -68,6 +80,7 @@ interface Violation {
   mode: string;
   severity: string;
   points: number;
+  penalty_multiplier: number;
   first_seen_utc: string;
   window_start_utc: string;
   window_end_utc: string;
@@ -80,6 +93,7 @@ interface ComputeResult {
   violations_found: number;
   bss_score: number | null;
   days_scored: number;
+  error?: string;  // TB-005: present if compute pipeline failed
 }
 
 /* ─────────────────────────────────────────────
@@ -277,6 +291,31 @@ function buildSessions(
 }
 
 /* ─────────────────────────────────────────────
+   VIOLATION VALIDATOR — TB-005
+   Pre-flight check against Schema Contract enums.
+   ───────────────────────────────────────────── */
+
+const VALID_SEVERITIES = ['LOW', 'MED', 'HIGH', 'CRITICAL'] as const;
+const VALID_MODES = [
+  'ONE_SHOT', 'PROTECT_GREEN', 'GHOST_EQUITY', 'OVERSIZE',
+  'OFF_SESSION', 'FREQUENCY', 'REVENGE_ENTRY', 'SIZE_ESCALATION',
+  'BASELINE_SHIFT', 'HESITATION',
+] as const;
+const VALID_STATUSES = ['active', 'acknowledged', 'resolved'] as const;
+
+function validateViolation(v: Violation): string | null {
+  if (!VALID_SEVERITIES.includes(v.severity as typeof VALID_SEVERITIES[number]))
+    return `Invalid severity: ${v.severity}`;
+  if (!VALID_MODES.includes(v.mode as typeof VALID_MODES[number]))
+    return `Invalid mode: ${v.mode}`;
+  if (!VALID_STATUSES.includes(v.status as typeof VALID_STATUSES[number]))
+    return `Invalid status: ${v.status}`;
+  if (v.points < 0)
+    return `Points must be >= 0, got: ${v.points}`;
+  return null;
+}
+
+/* ─────────────────────────────────────────────
    RULE EVALUATOR
    ───────────────────────────────────────────── */
 
@@ -337,9 +376,16 @@ function evaluateOneShot(
   }
 
   // Violation: hit the loss limit AND kept trading after
+  // TB-004: Graduated penalty — M_i = (trades_after / 1)^n
   if (limitHitAt >= 0 && limitHitAt < trades.length - 1) {
     const tradesAfterLimit = trades.slice(limitHitAt + 1);
     const evidenceIds = tradesAfterLimit.flatMap(t => [t.buy_event_id, t.sell_event_id]);
+
+    const tradesAfterCount = tradesAfterLimit.length;
+    const ratio = Math.max(tradesAfterCount, 1);
+    const multiplier = Math.pow(ratio, PENALTY_EXPONENT);
+    const baseWeight = VIOLATION_WEIGHTS.ONE_SHOT ?? 15;
+    const points = Math.round(baseWeight * multiplier);
 
     return [{
       violation_id: randomUUID(),
@@ -348,7 +394,8 @@ function evaluateOneShot(
       rule_id: 'one-shot',
       mode: 'ONE_SHOT',
       severity: 'HIGH',
-      points: 15,
+      points,
+      penalty_multiplier: multiplier,
       first_seen_utc: tradesAfterLimit[0].buy_time,
       window_start_utc: session.session_start_utc,
       window_end_utc: session.session_end_utc,
@@ -388,6 +435,7 @@ function evaluateProtectGreen(
   const finalPnl = runningPnl;
 
   // Session went green (peak > 0) but ended at or below breakeven
+  // TB-004: Graduated penalty — M_i = (giveback_ratio / 0.5)^n
   if (peakPnl > 0 && finalPnl <= 0 && peakIdx >= 0) {
     // Find the trade that crossed back below zero
     let crossIdx = peakIdx + 1;
@@ -399,6 +447,13 @@ function evaluateProtectGreen(
         break;
       }
     }
+
+    // Giveback ratio: how much of peak gains were returned (0 to 1+)
+    const givebackRatio = peakPnl > 0 ? (peakPnl - finalPnl) / peakPnl : 1;
+    // Threshold is 50% giveback — below that is partial penalty, above is amplified
+    const multiplier = Math.pow(Math.max(givebackRatio / 0.5, 0.1), PENALTY_EXPONENT);
+    const baseWeight = VIOLATION_WEIGHTS.PROTECT_GREEN ?? 10;
+    const points = Math.round(baseWeight * multiplier);
 
     const peakTrade = trades[peakIdx];
     const crossTrade = trades[crossIdx] ?? trades[trades.length - 1];
@@ -414,7 +469,8 @@ function evaluateProtectGreen(
       rule_id: 'protect-green',
       mode: 'PROTECT_GREEN',
       severity: 'MED',
-      points: 10,
+      points,
+      penalty_multiplier: multiplier,
       first_seen_utc: crossTrade.sell_time || crossTrade.buy_time,
       window_start_utc: session.session_start_utc,
       window_end_utc: session.session_end_utc,
@@ -446,6 +502,19 @@ function evaluateGhostEquity(
 
   if (lateFills.length === 0) return [];
 
+  // TB-004: Graduated penalty — M_i = (time_ratio)^n
+  // time_ratio: how deep into the danger zone (0 = at cutoff, 1 = at bell)
+  const earliestLateFill = lateFills.reduce((earliest, f) => {
+    const ts = new Date(f.timestamp_utc).getTime();
+    return ts < earliest ? ts : earliest;
+  }, Infinity);
+  const dangerZoneMs = minutesBefore * 60 * 1000;
+  const timeIntoZoneMs = sessionEnd - earliestLateFill;
+  const timeRatio = dangerZoneMs > 0 ? timeIntoZoneMs / dangerZoneMs : 1;
+  const multiplier = Math.pow(Math.max(timeRatio, 0.1), PENALTY_EXPONENT);
+  const baseWeight = VIOLATION_WEIGHTS.GHOST_EQUITY ?? 10;
+  const points = Math.round(baseWeight * multiplier);
+
   return [{
     violation_id: randomUUID(),
     mode_instance_id: `${accountRef}:${session.trading_date}`,
@@ -453,7 +522,8 @@ function evaluateGhostEquity(
     rule_id: 'ghost-equity',
     mode: 'GHOST_EQUITY',
     severity: 'MED',
-    points: 10,
+    points,
+    penalty_multiplier: multiplier,
     first_seen_utc: lateFills[0].timestamp_utc,
     window_start_utc: session.session_start_utc,
     window_end_utc: session.session_end_utc,
@@ -466,9 +536,12 @@ function evaluateGhostEquity(
    DSI SCORER
    ───────────────────────────────────────────── */
 
-function computeDSI(violations: Violation[]): number {
-  const totalPoints = violations.reduce((sum, v) => sum + v.points, 0);
-  return Math.max(0, 100 - totalPoints);
+// TB-004: Algorithm Spec §2 — DSI = 100 − Σ(w_i × M_i) + Σ(p_j × R_j)
+// Points already include (w_i × M_i) from graduated evaluators.
+// positiveSignalPoints reserved for future positive signal implementation.
+function computeDSI(violations: Violation[], positiveSignalPoints: number = 0): number {
+  const totalPenalty = violations.reduce((sum, v) => sum + v.points, 0);
+  return Math.max(0, Math.min(100, 100 - totalPenalty + positiveSignalPoints));
 }
 
 /* ─────────────────────────────────────────────
@@ -633,6 +706,16 @@ export async function runComputeEngine(
 
   console.log(`[compute-engine] ${allViolations.length} violations detected`);
 
+  // TB-005: Pre-flight validation — check all violations against Schema Contract enums
+  for (const v of allViolations) {
+    const validationError = validateViolation(v);
+    if (validationError) {
+      const msg = `Violation validation failed (${v.rule_id}, ${v.mode}): ${validationError}`;
+      console.error(`[compute-engine] ${msg}`);
+      return { sessions_built: 0, violations_found: 0, bss_score: null, days_scored: 0, error: msg };
+    }
+  }
+
   /* 7. Compute BSS across all days */
   const bssResults = computeBSS(dailyInput);
 
@@ -640,10 +723,18 @@ export async function runComputeEngine(
 
   // 8a. Delete old session_events, sessions, violations, daily_scores for this account
   // (order matters for FK constraints)
-  await admin.from('session_events').delete().eq('account_ref', accountRef);
-  await admin.from('sessions').delete().eq('account_ref', accountRef);
-  await admin.from('violations').delete().eq('account_ref', accountRef);
-  await admin.from('daily_scores').delete().eq('account_ref', accountRef);
+  // TB-005: Check delete errors — abort if stale data can't be cleared
+  const { error: delEvErr } = await admin.from('session_events').delete().eq('account_ref', accountRef);
+  const { error: delSessErr } = await admin.from('sessions').delete().eq('account_ref', accountRef);
+  const { error: delViolErr } = await admin.from('violations').delete().eq('account_ref', accountRef);
+  const { error: delDsErr } = await admin.from('daily_scores').delete().eq('account_ref', accountRef);
+
+  const deleteError = delEvErr || delSessErr || delViolErr || delDsErr;
+  if (deleteError) {
+    const msg = `Delete phase failed: ${deleteError.message}`;
+    console.error(`[compute-engine] ${msg}`);
+    return { sessions_built: 0, violations_found: 0, bss_score: null, days_scored: 0, error: msg };
+  }
 
   // Track session inserts for event building after violations are written
   const sessionInserts: { sessionId: string; session: BuiltSession; sessionViolations: Violation[] }[] = [];
@@ -701,9 +792,14 @@ export async function runComputeEngine(
   }
 
   // 8c. Write violations FIRST (session_events FK references violations)
+  // TB-005: Abort on error — session_events depend on violations existing
   if (allViolations.length > 0) {
     const { error: vErr } = await admin.from('violations').insert(allViolations);
-    if (vErr) console.error(`[compute-engine] Violations insert error:`, vErr.message);
+    if (vErr) {
+      const msg = `Violations insert failed: ${vErr.message}`;
+      console.error(`[compute-engine] ${msg}`);
+      return { sessions_built: sessions.length, violations_found: 0, bss_score: null, days_scored: 0, error: msg };
+    }
   }
 
   // 8d. Write session_events (needs violations to exist for FK)
@@ -810,9 +906,14 @@ export async function runComputeEngine(
       violation_id: null,
     });
 
+    // TB-005: Abort on session_events error
     if (sessionEvents.length > 0) {
       const { error: evErr } = await admin.from('session_events').insert(sessionEvents);
-      if (evErr) console.error(`[compute-engine] Session events insert error:`, evErr.message);
+      if (evErr) {
+        const msg = `Session events insert failed (${session.trading_date}): ${evErr.message}`;
+        console.error(`[compute-engine] ${msg}`);
+        return { sessions_built: sessions.length, violations_found: allViolations.length, bss_score: null, days_scored: 0, error: msg };
+      }
     }
   }
 
@@ -831,7 +932,12 @@ export async function runComputeEngine(
       streak_count: day.streak_count,
       alpha_effective: day.alpha_effective,
     });
-    if (dsErr) console.error(`[compute-engine] Daily score insert error (${day.trading_date}):`, dsErr.message);
+    // TB-005: Abort on daily_scores error
+    if (dsErr) {
+      const msg = `Daily score insert failed (${day.trading_date}): ${dsErr.message}`;
+      console.error(`[compute-engine] ${msg}`);
+      return { sessions_built: sessions.length, violations_found: allViolations.length, bss_score: null, days_scored: 0, error: msg };
+    }
   }
 
   const finalBSS = bssResults.length > 0 ? bssResults[bssResults.length - 1].bss_score : null;
